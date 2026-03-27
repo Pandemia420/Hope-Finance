@@ -13,11 +13,13 @@ def add_headers(resp):
     return resp
 
 
-DB = '/home/d-s/HopeData/finanzas_prod.db'
+DB = os.getenv('DATABASE_URL', 'finanzas_prod.db')
+if DB.startswith('postgres://'): DB = DB.replace('postgres://', 'postgresql://', 1)
 
 def get_db():
-    conn = sqlite3.connect(DB)
-    conn.row_factory = sqlite3.Row
+    if DB.startswith("postgres"): import psycopg2; conn = psycopg2.connect(DB, sslmode="require"); conn.autocommit = True
+    else: conn = sqlite3.connect(DB)
+    if not DB.startswith("postgres"): conn.row_factory = sqlite3.Row
     return conn
 
 def init_db():
