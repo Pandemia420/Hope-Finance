@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+  <link rel="manifest" href="/static/manifest-hogar.json">
+  <meta name="theme-color" content="#00c896">
+  <link rel="apple-touch-icon" href="/static/icon.svg">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Hogar</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --green:#00c896;--green2:#00a87e;--gold:#f0a500;
+  --red:#ff4d6d;--blue:#4d9fff;
+  --bg:#0a0e14;--bg2:#111620;--bg3:#1a2030;
+  --border:rgba(255,255,255,0.07);
+  --text:#f0f4ff;--text2:#6b7a99;
+  --mono:'JetBrains Mono',monospace;
+  --sans:'Syne',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;padding-bottom:80px}
+.header{position:sticky;top:0;z-index:100;background:rgba(10,14,20,0.95);backdrop-filter:blur(12px);padding:16px 20px 12px;border-bottom:1px solid var(--border)}
+.header-top{display:flex;justify-content:space-between;align-items:center}
+.back-btn{background:none;border:none;color:var(--text);font-size:22px;cursor:pointer;padding:0;margin-right:8px}
+.app-title{font-size:11px;letter-spacing:3px;color:var(--text2);font-weight:600}
+.header-titulo{display:flex;align-items:center}
+
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:16px 20px}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:12px 14px}
+.stat-card.full{grid-column:span 2;background:rgba(0,200,150,0.06);border-color:rgba(0,200,150,0.2)}
+.stat-label{font-size:9px;letter-spacing:1.5px;color:var(--text2);font-weight:600;margin-bottom:4px}
+.stat-val{font-family:var(--mono);font-size:15px;font-weight:700}
+
+.tabs{display:flex;gap:8px;margin:0 20px 16px}
+.tab{flex:1;padding:10px;border-radius:12px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-family:var(--sans);font-weight:600;font-size:13px;cursor:pointer;text-align:center}
+.tab.active{background:var(--green);color:#000;border-color:var(--green)}
+
+.lista{padding:0 20px}
+.section-title{font-size:10px;letter-spacing:2px;color:var(--text2);font-weight:600;margin-bottom:12px}
+.mov-item{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;border-left:3px solid var(--green)}
+.mov-item.gasto{border-left-color:var(--red)}
+.mov-concepto{font-size:14px;font-weight:700}
+.mov-fecha{font-size:11px;color:var(--text2);margin-top:2px}
+.mov-monto{font-family:var(--mono);font-size:16px;font-weight:700;color:var(--green)}
+.mov-monto.gasto{color:var(--red)}
+.empty-state{text-align:center;padding:60px 20px;color:var(--text2)}
+.empty-ico{font-size:48px;margin-bottom:12px}
+
+.fab{position:fixed;bottom:24px;right:20px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--green2));border:none;color:#000;font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,200,150,0.4);z-index:50}
+
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:200;display:none;align-items:flex-end}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg2);border-radius:24px 24px 0 0;width:100%;padding:24px 20px 40px;border-top:1px solid var(--border);max-height:90vh;overflow-y:auto;animation:slideUp 0.25s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 20px}
+.modal-title{font-size:18px;font-weight:800;margin-bottom:20px}
+.form-group{margin-bottom:16px}
+.form-label{font-size:11px;letter-spacing:1.5px;color:var(--text2);font-weight:600;margin-bottom:8px;display:block}
+.form-input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:13px 16px;color:var(--text);font-family:var(--sans);font-size:15px;outline:none}
+.form-input:focus{border-color:var(--green)}
+.form-input::placeholder{color:var(--text2)}
+.form-submit{width:100%;background:var(--green);color:#000;border:none;border-radius:14px;padding:15px;font-family:var(--sans);font-weight:800;font-size:16px;cursor:pointer;margin-top:8px}
+.btn-ghost{width:100%;background:transparent;color:var(--text2);border:1px solid var(--border);border-radius:12px;padding:12px;font-family:var(--sans);font-size:14px;cursor:pointer;margin-top:8px}
+.tipo-toggle{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.tipo-btn{padding:12px;border-radius:12px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);font-family:var(--sans);font-weight:700;font-size:14px;cursor:pointer;text-align:center}
+.tipo-btn.ingreso.active{background:rgba(0,200,150,0.15);border-color:var(--green);color:var(--green)}
+.tipo-btn.gasto.active{background:rgba(255,77,109,0.15);border-color:var(--red);color:var(--red)}
+#save-indicator{position:fixed;bottom:88px;right:16px;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:600;z-index:999;opacity:0;transition:opacity 0.3s;pointer-events:none}
+
+/* Tarjeta Dania */
+#msg-esposa { position: relative; overflow: hidden; padding: 0 !important; border-radius: 18px !important; }
+.dania-card {
+  background: linear-gradient(135deg, #0a0e2a 0%, #1a0533 50%, #0a1a0e 100%);
+  border-radius: 18px;
+  padding: 18px 16px 14px;
+  position: relative;
+  overflow: hidden;
+}
+.dania-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: 
+    radial-gradient(circle at 20% 20%, rgba(0,255,150,0.08) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(157,77,255,0.08) 0%, transparent 50%);
+  animation: bgpulse 4s ease-in-out infinite alternate;
+}
+@keyframes bgpulse {
+  from { opacity: 0.5; }
+  to { opacity: 1; }
+}
+.stars {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.star {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: #fff;
+  border-radius: 50%;
+  animation: twinkle 2s ease-in-out infinite;
+}
+@keyframes twinkle {
+  0%, 100% { opacity: 0.2; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.5); }
+}
+.dania-content {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+/* Astronauta */
+.astro-wrap {
+  position: absolute;
+  animation: explorar 8s ease-in-out infinite;
+  z-index: 2;
+}
+@keyframes brincar {
+  0%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-18px) scale(1.05); }
+  60% { transform: translateY(-8px) scale(0.97); }
+}
+@keyframes rodar {
+  0% { transform: rotate(0deg) translateX(40px); }
+  40% { transform: rotate(90deg) translateX(60px); }
+  70% { transform: rotate(180deg) translateX(80px); }
+  100% { transform: rotate(0deg) translateX(40px); }
+}
+@keyframes explorarLetras {
+  0%   { transform: translate(10px, 0px); }
+  20%  { transform: translate(80px, -8px); }
+  40%  { transform: translate(140px, 5px); }
+  60%  { transform: translate(100px, -12px); }
+  80%  { transform: translate(50px, 8px); }
+  100% { transform: translate(10px, 0px); }
+}
+@keyframes saludar {
+  0%, 100% { transform: rotate(-20deg); }
+  50% { transform: rotate(-60deg); }
+}
+@keyframes explorar {
+  0%   { transform: translate(0px, 0px) rotate(-5deg) scale(1); }
+  15%  { transform: translate(30px, -15px) rotate(10deg) scale(0.95); }
+  30%  { transform: translate(140px, 10px) rotate(-8deg) scale(1.05); }
+  45%  { transform: translate(120px, -25px) rotate(15deg) scale(0.9); }
+  60%  { transform: translate(60px, 20px) rotate(-12deg) scale(1); }
+  75%  { transform: translate(160px, -10px) rotate(8deg) scale(1.05); }
+  90%  { transform: translate(20px, -20px) rotate(-6deg) scale(0.95); }
+  100% { transform: translate(0px, 0px) rotate(-5deg) scale(1); }
+}
+.astro {
+  width: 72px;
+  height: 90px;
+  position: relative;
+}
+.astro-casco {
+  width: 52px;
+  height: 52px;
+  background: radial-gradient(circle at 35% 30%, #e0eeff, #a0b8e0, #6080b0);
+  border-radius: 50%;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  box-shadow: 0 0 12px rgba(100,160,255,0.5), inset 0 2px 4px rgba(255,255,255,0.4);
+  overflow: hidden;
+}
+.astro-visor {
+  width: 32px;
+  height: 20px;
+  background: linear-gradient(135deg, rgba(0,200,255,0.7), rgba(0,100,200,0.5));
+  border-radius: 50%;
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  box-shadow: inset 0 2px 4px rgba(255,255,255,0.3);
+}
+.astro-visor::after {
+  content: '';
+  position: absolute;
+  width: 8px;
+  height: 5px;
+  background: rgba(255,255,255,0.4);
+  border-radius: 50%;
+  top: 3px;
+  left: 5px;
+}
+.astro-cuerpo {
+  width: 48px;
+  height: 38px;
+  background: linear-gradient(180deg, #c0d0e8, #8090b0);
+  border-radius: 14px 14px 8px 8px;
+  position: absolute;
+  top: 44px;
+  left: 50%;
+  transform: translateX(-50%);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.astro-nombre {
+  font-size: 6px;
+  font-weight: 900;
+  color: #1a1a2e;
+  letter-spacing: 0.5px;
+  font-family: monospace;
+}
+.astro-brazo-i {
+  width: 12px;
+  height: 28px;
+  background: linear-gradient(180deg, #c0d0e8, #8090b0);
+  border-radius: 6px;
+  position: absolute;
+  top: 46px;
+  left: 4px;
+  transform: rotate(15deg);
+  animation: brazo 3s ease-in-out infinite;
+}
+.astro-brazo-d {
+  width: 12px;
+  height: 28px;
+  background: linear-gradient(180deg, #c0d0e8, #8090b0);
+  border-radius: 6px;
+  position: absolute;
+  top: 46px;
+  right: 4px;
+  transform: rotate(-15deg);
+  animation: brazo 3s ease-in-out infinite reverse;
+}
+@keyframes brazoI {
+  0%, 100% { transform: rotate(20deg); }
+  50% { transform: rotate(40deg); }
+}
+@keyframes brazoD {
+  0%, 100% { transform: rotate(-20deg); }
+  50% { transform: rotate(-40deg); }
+}
+@keyframes corazon {
+  0%, 100% { transform: translateY(0) scale(1); opacity:1; }
+  50% { transform: translateY(-6px) scale(1.2); opacity:0.7; }
+}
+@keyframes brazo {
+  0%, 100% { transform: rotate(15deg); }
+  50% { transform: rotate(30deg); }
+}
+.astro-pierna-i {
+  width: 14px;
+  height: 22px;
+  background: linear-gradient(180deg, #8090b0, #6070a0);
+  border-radius: 0 0 6px 6px;
+  position: absolute;
+  top: 78px;
+  left: 14px;
+}
+.astro-pierna-d {
+  width: 14px;
+  height: 22px;
+  background: linear-gradient(180deg, #8090b0, #6070a0);
+  border-radius: 0 0 6px 6px;
+  position: absolute;
+  top: 78px;
+  right: 14px;
+}
+/* Texto */
+.dania-texto {
+  flex: 1;
+}
+.dania-saludo {
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: rgba(0,255,150,0.7);
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.frase-neon {
+  font-size: 13px;
+  font-weight: 700;
+  color: #00ff96;
+  text-shadow: 0 0 8px rgba(0,255,150,0.8), 0 0 20px rgba(0,255,150,0.4);
+  line-height: 1.5;
+  animation: pulso 2.5s ease-in-out infinite;
+}
+@keyframes pulso {
+  0%, 100% { text-shadow: 0 0 8px rgba(0,255,150,0.8), 0 0 20px rgba(0,255,150,0.4); }
+  50% { text-shadow: 0 0 16px rgba(0,255,150,1), 0 0 32px rgba(0,255,150,0.7), 0 0 48px rgba(0,255,150,0.3); }
+}
+.dania-firma {
+  font-size: 10px;
+  color: rgba(157,77,255,0.8);
+  margin-top: 6px;
+  font-style: italic;
+}
+</style>
+</head>
+<body>
+
+
+<div class="header">
+  <div class="header-top">
+    <div class="header-titulo">
+      <button class="back-btn" id="btn-back" onclick="location.href='/'">←</button>
+      <div>
+        <div class="app-title">HOPE FINANCE</div>
+        <div style="font-size:16px;font-weight:800">Hogar</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-label">INGRESOS</div>
+    <div class="stat-val" style="color:var(--green)" id="h-ingresos">$0</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">GASTOS</div>
+    <div class="stat-val" style="color:var(--red)" id="h-gastos">$0</div>
+  </div>
+  <div class="stat-card full">
+    <div class="stat-label">NETO TOTAL</div>
+    <div class="stat-val" id="h-neto" style="font-size:22px">$0</div>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" id="tab-todos" onclick="cambiarTab('todos')">Todos</div>
+  <div class="tab" id="tab-ingresos" onclick="cambiarTab('ingresos')">Ingresos</div>
+  <div class="tab" id="tab-gastos" onclick="cambiarTab('gastos')">Gastos</div>
+  <div class="tab" id="tab-presupuesto" onclick="cambiarTab('presupuesto')">💰</div>
+</div>
+
+<div id="msg-esposa" style="display:none;background:rgba(0,255,150,0.07);border:1px solid rgba(0,255,150,0.3);border-radius:14px;padding:16px;margin:0 16px 16px;text-align:center">
+  <div class="dania-card">
+    <div class="stars" id="stars-container"></div>
+    <div class="dania-content" style="position:relative;min-height:110px;">
+      <div class="astro-wrap" id="jesuel-wrap">
+        <div class="astro" id="jesuel">
+          <!-- Cabeza bebé -->
+          <div style="width:50px;height:50px;background:radial-gradient(circle at 40% 35%,#ffe0c0,#f0b080);border-radius:50%;position:absolute;top:0;left:50%;transform:translateX(-50%);box-shadow:0 2px 8px rgba(0,0,0,0.2)">
+            <!-- Ojos -->
+            <div id="ojo-i" style="position:absolute;top:18px;left:10px;width:8px;height:8px;background:#3a2010;border-radius:50%;box-shadow:inset 0 1px 2px rgba(255,255,255,0.5)"></div>
+            <div id="ojo-d" style="position:absolute;top:18px;right:10px;width:8px;height:8px;background:#3a2010;border-radius:50%;box-shadow:inset 0 1px 2px rgba(255,255,255,0.5)"></div>
+            <!-- Brillo ojos -->
+            <div style="position:absolute;top:18px;left:13px;width:3px;height:3px;background:#fff;border-radius:50%"></div>
+            <div style="position:absolute;top:18px;right:13px;width:3px;height:3px;background:#fff;border-radius:50%"></div>
+            <!-- Nariz -->
+            <div style="position:absolute;top:26px;left:50%;transform:translateX(-50%);width:6px;height:4px;background:rgba(180,100,60,0.3);border-radius:50%"></div>
+            <!-- Sonrisa -->
+            <div id="jesuel-boca-svg" style="position:absolute;top:31px;left:50%;transform:translateX(-50%);width:14px;height:7px;border-bottom:2px solid #c07040;border-radius:0 0 10px 10px"></div><div id="jesuel-boca" style="position:absolute;top:28px;left:50%;transform:translateX(-50%);font-size:10px"></div>
+            <!-- Cachetes rosados -->
+            <div style="position:absolute;top:24px;left:4px;width:10px;height:7px;background:rgba(255,150,150,0.4);border-radius:50%"></div>
+            <div style="position:absolute;top:24px;right:4px;width:10px;height:7px;background:rgba(255,150,150,0.4);border-radius:50%"></div>
+            <!-- Cabello -->
+            <div style="position:absolute;top:-2px;left:10px;width:30px;height:12px;background:linear-gradient(180deg,#3a2010,transparent);border-radius:50% 50% 0 0"></div>
+          </div>
+          <!-- Cuerpo traje -->
+          <div style="width:46px;height:36px;background:linear-gradient(180deg,#b0c8f0,#7090c0);border-radius:12px 12px 8px 8px;position:absolute;top:44px;left:50%;transform:translateX(-50%);box-shadow:0 4px 8px rgba(0,0,0,0.2);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2px">
+            <div style="font-size:5.5px;font-weight:900;color:#1a1a2e;letter-spacing:0.3px;font-family:monospace">JESUEL</div>
+            <div style="width:16px;height:10px;background:rgba(100,180,255,0.6);border-radius:4px;border:1px solid rgba(255,255,255,0.4)"></div>
+          </div>
+          <!-- Brazos -->
+          <div class="brazo-i" style="width:12px;height:26px;background:linear-gradient(180deg,#b0c8f0,#7090c0);border-radius:6px;position:absolute;top:46px;left:2px;transform:rotate(20deg);animation:brazoI 2s ease-in-out infinite"></div>
+          <div class="brazo-d" style="width:12px;height:26px;background:linear-gradient(180deg,#b0c8f0,#7090c0);border-radius:6px;position:absolute;top:46px;right:2px;transform:rotate(-20deg);animation:brazoD 2s ease-in-out infinite"></div>
+          <!-- Piernas -->
+          <div style="width:14px;height:18px;background:linear-gradient(180deg,#7090c0,#5070a0);border-radius:0 0 6px 6px;position:absolute;top:76px;left:10px"></div>
+          <div style="width:14px;height:18px;background:linear-gradient(180deg,#7090c0,#5070a0);border-radius:0 0 6px 6px;position:absolute;top:76px;right:10px"></div>
+          <!-- Corazón flotante -->
+          <div style="position:absolute;top:-10px;right:-5px;font-size:12px;animation:corazon 1.5s ease-in-out infinite">💙</div>
+        </div>
+      </div>
+      <div class="dania-texto" style="margin-left:86px;position:relative;z-index:1;">
+        <div class="dania-saludo">✦ PARA MI MAMI ✦</div>
+        <div class="frase-neon"><span id="frase-dia"></span></div>
+        <div class="dania-firma">— Tu bebé Jesuel 👶</div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  const frases = [
+"Mamá, ya casi llego, prepárate para el mejor abrazo de tu vida 💙",
+"Aquí dentro escucho tu corazón y me da mucha calma, te amo mamá 🤍",
+"Cada día que pasa es un día más cerca de conocerte, mamá 🌟",
+"Soy el proyecto más bonito que has tenido, y aún no salgo 😄",
+"Mamá, ya tengo ganas de ver tu cara por primera vez 👶",
+"Gracias por cuidarme tanto, pronto te lo voy a agradecer con sonrisas 😊",
+"Eres la mujer más valiente que conozco, mamá 💪",
+"Aquí adentro ya sé que el mundo afuera va a ser bonito porque tú estás 🌸",
+"Mamá, ya falta poco para que nos conozcamos 🎉",
+"Te escucho cantar y me pongo feliz, sigue haciéndolo siempre 🎵",
+"Soy tu mayor aventura y estoy listo para empezar 🚀",
+"Mamá, eres increíble y todavía ni me ves 💖",
+"Cada patada que doy es para decirte que aquí estoy y que te amo 💙",
+"Voy a ser tu más grande razón de sonreír, te lo prometo 😄",
+"Mamá, ya escucho la voz de papá también, somos un equipo los tres 👨‍👩‍👦",
+"Pronto voy a necesitar tus brazos, no los sueltes nunca 🤗",
+"Eres fuerte, hermosa y mi mamá favorita del universo 🌌",
+"Ya casi estoy listo para explorar el mundo contigo, mamá 🗺️",
+"Gracias por cada noche que te cuidaste para cuidarme a mí 🙏",
+"Mamá, cuando llegue, todo va a cambiar para mejor, lo juro 🌈",
+"Tu voz es lo más bonito que he escuchado en mi vida 🎶",
+"Soy pequeñito pero ya te amo con todo 💙",
+"Mamá, eres mi héroe y aún no salgo 🦸‍♀️",
+"Cada día que resistes con amor me haces más fuerte también 💪",
+"Ya quiero ver el sol, las estrellas, y sobre todo tu cara 🌟",
+"Mamá, pronto voy a ser tu razón de levantarte temprano 😄",
+"Eres la mejor decisión que tomé antes de nacer: elegirte como mamá 💖",
+"Ya falta poco para el abrazo más importante de nuestras vidas 🤍",
+"Mamá, me das fuerza desde adentro, gracias por tanto amor 💙",
+"Cuando llegue, prometo darte todo el amor que me has dado 🌸",
+"Soy Jesuel y ya casi estoy listo para conocerte 👋",
+"Mamá, tu sonrisa es lo que más quiero ver cuando llegue 😊",
+"Aquí dentro ya sé que voy a ser muy feliz contigo 🌟",
+"Cada día eres más mi mamá y eso me llena de alegría 💖",
+"Ya casi mamá, aguanta un poquito más, voy en camino 🚀",
+"Eres valiente, fuerte y bella, y vas a ser la mejor mamá 🌺",
+"Mamá, el mundo me espera pero tú eres mi primer mundo 🌍",
+"Pronto voy a agarrar tu dedo con toda mi fuerza 🤞",
+"Gracias por cada cuidado, cada alimento, cada amor que me das 🙏",
+"Mamá, ya tengo muchas ganas de escucharte de cerca 🎵",
+"Soy tu milagro y casi estoy aquí 💙",
+"Cada noche que duermes me arrullas sin saberlo 🌙",
+"Mamá, cuando te canses, recuerda que yo te voy a dar energía nueva 💪",
+"Ya casi terminamos esta etapa juntos, lo logramos 🏆",
+"Eres extraordinaria por todo lo que haces por mí antes de conocerme 🌟",
+"Mamá, pronto te voy a hacer reír todos los días 😄",
+"Soy pequeño pero mi amor por ti ya es enorme 💖",
+"Ya escucho el mundo afuera, suena bonito porque tú estás en él 🌸",
+"Mamá, eres mi hogar, mi calma y mi todo 🏡",
+"Pronto voy a llorar pero no de tristeza, sino de emoción de verte 😊",
+"Gracias por elegir ser mi mamá, es el mejor regalo 🎁",
+"Mamá, ya casi me tienes en brazos, aguanta 💙",
+"Eres la persona más especial que conozco y aún no he conocido a nadie 🌟",
+"Cada latido tuyo me recuerda que estás aquí conmigo siempre 💓",
+"Mamá, cuando llegue prométeme que me vas a contar muchos cuentos 📖",
+"Ya falta poco para que me veas por primera vez, eso me emociona 🥹",
+"Soy Jesuel, tu hijo, y ya te amo con todo lo que soy 💙",
+"Mamá, eres mi fuerza antes de nacer, imagínate después 💪",
+"Pronto voy a necesitar tu abrazo para sentirme en casa 🤗",
+"Gracias por cuidarme tanto, lo voy a recordar siempre 🙏",
+"Mamá, el mundo va a ser mejor porque lo voy a ver contigo 🌍",
+"Ya casi mamá, el tiempo vuela y pronto nos vemos 🕐",
+"Eres la razón de mi primera sonrisa, aunque aún no la veas 😊",
+"Soy tu aventura más grande y la más bonita que tendrás 🗺️",
+"Mamá, cuando llegue, prometo llenar de risas nuestra casa 😄",
+"Cada día que pasa, más cerca estamos de nuestro primer abrazo 💖",
+"Eres increíble mamá, no lo olvides nunca 🌟",
+"Ya tengo ganas de sentir el sol en mi carita por primera vez ☀️",
+"Mamá, gracias por ser tan valiente, eso también me lo enseñas 💪",
+"Pronto voy a ser tu compañero de aventuras para siempre 🚀",
+"Soy Jesuel y ya te elegí como mi mamá favorita del universo 🌌",
+"Cada noche que descansas me cuidas el sueño también 🌙",
+"Mamá, ya casi te escucho sin la barriga de por medio 😄",
+"Eres fuerte, hermosa y mía, gracias por ser mi mamá 💙",
+"Ya falta poquito, prometo que valdrá cada segundo de espera 🏆",
+"Mamá, cuando llegue, voy a hacer que todo valga la pena 💖",
+"Soy tu hijo y eso ya me hace el niño más afortunado 🍀",
+"Gracias por tanto amor antes de conocerme, imagínate después 🌸",
+"Mamá, pronto vas a sentir mi abrazo y ya no querrás soltarme 🤗",
+"Eres mi primer hogar y el mejor que podría tener 🏡",
+"Ya casi estoy listo para explorar el mundo a tu lado 🌟",
+"Mamá, eres mi superhéroe favorita antes de nacer 🦸‍♀️",
+"Pronto voy a abrir los ojos y lo primero que busco eres tú 👀",
+"Soy Jesuel y tengo mucho amor para darte, mamá 💙",
+"Cada patadita es un te amo que todavía no sé decir con palabras 💖",
+"Mamá, el día que nos conozcamos va a ser el mejor de nuestras vidas 🎉",
+"Ya falta poco para que seamos familia completa los tres 👨‍👩‍👦",
+"Eres valiente y yo lo soy también porque aprendí de ti 💪",
+"Mamá, pronto voy a necesitar que me enseñes todo 📚",
+"Gracias por cada canción de cuna que me dedicas sin que yo lo pida 🎵",
+"Soy pequeñito pero ya tengo clarito que te amo, mamá 💙",
+"Ya casi mamá, el momento más bonito está por llegar 🌈",
+"Eres mi primera amiga, mi primera maestra y mi primera casa 🏡",
+"Pronto voy a sonreírte y vas a entender para qué era todo esto 😊",
+"Mamá, gracias por aguantar tanto con tanto amor 🙏",
+"Soy Jesuel y ya tengo mucho que contarte cuando llegue 🌟",
+"Cada día que pasa eres más mi mamá y eso me pone muy feliz 💖",
+"Ya casi estamos del otro lado, juntos lo logramos 🏆",
+"Mamá, eres extraordinaria y el mundo lo va a saber cuando me conozca 🌍",
+"Pronto te voy a dar la mano y ya no la suelteo 🤝",
+"Soy tu milagro más grande y ya casi llego 💙",
+"Gracias mamá, por todo, por tanto, por siempre 🌸",
+];
+  const hoy = new Date();
+  const inicio = new Date(hoy.getFullYear(), 0, 0);
+  const diff = hoy - inicio;
+  const diaDelAnio = Math.floor(diff / 86400000);
+  const idx = (diaDelAnio - 1) % frases.length;
+  document.getElementById('frase-dia').textContent = frases[idx];
+})();
+// ── PRESUPUESTO ──
+function getSemanaActual(){
+  const hoy = new Date();
+  return Math.min(4, Math.ceil(hoy.getDate() / 7));
+}
+
+function getPresupuesto(){
+  if(!state.presupuesto) state.presupuesto = {conceptos:[]};
+  if(!state.presupuesto.conceptos) state.presupuesto.conceptos = [];
+  return state.presupuesto;
+}
+
+function fmtP(v){ return '$'+Math.round(v||0).toLocaleString('es-MX'); }
+
+function acumuladoConcepto(c){
+  const sem = getSemanaActual();
+  const semPago = c.semPago||0;
+  // Semanas acumuladas desde el último pago
+  const semsAcum = semPago===0 ? sem : Math.max(0, sem - semPago + 1);
+  const base = (c.acumInicial||0) + (semsAcum * (c.montoSem||0));
+  return Math.max(0, base - (c.gastado||0));
+}
+
+function renderPresupuesto(){
+  const sem = getSemanaActual();
+  const pres = getPresupuesto();
+  const conceptos = pres.conceptos||[];
+  document.getElementById('pres-semana').textContent = 'S'+sem+' de 4';
+  const totalAcum = conceptos.reduce((a,c)=>a+acumuladoConcepto(c),0);
+  document.getElementById('pres-acumulado').textContent = fmtP(totalAcum);
+
+  const lista = document.getElementById('pres-lista');
+  if(!conceptos.length){
+    lista.innerHTML = '<div style="text-align:center;color:var(--text2);padding:40px;font-size:13px">Sin conceptos aún<br>Toca + para agregar</div>';
+    return;
+  }
+
+  lista.innerHTML = conceptos.map(c=>{
+    const acum = acumuladoConcepto(c);
+    const semPagoLabel = c.semPago ? 'Sem '+c.semPago : 'Acumula';
+    const color = acum >= c.montoSem*2 ? 'var(--gold)' : acum > 0 ? 'var(--green)' : 'var(--text2)';
+    const semAcum = c.semPago===0 ? getSemanaActual() : Math.max(0, getSemanaActual()-c.semPago+1);
+    const movs = (c.movimientos||[]).slice().reverse();
+    const histHTML = movs.length ? movs.map(m=>`
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)">
+        <div>
+          <div style="font-size:11px;font-weight:600;color:${m.tipo==='abonar'?'var(--green)':'var(--red)'}">${m.tipo==='abonar'?'➕ Abono':'💸 Gasto'}</div>
+          <div style="font-size:10px;color:var(--text2)">${m.fecha||''}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="font-family:var(--mono);font-size:13px;font-weight:700;color:${m.tipo==='abonar'?'var(--green)':'var(--red)'}">${m.tipo==='abonar'?'+':'-'}${fmtP(m.monto)}</div>
+          <button onclick="eliminarMovPres('${c.id}',${m.id})" style="background:none;border:none;color:var(--text2);font-size:12px;cursor:pointer">🗑</button>
+        </div>
+      </div>`).join('') : '<div style="font-size:11px;color:var(--text2);text-align:center;padding:8px">Sin movimientos</div>';
+
+    return `<div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:12px 14px;margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="toggleHistPres('hist-${c.id}')">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:20px">${c.icono||'📌'}</span>
+          <div>
+            <div style="font-size:13px;font-weight:700">${c.nombre}</div>
+            <div style="font-size:10px;color:var(--text2)">${movs.length} movimiento${movs.length!==1?'s':''}</div>
+          </div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-family:var(--mono);font-size:16px;font-weight:700;color:${color}">${fmtP(acum)}</div>
+          <div style="font-size:10px;color:var(--text2)">acumulado ▾</div>
+        </div>
+      </div>
+      <div id="hist-${c.id}" style="display:none;margin-top:10px;border-top:1px solid var(--border);padding-top:8px">
+        ${histHTML}
+      </div>
+      <div style="display:flex;gap:6px;margin-top:10px">
+        <button onclick="abrirMovPresupuesto('${c.id}')" style="flex:1;background:rgba(0,200,150,0.1);border:1px solid rgba(0,200,150,0.3);color:var(--green);border-radius:8px;padding:7px;font-size:11px;font-weight:700;cursor:pointer">+ Añadir movimiento</button>
+        <button onclick="editarConcepto('${c.id}')" style="background:none;border:1px solid var(--border);color:var(--text2);border-radius:8px;padding:7px 10px;font-size:13px;cursor:pointer">✏️</button>
+        <button onclick="eliminarConcepto('${c.id}')" style="background:none;border:1px solid var(--border);color:var(--text2);border-radius:8px;padding:7px 10px;font-size:13px;cursor:pointer">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+let _presMovTipo = 'abonar';
+function setPresMovTipo(tipo){
+  _presMovTipo = tipo;
+  const esAbonar = tipo==='abonar';
+  document.getElementById('pres-mov-tipo-abonar').style.borderColor = esAbonar?'var(--green)':'var(--border)';
+  document.getElementById('pres-mov-tipo-abonar').style.color = esAbonar?'var(--green)':'var(--text2)';
+  document.getElementById('pres-mov-tipo-abonar').style.background = esAbonar?'rgba(0,200,150,0.1)':'var(--bg2)';
+  document.getElementById('pres-mov-tipo-gastar').style.borderColor = !esAbonar?'var(--red)':'var(--border)';
+  document.getElementById('pres-mov-tipo-gastar').style.color = !esAbonar?'var(--red)':'var(--text2)';
+  document.getElementById('pres-mov-tipo-gastar').style.background = !esAbonar?'rgba(255,77,109,0.1)':'var(--bg2)';
+}
+
+function abrirMovPresupuesto(id){
+  const pres = getPresupuesto();
+  const c = pres.conceptos.find(x=>x.id===id); if(!c) return;
+  document.getElementById('pres-mov-id').value = id;
+  document.getElementById('m-pres-mov-titulo').textContent = c.nombre;
+  document.getElementById('m-pres-mov-acum').textContent = fmtP(acumuladoConcepto(c));
+  document.getElementById('pres-mov-monto').value = c.montoSem||'';
+  setPresMovTipo('abonar');
+  openModal('m-pres-mov');
+}
+
+async function guardarMovPresupuesto(){
+  const id = document.getElementById('pres-mov-id').value;
+  const monto = parseFloat(document.getElementById('pres-mov-monto').value)||0;
+  if(!monto) return alert('Ingresa el monto');
+  const pres = getPresupuesto();
+  const c = pres.conceptos.find(x=>x.id===id); if(!c) return;
+  if(_presMovTipo==='abonar'){
+    c.acumInicial = (c.acumInicial||0) + monto;
+  } else {
+    c.gastado = (c.gastado||0) + monto;
+    if(c.gastado > (c.acumInicial||0)) c.acumInicial = 0;
+  }
+  if(!c.movimientos) c.movimientos=[];
+  c.movimientos.push({id:Date.now(), tipo:_presMovTipo, monto, fecha:new Date().toISOString().split('T')[0]});
+  await save(); closeModal('m-pres-mov'); renderPresupuesto();
+}
+
+async function eliminarMovPres(conceptoId, movId){
+  const pres = getPresupuesto();
+  const c = pres.conceptos.find(x=>x.id===conceptoId); if(!c) return;
+  const mov = (c.movimientos||[]).find(m=>m.id===movId); if(!mov) return;
+  // Revertir efecto del movimiento
+  if(mov.tipo==='abonar') c.acumInicial = Math.max(0,(c.acumInicial||0)-mov.monto);
+  else c.gastado = Math.max(0,(c.gastado||0)-mov.monto);
+  c.movimientos = c.movimientos.filter(m=>m.id!==movId);
+  await save(); renderPresupuesto();
+  // Reabrir historial
+  setTimeout(()=>{ const el=document.getElementById('hist-'+conceptoId); if(el) el.style.display='block'; },100);
+}
+function toggleHistPres(id){
+  const el = document.getElementById(id);
+  if(el) el.style.display = el.style.display==='none'?'block':'none';
+}
+function abrirNuevoConcepto(){
+  ['pres-nombre','pres-monto-sem','pres-icono','pres-acum-inicial'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('pres-semana-pago').value='0';
+  document.getElementById('pres-edit-id').value='';
+  document.getElementById('m-pres-titulo').textContent='Nuevo Concepto';
+  openModal('m-pres-concepto');
+}
+
+function editarConcepto(id){
+  const pres = getPresupuesto();
+  const c = pres.conceptos.find(x=>x.id===id); if(!c) return;
+  document.getElementById('pres-nombre').value = c.nombre||'';
+  document.getElementById('pres-monto-sem').value = c.montoSem||'';
+  document.getElementById('pres-semana-pago').value = c.semPago||0;
+  document.getElementById('pres-icono').value = c.icono||'';
+  document.getElementById('pres-acum-inicial').value = c.acumInicial||'';
+  document.getElementById('pres-edit-id').value = id;
+  document.getElementById('m-pres-titulo').textContent='Editar Concepto';
+  openModal('m-pres-concepto');
+}
+
+async function guardarConcepto(){
+  const nombre = document.getElementById('pres-nombre').value.trim(); if(!nombre) return alert('Ingresa el nombre');
+  const montoSem = parseFloat(document.getElementById('pres-monto-sem').value)||0;
+  const semPago = parseInt(document.getElementById('pres-semana-pago').value)||0;
+  const icono = document.getElementById('pres-icono').value.trim()||'📌';
+  const acumInicial = parseFloat(document.getElementById('pres-acum-inicial').value)||0;
+  const editId = document.getElementById('pres-edit-id').value;
+  const pres = getPresupuesto();
+  if(editId){
+    const c = pres.conceptos.find(x=>x.id===editId);
+    if(c){ c.nombre=nombre; c.montoSem=montoSem; c.semPago=semPago; c.icono=icono; c.acumInicial=acumInicial; }
+  } else {
+    pres.conceptos.push({id:Date.now()+'', nombre, montoSem, semPago, icono, acumInicial, gastado:0, ultimoPago:null});
+  }
+  await save(); closeModal('m-pres-concepto'); renderPresupuesto();
+}
+
+async function marcarGastado(id){
+  const pres = getPresupuesto();
+  const c = pres.conceptos.find(x=>x.id===id); if(!c) return;
+  const acum = acumuladoConcepto(c);
+  if(!confirm('¿Marcar '+c.nombre+' como gastado? ('+fmtP(acum)+')')) return;
+  // Reiniciar: guardar el gastado y resetear acumulado
+  c.gastado = (c.gastado||0) + acum;
+  c.acumInicial = 0;
+  c.ultimoPago = new Date().toISOString().split('T')[0];
+  await save(); renderPresupuesto();
+}
+
+async function eliminarConcepto(id){
+  if(!confirm('¿Eliminar este concepto?')) return;
+  const pres = getPresupuesto();
+  pres.conceptos = pres.conceptos.filter(x=>x.id!==id);
+  await save(); renderPresupuesto();
+}
+
+
+// ── Animaciones Jesuel ──
+(function(){
+  const wrap = document.getElementById('jesuel-wrap');
+  if(!wrap) return;
+
+  const estados = [
+    // Saluda agitando brazo
+    () => {
+      wrap.style.animation = 'none';
+      wrap.style.transform = 'translateX(20px) translateY(0)';
+      const brazoD = wrap.querySelector('.brazo-d');
+      if(brazoD) { brazoD.style.animation = 'saludar 0.4s ease-in-out 4'; }
+      setBoca('😄'); setOjos('normal');
+    },
+    // Brinca
+    () => {
+      wrap.style.animation = 'brincar 0.5s ease-in-out 3';
+      setBoca('😮'); setOjos('normal');
+    },
+    // Voltea a la izquierda curioso
+    () => {
+      wrap.style.animation = 'none';
+      wrap.style.transform = 'translateX(150px) scaleX(-1)';
+      setBoca('🤔'); setOjos('lateral');
+      setTimeout(()=>{ wrap.style.transform = 'translateX(150px)'; }, 1200);
+    },
+    // Voltea a la derecha
+    () => {
+      wrap.style.animation = 'none';
+      wrap.style.transform = 'translateX(10px)';
+      setBoca('😊'); setOjos('lateral');
+      setTimeout(()=>{ wrap.style.transform = 'translateX(60px)'; }, 1000);
+    },
+    // Saca la lengua
+    () => {
+      wrap.style.animation = 'none';
+      setBoca('😛'); setOjos('normal');
+      setTimeout(()=>{ setBoca('😄'); }, 1500);
+    },
+    // Se acuesta / gira
+    () => {
+      wrap.style.animation = 'rodar 1s ease-in-out 1';
+      setBoca('😄'); setOjos('cerrar');
+      setTimeout(()=>{ setOjos('normal'); }, 800);
+    },
+    // Explora las letras (se mueve lentamente por el área)
+    () => {
+      wrap.style.animation = 'explorarLetras 4s ease-in-out 1';
+      setBoca('😮'); setOjos('arriba');
+      setTimeout(()=>{ setOjos('normal'); setBoca('😄'); }, 3500);
+    },
+    // Mira hacia afuera (al usuario)
+    () => {
+      wrap.style.animation = 'none';
+      wrap.style.transform = 'translateX(80px) translateY(-5px) scale(1.1)';
+      setBoca('😄'); setOjos('normal');
+      // Agita las dos manos
+      const brazos = wrap.querySelectorAll('.brazo-i, .brazo-d');
+      brazos.forEach(b => { b.style.animation = 'saludar 0.35s ease-in-out 5'; });
+      setTimeout(()=>{ wrap.style.transform = 'translateX(80px)'; brazos.forEach(b=>b.style.animation=''); }, 2500);
+    },
+    // Flota tranquilo
+    () => {
+      wrap.style.animation = 'explorar 6s ease-in-out 1';
+      setBoca('😊'); setOjos('normal');
+    },
+  ];
+
+  function setBoca(emoji) {
+    const b = document.getElementById('jesuel-boca');
+    if(b) b.textContent = emoji === '😛' ? '👅' : '';
+    const boca = document.getElementById('jesuel-boca-svg');
+    if(!boca) return;
+    if(emoji === '😄' || emoji === '😊') { boca.style.borderBottom = '2px solid #c07040'; boca.style.borderTop = 'none'; boca.style.height='7px'; }
+    else if(emoji === '😮') { boca.style.borderRadius='50%'; boca.style.width='8px'; boca.style.height='8px'; boca.style.border='2px solid #c07040'; }
+    else if(emoji === '😛') { boca.style.borderBottom = '2px solid #c07040'; boca.style.height='5px'; }
+    else if(emoji === '🤔') { boca.style.borderBottom = 'none'; boca.style.borderTop = '2px solid #c07040'; boca.style.height='5px'; }
+    else { boca.style.borderBottom = '2px solid #c07040'; boca.style.height='7px'; }
+  }
+
+  function setOjos(tipo) {
+    const oi = document.getElementById('ojo-i');
+    const od = document.getElementById('ojo-d');
+    if(!oi || !od) return;
+    if(tipo === 'normal') { oi.style.cssText = od.style.cssText = 'width:8px;height:8px;background:#3a2010;border-radius:50%'; }
+    else if(tipo === 'lateral') { oi.style.cssText = od.style.cssText = 'width:8px;height:8px;background:#3a2010;border-radius:50%;transform:translateX(3px)'; }
+    else if(tipo === 'arriba') { oi.style.cssText = od.style.cssText = 'width:8px;height:8px;background:#3a2010;border-radius:50%;transform:translateY(-2px)'; }
+    else if(tipo === 'cerrar') { oi.style.cssText = od.style.cssText = 'width:8px;height:3px;background:#3a2010;border-radius:4px;margin-top:4px'; }
+  }
+
+  let idx2 = 0;
+  function siguienteEstado() {
+    if(!document.getElementById('msg-esposa') || document.getElementById('msg-esposa').style.display === 'none') return;
+    try { estados[idx2 % estados.length](); } catch(e){}
+    idx2++;
+    const delay = 1500 + Math.random() * 2500;
+    setTimeout(siguienteEstado, delay);
+  }
+
+  // Iniciar cuando se muestre el mensaje
+  const observer = new MutationObserver(()=>{
+    if(document.getElementById('msg-esposa').style.display !== 'none') {
+      observer.disconnect();
+      setTimeout(siguienteEstado, 800);
+    }
+  });
+  const msgEl = document.getElementById('msg-esposa');
+  if(msgEl) observer.observe(msgEl, {attributes:true, attributeFilter:['style']});
+})();
+</script>
+<div class="lista">
+  <div class="section-title" id="lista-titulo">MOVIMIENTOS</div>
+  <div id="pendientes-hogar" style="display:none;margin-bottom:16px"></div>
+<div id="movimientos-list"></div>
+</div>
+
+<button class="fab" onclick="openModal('m-movimiento')">＋</button>
+
+<div class="modal-overlay" id="m-movimiento">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Nuevo Movimiento</div>
+    <div class="tipo-toggle">
+      <div class="tipo-btn ingreso active" id="btn-ingreso" onclick="setTipo('ingreso')">↑ Ingreso</div>
+      <div class="tipo-btn gasto" id="btn-gasto" onclick="setTipo('gasto')">↓ Gasto</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">CONCEPTO</label>
+      <input class="form-input" id="m-concepto" placeholder="Descripción">
+    </div>
+    <div class="form-group">
+      <label class="form-label">MONTO</label>
+      <input class="form-input" id="m-monto" placeholder="$0.00" type="number">
+    </div>
+    <div class="form-group">
+      <label class="form-label">FECHA</label>
+      <input class="form-input" id="m-fecha" type="date">
+    </div>
+    <button class="form-submit" onclick="guardarMovimiento()">Guardar</button>
+    <button class="btn-ghost" onclick="closeModal('m-movimiento')">Cancelar</button>
+  </div>
+</div>
+
+<div id="save-indicator"></div>
+
+<!-- PRESUPUESTO -->
+<div id="sec-presupuesto" style="display:none;padding:0 16px 100px">
+
+  <!-- Semana actual -->
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:14px 16px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center">
+    <div>
+      <div style="font-size:10px;letter-spacing:2px;color:var(--text2);font-weight:700">SEMANA ACTUAL</div>
+      <div style="font-family:var(--mono);font-size:22px;font-weight:700;color:var(--green)" id="pres-semana">S1</div>
+    </div>
+    <div style="text-align:right">
+      <div style="font-size:10px;letter-spacing:2px;color:var(--text2);font-weight:700">ACUMULADO TOTAL</div>
+      <div style="font-family:var(--mono);font-size:22px;font-weight:700;color:var(--gold)" id="pres-acumulado">$0</div>
+    </div>
+  </div>
+
+  <!-- Lista conceptos -->
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+    <div style="font-size:11px;letter-spacing:2px;color:var(--text2);font-weight:700">CONCEPTOS</div>
+    <button onclick="abrirNuevoConcepto()" style="background:var(--green);border:none;color:#000;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer">+ Agregar</button>
+  </div>
+  <div id="pres-lista"></div>
+</div>
+
+<!-- MODAL MOVIMIENTO PRESUPUESTO -->
+<div class="modal-overlay" id="m-pres-mov" onclick="if(event.target===this)closeModal('m-pres-mov')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div style="font-size:16px;font-weight:800;margin-bottom:4px" id="m-pres-mov-titulo">Movimiento</div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:16px">Acumulado: <span id="m-pres-mov-acum" style="color:var(--green);font-weight:700">$0</span></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
+      <button id="pres-mov-tipo-abonar" onclick="setPresMovTipo('abonar')" class="tipo ing active" style="padding:12px;border-radius:12px;border:2px solid var(--green);background:rgba(0,200,150,0.1);color:var(--green);font-weight:700;font-size:12px;cursor:pointer">➕ Añadir semana</button>
+      <button id="pres-mov-tipo-gastar" onclick="setPresMovTipo('gastar')" class="tipo gas" style="padding:12px;border-radius:12px;border:2px solid var(--border);background:var(--bg2);color:var(--text2);font-weight:700;font-size:12px;cursor:pointer">💸 Registrar gasto</button>
+    </div>
+    <label style="font-size:11px;color:var(--text2);margin-bottom:6px;display:block">MONTO</label>
+    <input class="form-input" id="pres-mov-monto" type="number" placeholder="0.00" style="margin-bottom:16px">
+    <input type="hidden" id="pres-mov-id">
+    <input type="hidden" id="pres-mov-tipo-val" value="abonar">
+    <button class="form-submit" onclick="guardarMovPresupuesto()">Guardar</button>
+    <button class="btn-ghost" onclick="closeModal('m-pres-mov')">Cancelar</button>
+  </div>
+</div>
+
+<!-- MODAL NUEVO CONCEPTO -->
+<div class="modal-overlay" id="m-pres-concepto" onclick="if(event.target===this)closeModal('m-pres-concepto')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div style="font-size:16px;font-weight:800;margin-bottom:16px" id="m-pres-titulo">Nuevo Concepto</div>
+    <input class="form-input" id="pres-nombre" placeholder="Nombre (ej: Renta)" style="margin-bottom:10px">
+    <input class="form-input" id="pres-monto-sem" placeholder="Monto por semana $" type="number" style="margin-bottom:10px">
+    <label style="font-size:11px;color:var(--text2);margin-bottom:6px;display:block">Semana de pago (1-4)</label>
+    <select class="form-input" id="pres-semana-pago" style="margin-bottom:10px">
+      <option value="0">Cualquier semana / Acumula</option>
+      <option value="1">Semana 1</option>
+      <option value="2">Semana 2</option>
+      <option value="3">Semana 3</option>
+      <option value="4">Semana 4</option>
+    </select>
+    <input class="form-input" id="pres-icono" placeholder="Emoji (ej: 🏠)" style="margin-bottom:10px">
+    <label style="font-size:11px;color:var(--text2);margin-bottom:6px;display:block">Monto ya acumulado $</label>
+    <input class="form-input" id="pres-acum-inicial" placeholder="0.00 (lo que ya tienes)" type="number" style="margin-bottom:16px">
+    <input type="hidden" id="pres-edit-id">
+    <button class="form-submit" onclick="guardarConcepto()">Guardar</button>
+    <button class="btn-ghost" onclick="closeModal('m-pres-concepto')">Cancelar</button>
+  </div>
+</div>
+
+<script>
+let state = {movimientos:[]};
+let tabActual = 'todos';
+let tipoActual = 'ingreso';
+
+function mostrarIndicador(ok) {
+  const el = document.getElementById('save-indicator');
+  el.style.background = ok ? 'var(--green)' : 'var(--red)';
+  el.style.color = ok ? '#000' : '#fff';
+  el.textContent = ok ? '✓ Guardado' : '⚠ Sin conexión';
+  el.style.opacity = '1';
+  setTimeout(()=>{ el.style.opacity='0'; }, 2000);
+}
+
+async function save() {
+  try { localStorage.setItem('hogar_v1', JSON.stringify(state)); } catch(e){}
+  try {
+    // Sincronizar neto con interfaz
+    const neto = calcularNeto();
+    const ri = await fetch('/api/state');
+    if(ri.ok) {
+      const si = await ri.json();
+      if(!si.modulos) si.modulos = {};
+      si.modulos.hogar = neto;
+      await fetch('/api/state', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(si)});
+    }
+    const r = await fetch('/api/state/hogar', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(state)});
+    mostrarIndicador(r.ok);
+  } catch(e){ mostrarIndicador(false); }
+}
+
+async function load() {
+  try {
+    const r = await fetch('/api/state/hogar');
+    if(r.ok){ const d=await r.json(); if(d&&d.movimientos){ state=d; renderAll(); return; } }
+  } catch(e){}
+  try{ const d=localStorage.getItem('hogar_v1'); if(d){ const p=JSON.parse(d); if(p.movimientos) state=p; } } catch(e){}
+  renderAll();
+}
+
+function calcularNeto() {
+  const movs = state.movimientos||[];
+  const ingresos = movs.filter(m=>m.tipo==='ingreso').reduce((a,m)=>a+m.monto,0);
+  const gastos   = movs.filter(m=>m.tipo==='gasto').reduce((a,m)=>a+m.monto,0);
+  return ingresos - gastos;
+}
+
+function renderAll() {
+  const movs = state.movimientos||[];
+  const ingresos = movs.filter(m=>m.tipo==='ingreso').reduce((a,m)=>a+m.monto,0);
+  const gastos   = movs.filter(m=>m.tipo==='gasto').reduce((a,m)=>a+m.monto,0);
+  const neto     = ingresos - gastos;
+  const fmt = v => '$'+v.toLocaleString('es-MX',{minimumFractionDigits:0});
+
+  document.getElementById('h-ingresos').textContent = fmt(ingresos);
+  document.getElementById('h-gastos').textContent   = fmt(gastos);
+  const netoEl = document.getElementById('h-neto');
+  netoEl.textContent = (neto>=0?'+':'')+fmt(neto);
+  netoEl.style.color = neto>=0 ? 'var(--green)' : 'var(--red)';
+
+  let lista = movs.slice().reverse();
+  if(tabActual==='ingresos') lista = lista.filter(m=>m.tipo==='ingreso');
+  if(tabActual==='gastos')   lista = lista.filter(m=>m.tipo==='gasto');
+
+  const el = document.getElementById('movimientos-list');
+  if(!lista.length){
+    el.innerHTML=`<div class="empty-state"><div class="empty-ico">🏠</div><div>Sin movimientos<br>Toca + para agregar</div></div>`;
+    return;
+  }
+  el.innerHTML = lista.map(m=>`
+    <div class="mov-item ${m.tipo==='gasto'?'gasto':''}">
+      <div>
+        <div class="mov-concepto">${m.concepto}</div>
+        <div class="mov-fecha">${m.fecha||''} · ${m.tipo==='ingreso'?'Ingreso':'Gasto'}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="mov-monto ${m.tipo==='gasto'?'gasto':''}">${m.tipo==='gasto'?'-':'+'} ${fmt(m.monto)}</span>
+        <button onclick="eliminarMov(${m.id})" style="background:none;border:none;color:var(--text2);font-size:14px;cursor:pointer">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+function cambiarTab(tab) {
+  tabActual = tab;
+  ['todos','ingresos','gastos','presupuesto'].forEach(t=>{
+    const el = document.getElementById('tab-'+t); if(el) el.classList.toggle('active', t===tab);
+  });
+  const secPres = document.getElementById('sec-presupuesto');
+  const lista = document.querySelector('.lista');
+  if(tab === 'presupuesto'){
+    if(secPres) secPres.style.display = 'block';
+    if(lista) lista.style.display = 'none';
+    renderPresupuesto();
+  } else {
+    if(secPres) secPres.style.display = 'none';
+    if(lista) lista.style.display = 'block';
+    renderAll();
+  }
+}
+
+function setTipo(tipo) {
+  tipoActual = tipo;
+  document.getElementById('btn-ingreso').classList.toggle('active', tipo==='ingreso');
+  document.getElementById('btn-gasto').classList.toggle('active', tipo==='gasto');
+}
+
+function openModal(id){
+  document.getElementById(id).classList.add('open');
+  document.body.style.overflow='hidden';
+  if(id==='m-movimiento' && modoAdmin) {
+    if(!document.getElementById('m-movimiento-origen')) {
+      const btn = document.querySelector('#m-movimiento .form-submit');
+      const div = document.createElement('div');
+      div.innerHTML = `
+        <div class="form-group">
+          <label class="form-label">💼 ORIGEN (opcional)</label>
+          <select class="form-input" id="m-movimiento-origen"><option value="">Sin afectar bolsillo</option></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">💼 DESTINO (opcional)</label>
+          <select class="form-input" id="m-movimiento-destino"><option value="">Sin afectar bolsillo</option></select>
+        </div>`;
+      if(btn) btn.parentNode.insertBefore(div, btn);
+    }
+    hf_llenarSelect('m-movimiento-origen');
+    hf_llenarSelect('m-movimiento-destino');
+  }
+}
+function closeModal(id){ document.getElementById(id).classList.remove('open'); document.body.style.overflow=''; }
+document.querySelectorAll('.modal-overlay').forEach(el=>{ el.addEventListener('click',e=>{ if(e.target===el) closeModal(el.id); }); });
+
+async function guardarMovimiento() {
+  const concepto = document.getElementById('m-concepto').value.trim();
+  const monto    = parseFloat(document.getElementById('m-monto').value)||0;
+  const fecha    = document.getElementById('m-fecha').value;
+  if(!concepto||!monto) return alert('Completa los campos');
+  if(!state.movimientos) state.movimientos=[];
+  state.movimientos.push({id:Date.now(), tipo:tipoActual, concepto, monto, fecha, bolsilloAsignado:modoAdmin});
+  await save(); closeModal('m-movimiento');
+  ['m-concepto','m-monto'].forEach(id=>document.getElementById(id).value='');
+  setTipo('ingreso');
+  renderAll();
+  if(modoAdmin) {
+    const origenId = document.getElementById('m-movimiento-origen')?.value;
+    const destinoId = document.getElementById('m-movimiento-destino')?.value;
+    const _movs_hg=[]; if(origenId) _movs_hg.push({id:origenId,monto,tipo:'salida',concepto,fecha}); if(destinoId) _movs_hg.push({id:destinoId,monto,tipo:'entrada',concepto,fecha}); if(_movs_hg.length) await hf_actualizarBolsillos(_movs_hg);
+  }
+  if(modoAdmin) {
+    renderPendientes();
+    // Inyectar selectores en modal si no existen
+    const modal = document.getElementById('m-movimiento');
+    if(modal && !modal.querySelector('#m-movimiento-origen')) {
+      const btn = modal.querySelector('.form-submit');
+      const div = document.createElement('div');
+      div.innerHTML = `
+        <div class="form-group">
+          <label class="form-label">💼 ORIGEN (opcional)</label>
+          <select class="form-input" id="m-movimiento-origen"><option value="">Sin afectar bolsillo</option></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">💼 DESTINO (opcional)</label>
+          <select class="form-input" id="m-movimiento-destino"><option value="">Sin afectar bolsillo</option></select>
+        </div>`;
+      btn.parentNode.insertBefore(div, btn);
+    }
+    await hf_llenarSelect('m-movimiento-origen');
+    await hf_llenarSelect('m-movimiento-destino');
+  }
+}
+
+async function eliminarMov(id) {
+  if(!confirm('¿Eliminar este movimiento?')) return;
+  state.movimientos = state.movimientos.filter(m=>m.id!==id);
+  await save(); renderAll();
+}
+
+document.getElementById('m-fecha').value = new Date().toISOString().split('T')[0];
+load();
+
+async function checkPIN() {
+  try {
+    const r = await fetch('/api/state');
+    const d = await r.json();
+    const pin = d.config?.pinHogar;
+    if(pin) {
+      const screen = document.getElementById('pin-screen');
+      screen.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+      // Ocultar todo el contenido excepto el PIN
+      Array.from(document.body.children).forEach(el=>{
+        if(el.id !== 'pin-screen') el.style.visibility = 'hidden';
+      });
+    }
+  } catch(e){}
+}
+
+const PIN_ADMIN = '5111';
+const PIN_ESPOSA = '5110';
+let modoAdmin = false;
+
+async function verificarPIN() {
+  const entrada = document.getElementById('pin-entry').value;
+  if(entrada === PIN_ADMIN || entrada === PIN_ESPOSA) {
+    modoAdmin = entrada === PIN_ADMIN;
+    document.getElementById('pin-screen').style.display = 'none';
+    if(!modoAdmin) {
+      document.getElementById('msg-esposa').style.display = 'block';
+      document.getElementById('btn-back').style.display = 'none';
+      // Generar estrellas
+      const sc = document.getElementById('stars-container');
+      if(sc && !sc.children.length){ for(let i=0;i<20;i++){ const s=document.createElement('div'); s.className='star'; s.style.cssText=`left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${Math.random()*2}s;animation-duration:${1.5+Math.random()*2}s`; sc.appendChild(s); } }
+      // Bloquear navegación hacia atrás
+      history.pushState(null, '', window.location.href);
+      window.addEventListener('popstate', () => {
+        history.pushState(null, '', window.location.href);
+      });
+    }
+    document.body.style.overflow = '';
+    Array.from(document.body.children).forEach(el=>{
+      el.style.visibility = 'visible';
+    });
+    if(modoAdmin) renderPendientes();
+  } else {
+    document.getElementById('pin-entry').value = '';
+    document.getElementById('pin-entry').style.borderColor = 'var(--red)';
+    setTimeout(()=>document.getElementById('pin-entry').style.borderColor='', 1000);
+    alert('PIN incorrecto');
+  }
+}
+
+async function renderPendientes() {
+  if(!modoAdmin) return;
+  const movs = state.movimientos||[];
+  const pendientes = movs.filter(m=>!m.bolsilloAsignado);
+  const el = document.getElementById('pendientes-hogar');
+  if(!el) return;
+  if(!pendientes.length){ el.style.display='none'; return; }
+  const r = await fetch('/api/state');
+  const d = await r.json();
+  const bolsillos = (d.bolsillos||[]).filter(b=>!b.oculto);
+  const fmt = v => '$'+v.toLocaleString('es-MX');
+  const opts = '<option value="">Sin asignar</option>' + bolsillos.map(b=>`<option value="${b.id}">${b.nombre} (${fmt(b.saldo||0)})</option>`).join('');
+  el.innerHTML = `<div style="font-size:10px;letter-spacing:2px;font-weight:700;color:var(--red);margin-bottom:8px">⚠ PENDIENTES POR ASIGNAR</div>` +
+    pendientes.map(m=>`
+    <div style="background:rgba(255,77,109,0.08);border:1px solid rgba(255,77,109,0.3);border-radius:12px;padding:12px;margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+        <div><div style="font-weight:700">${m.concepto}</div><div style="font-size:11px;color:#6b7a99">${m.fecha||''}</div></div>
+        <div style="font-weight:800;color:var(--red)">-${fmt(m.monto)}</div>
+      </div>
+      <select id="pb-${m.id}" style="width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--text);font-size:13px;margin-bottom:6px">${opts}</select>
+      <button onclick="asignarBolsilloHogar(${m.id})" style="width:100%;background:var(--red);color:#fff;border:none;border-radius:8px;padding:10px;font-weight:700;cursor:pointer">Asignar bolsillo</button>
+    </div>`).join('');
+  el.style.display = 'block';
+}
+
+async function asignarBolsilloHogar(movId) {
+  const bolsilloId = document.getElementById('pb-'+movId).value;
+  const mov = (state.movimientos||[]).find(m=>m.id===movId);
+  if(!mov) return;
+  mov.bolsilloAsignado = true;
+  mov.bolsilloId = bolsilloId||null;
+  if(bolsilloId) {
+    const r = await fetch('/api/state');
+    const d = await r.json();
+    const b = (d.bolsillos||[]).find(b=>b.id==bolsilloId);
+    if(b) {
+      if(!b.movimientos) b.movimientos=[];
+      b.movimientos.push({id:Date.now(), tipo:'salida', monto:mov.monto, concepto:mov.concepto, fecha:mov.fecha});
+      b.saldo = (b.saldo||0) - mov.monto;
+      await fetch('/api/state',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
+    }
+  }
+  await save();
+  renderAll();
+  renderPendientes();
+}
+
+checkPIN();
+
+</script>
+
+<div id="pin-screen" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:999;flex-direction:column;align-items:center;justify-content:center;padding:40px">
+  <div style="font-size:48px;margin-bottom:16px">🔑</div>
+  <div style="font-size:22px;font-weight:800;margin-bottom:8px">Módulo Protegido</div>
+  <div style="font-size:13px;color:var(--text2);margin-bottom:32px;text-align:center">Ingresa el PIN para acceder al módulo Hogar</div>
+  <input id="pin-entry" type="password" inputmode="numeric" maxlength="4" placeholder="••••"
+    style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px;font-size:28px;letter-spacing:12px;text-align:center;color:var(--text);width:200px;outline:none;margin-bottom:16px">
+  <button onclick="verificarPIN()" style="background:var(--green);color:#000;border:none;border-radius:14px;padding:14px 40px;font-family:var(--sans);font-weight:800;font-size:16px;cursor:pointer">Entrar</button>
+</div>
+
+
+<script src="/static/bolsillos.js"></script>
+</body>
+</html>

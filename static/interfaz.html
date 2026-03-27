@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Nexus Finance</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --green:#00c896;--gold:#f0a500;--red:#ff4d6d;--blue:#4d9fff;
+  --bg:#0a0e14;--bg2:#111620;--bg3:#1a2030;
+  --border:rgba(255,255,255,0.07);
+  --text:#f0f4ff;--text2:#6b7a99;
+  --mono:'JetBrains Mono',monospace;
+  --sans:'Syne',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;padding-bottom:40px}
+.header{padding:20px 20px 0}
+.app-label{font-size:10px;letter-spacing:3px;color:var(--text2);font-weight:600}
+.saludo{font-size:28px;font-weight:800;line-height:1.1;margin-top:4px}
+.saludo span{color:var(--green)}
+
+/* BALANCE CARD */
+.balance-card{margin:20px;background:linear-gradient(135deg,#0d1829,#111d2e);border:1px solid rgba(77,159,255,0.15);border-radius:20px;padding:20px}
+.balance-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.bal-label{font-size:10px;letter-spacing:1.5px;color:var(--text2);font-weight:600;margin-bottom:4px;display:flex;align-items:center;gap:6px}
+.bal-val{font-family:var(--mono);font-size:22px;font-weight:700}
+.bal-val.green{color:var(--green)}
+.bal-val.blue{color:var(--blue)}
+.balance-divider{border:none;border-top:1px solid var(--border);margin:12px 0}
+.balance-row2{display:flex;flex-direction:column;gap:8px}
+.bal-row-item{display:flex;justify-content:space-between;align-items:center}
+.bal-row-label{font-size:12px;color:var(--text2);display:flex;align-items:center;gap:6px}
+.bal-row-val{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--green)}
+.config-btn{font-size:10px;color:var(--blue);background:none;border:none;cursor:pointer;font-family:var(--sans);padding:0;margin-left:4px}
+
+/* BOLSILLOS */
+.section{padding:0 20px;margin-bottom:24px}
+.section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.section-title{font-size:10px;letter-spacing:2px;color:var(--text2);font-weight:600}
+.bolsillos-scroll{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px}
+.bolsillo-card{flex-shrink:0;background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:14px 16px;min-width:130px;position:relative;cursor:pointer}
+.bolsillo-card.vinculado{border-color:rgba(77,159,255,0.3)}
+.bolsillo-nombre{font-size:10px;letter-spacing:1px;color:var(--text2);font-weight:600;margin-bottom:6px}
+.bolsillo-val{font-family:var(--mono);font-size:16px;font-weight:700;color:var(--text)}
+.bolsillo-tag{font-size:8px;color:var(--blue);letter-spacing:1px;margin-top:3px}
+.btn-add-bolsillo{flex-shrink:0;background:transparent;border:1px dashed var(--border);border-radius:14px;padding:14px 16px;min-width:110px;color:var(--text2);font-size:12px;cursor:pointer;font-family:var(--sans);white-space:nowrap}
+
+/* MÓDULOS */
+.modulos-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 20px}
+.modulo-card{border-radius:18px;padding:16px;position:relative;cursor:pointer;border:1px solid var(--border)}
+.modulo-card.verde{background:linear-gradient(135deg,#0d2e22,#0a1e17);border-color:rgba(0,200,150,0.15)}
+.modulo-card.rojo{background:linear-gradient(135deg,#2e0d17,#1e0a10);border-color:rgba(255,77,109,0.15)}
+.modulo-card.gold{background:linear-gradient(135deg,#2e200d,#1e150a);border-color:rgba(240,165,0,0.15)}
+.modulo-card.azul{background:linear-gradient(135deg,#0d1e2e,#0a1520);border-color:rgba(77,159,255,0.15)}
+.modulo-opts{position:absolute;top:10px;right:10px;background:rgba(255,255,255,0.06);border:none;color:var(--text2);width:28px;height:28px;border-radius:8px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.modulo-emoji{font-size:26px;margin-bottom:8px;display:block}
+.modulo-nombre{font-size:10px;letter-spacing:1.5px;font-weight:700;color:var(--text2);margin-bottom:6px}
+.modulo-val{font-family:var(--mono);font-size:18px;font-weight:700}
+.modulo-val.verde{color:var(--green)}
+.modulo-val.rojo{color:var(--red)}
+.modulo-val.gold{color:var(--gold)}
+.modulo-val.azul{color:var(--blue)}
+.modulo-sub{font-size:10px;color:var(--text2);margin-top:4px}
+.modulo-extra{display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.06)}
+.modulo-extra-label{font-size:8px;letter-spacing:1px;color:var(--text2)}
+.modulo-extra-val{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--gold)}
+
+/* MODALES */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:200;display:none;align-items:flex-end}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg2);border-radius:24px 24px 0 0;width:100%;padding:24px 20px 40px;border-top:1px solid var(--border);max-height:90vh;overflow-y:auto;animation:slideUp 0.25s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 20px}
+.modal-title{font-size:18px;font-weight:800;margin-bottom:20px}
+.form-group{margin-bottom:14px}
+.form-label{font-size:10px;letter-spacing:1.5px;color:var(--text2);font-weight:600;margin-bottom:8px;display:block}
+.form-input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:12px 14px;color:var(--text);font-family:var(--sans);font-size:15px;outline:none}
+.form-input:focus{border-color:var(--gold)}
+.form-submit{width:100%;background:var(--green);color:#000;border:none;border-radius:14px;padding:15px;font-family:var(--sans);font-weight:800;font-size:16px;cursor:pointer;margin-top:8px}
+.btn-ghost{width:100%;background:transparent;color:var(--text2);border:1px solid var(--border);border-radius:12px;padding:12px;font-family:var(--sans);font-size:14px;cursor:pointer;margin-top:8px}
+.btn-danger{width:100%;background:rgba(255,77,109,0.1);color:var(--red);border:1px solid rgba(255,77,109,0.2);border-radius:14px;padding:14px;font-family:var(--sans);font-weight:700;font-size:14px;cursor:pointer;margin-top:8px}
+.tipo-toggle{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.tipo-btn{padding:11px;border-radius:12px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);font-family:var(--sans);font-weight:700;font-size:13px;cursor:pointer;text-align:center}
+.tipo-btn.active{background:rgba(0,200,150,0.15);border-color:var(--green);color:var(--green)}
+.check-item{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)}
+.check-item:last-child{border-bottom:none}
+.check-label{font-size:14px}
+.check-box{width:22px;height:22px;border-radius:6px;border:2px solid var(--border);background:var(--bg3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px}
+.check-box.checked{background:var(--green);border-color:var(--green);color:#000}
+</style>
+</head>
+<body>
+
+<div class="header" style="display:flex;justify-content:space-between;align-items:center">
+  <div>
+    <div class="app-label">HOPE FINANCE</div>
+    <div class="saludo">Hola, <span id="nombre-usuario">Jesús</span> 👋</div>
+  </div>
+  <div style="display:flex;gap:4px">
+    <button onclick="abrirHistorialGlobal()" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px">
+      <div style="font-size:9px;letter-spacing:1px;color:var(--text2);font-weight:700">HISTORIAL</div>
+      <div style="font-size:22px;transform:rotate(-90deg);color:var(--green)">➜</div>
+    </button>
+    <button onclick="abrirConfig()" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px">
+      <div style="font-size:9px;letter-spacing:1px;color:var(--text2);font-weight:700">CONFIG</div>
+      <div style="font-size:22px;color:var(--gold)">⚙</div>
+    </button>
+    <button onclick="sincronizarModulos()" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px">
+      <div style="font-size:9px;letter-spacing:1px;color:var(--text2);font-weight:700">SYNC</div>
+      <div style="font-size:22px;color:var(--blue)">🔄</div>
+    </button>
+  </div>
+</div>
+
+<!-- BALANCE CARD -->
+<div class="balance-card">
+  <div class="balance-row">
+    <div>
+      <div class="bal-label">💡 TEÓRICO <button class="config-btn" onclick="openModal('m-config-teo')">⚙ config</button></div>
+      <div class="bal-val green" id="val-teorico">$0.00</div>
+      <div style="font-size:10px;color:var(--text2);margin-top:2px">Lo que el sistema registra</div>
+    </div>
+    <div>
+      <div class="bal-label">💵 FÍSICO</div>
+      <div class="bal-val blue" id="val-fisico">$0.00</div>
+      <div style="font-size:10px;color:var(--text2);margin-top:2px">Lo que tienes en mano</div>
+    </div>
+  </div>
+  <hr class="balance-divider">
+  <div class="balance-row2">
+    <div class="bal-row-item">
+      <span class="bal-row-label">📊 Total invertido <button class="config-btn" onclick="openModal('m-config-inv')">⚙ config</button></span>
+      <span class="bal-row-val" id="val-invertido">$0.00</span>
+    </div>
+    <div class="bal-row-item">
+      <span class="bal-row-label">💵 Físico + Inversiones</span>
+      <span class="bal-row-val" id="val-fisico-inv">$0.00</span>
+    </div>
+    <div class="bal-row-item">
+      <span class="bal-row-label" style="color:var(--text)">Diferencia (físico+inv - teórico)</span>
+      <span class="bal-row-val" id="val-diferencia" style="color:var(--text)">$0.00</span>
+    </div>
+  </div>
+</div>
+
+<!-- BOLSILLOS -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-title">MIS BOLSILLOS</div>
+    <div style="display:flex;gap:8px">
+      <button onclick="abrirTransferencia()" style="background:rgba(77,159,255,0.1);border:1px solid rgba(77,159,255,0.3);color:var(--blue);border-radius:10px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--sans)">⇄ Transferir</button>
+      <button onclick="verOcultos()" style="background:rgba(255,77,109,0.1);border:1px solid rgba(255,77,109,0.2);color:var(--red);border-radius:10px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--sans)">🙈 Ocultos</button>
+    </div>
+  </div>
+  <div class="bolsillos-scroll" id="bolsillos-list">
+    <button class="btn-add-bolsillo" onclick="abrirNuevoBolsillo()">+ Agregar bolsillo</button>
+  </div>
+</div>
+
+<!-- MÓDULOS -->
+<div style="padding:0 20px;margin-bottom:12px">
+  <div class="section-title">MIS MÓDULOS</div>
+</div>
+<div class="modulos-grid">
+
+  <div class="modulo-card verde" onclick="location.href='/modulo/prestaexpress'">
+    <button class="modulo-opts" onclick="event.stopPropagation();abrirOptsModulo('prest','PRESTAEXPRESS')">⋯</button>
+    <span class="modulo-emoji" id="me-prest">💰</span>
+    <div class="modulo-nombre" id="mn-prest">PRESTAEXPRESS</div>
+    <div class="modulo-val verde" id="mv-prest">$0</div>
+    <div class="modulo-sub">Cartera activa</div>
+    <div class="modulo-extra">
+      <span class="modulo-extra-label">UTILIDAD</span>
+      <span class="modulo-extra-val" id="mx-prest-utilidad">$0</span>
+    </div>
+  </div>
+
+  <div class="modulo-card verde" onclick="location.href='/modulo/cundinaplus'">
+    <button class="modulo-opts" onclick="event.stopPropagation();abrirOptsModulo('cundina','CUNDINAPLUS')">⋯</button>
+    <span class="modulo-emoji" id="me-cundina">💚</span>
+    <div class="modulo-nombre" id="mn-cundina">CUNDINAPLUS</div>
+    <div class="modulo-val verde" id="mv-cundina">$0</div>
+    <div class="modulo-sub">Capital total</div>
+    <div class="modulo-extra">
+      <span class="modulo-extra-label">ENTREGA</span>
+      <span class="modulo-extra-val" id="mx-cundina-entrega">$0</span>
+    </div>
+  </div>
+
+  <div class="modulo-card rojo" onclick="location.href='/modulo/hogar'">
+    <button class="modulo-opts" onclick="event.stopPropagation();abrirOptsModulo('hogar','HOGAR')">⋯</button>
+    <span class="modulo-emoji" id="me-hogar">🏠</span>
+    <div class="modulo-nombre" id="mn-hogar">HOGAR</div>
+    <div class="modulo-val rojo" id="mv-hogar">$0</div>
+    <div class="modulo-sub">Neto personal</div>
+  </div>
+
+  <div class="modulo-card gold" onclick="location.href='/modulo/tortas'">
+    <button class="modulo-opts" onclick="event.stopPropagation();abrirOptsModulo('tortas','TORTAS PRO')">⋯</button>
+    <span class="modulo-emoji" id="me-tortas">🥪</span>
+    <div class="modulo-nombre" id="mn-tortas">TORTAS PRO</div>
+    <div class="modulo-val gold" id="mv-tortas">$0</div>
+    <div class="modulo-sub">Neto negocio</div>
+  </div>
+
+  <div class="modulo-card" style="background:linear-gradient(135deg,#1a0d2e,#120a1e);border-color:rgba(157,77,255,0.15)" onclick="location.href='/modulo/cundinaanual'">
+    <button class="modulo-opts" onclick="event.stopPropagation();abrirOptsModulo('cundinaanual','CUNDINA ANUAL')">⋯</button>
+    <span class="modulo-emoji" id="me-cundinaanual">🤝</span>
+    <div class="modulo-nombre" id="mn-cundinaanual">CUNDINA ANUAL</div>
+    <div class="modulo-val" style="color:var(--purple)" id="mv-cundinaanual">$0</div>
+    <div class="modulo-sub">Participantes</div>
+    <div class="modulo-extra">
+      <span class="modulo-extra-label">RECAUDADO MES</span>
+      <span class="modulo-extra-val" id="mx-cundinaanual-recaudado">$0</span>
+    </div>
+    <div class="modulo-extra" style="margin-top:4px">
+      <span class="modulo-extra-label">TOTAL AHORROS</span>
+      <span class="modulo-extra-val" style="color:var(--blue)" id="mx-cundinaanual-ahorros">$0</span>
+    </div>
+  </div>
+
+  <div class="modulo-card azul" onclick="location.href='/modulo/inversiones'">
+    <button class="modulo-opts" onclick="event.stopPropagation();abrirOptsModulo('inv','INVERSIONES')">⋯</button>
+    <span class="modulo-emoji" id="me-inv">📈</span>
+    <div class="modulo-nombre" id="mn-inv">INVERSIONES</div>
+    <div class="modulo-val azul" id="mv-inv">$0</div>
+    <div class="modulo-sub">Saldo activo</div>
+  </div>
+
+</div>
+
+<!-- PANTALLA CONFIGURACIONES -->
+<div id="s-config" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:300;overflow-y:auto;padding-bottom:40px">
+  <div style="position:sticky;top:0;background:rgba(10,14,20,0.95);backdrop-filter:blur(12px);padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px">
+    <button onclick="cerrarConfig()" style="background:none;border:none;color:var(--text);font-size:22px;cursor:pointer">←</button>
+    <div>
+      <div style="font-size:11px;letter-spacing:3px;color:var(--text2);font-weight:600">HOPE FINANCE</div>
+      <div style="font-size:18px;font-weight:800">Configuraciones</div>
+    </div>
+  </div>
+
+  <div style="padding:20px">
+
+    <!-- PERFIL -->
+    <div style="font-size:10px;letter-spacing:2px;color:var(--text2);font-weight:600;margin-bottom:12px">PERFIL</div>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:24px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-size:12px;color:var(--text2);margin-bottom:4px">Nombre de usuario</div>
+          <div style="font-size:16px;font-weight:700" id="cfg-nombre-display">Jesús</div>
+        </div>
+        <button onclick="editarNombre()" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:8px 14px;font-family:var(--sans);font-weight:700;font-size:13px;cursor:pointer">✏️ Editar</button>
+      </div>
+    </div>
+
+    <!-- SEGURIDAD -->
+    <div style="font-size:10px;letter-spacing:2px;color:var(--text2);font-weight:600;margin-bottom:12px">SEGURIDAD</div>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:24px">
+      <div style="padding:16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-size:14px;font-weight:700">🔑 PIN módulo Hogar</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:2px">Protege el acceso compartido</div>
+        </div>
+        <button onclick="configurarPIN()" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:8px 14px;font-family:var(--sans);font-weight:700;font-size:13px;cursor:pointer" id="btn-pin">Configurar</button>
+      </div>
+      <div style="padding:16px;display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-size:14px;font-weight:700">📱 PIN acceso PWA</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:2px">Protege el registro móvil</div>
+        </div>
+        <button onclick="configurarPINPWA()" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:8px 14px;font-family:var(--sans);font-weight:700;font-size:13px;cursor:pointer" id="btn-pin-pwa">Configurar</button>
+      </div>
+      <div style="padding:16px;display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-size:14px;font-weight:700">🌐 URL compartida</div>
+          <div style="font-size:11px;color:var(--blue);margin-top:2px">http://192.168.1.83:5000/modulo/hogar</div>
+        </div>
+        <button onclick="copiarURL()" style="background:rgba(77,159,255,0.1);border:1px solid rgba(77,159,255,0.3);color:var(--blue);border-radius:10px;padding:8px 14px;font-family:var(--sans);font-weight:700;font-size:13px;cursor:pointer">📋 Copiar</button>
+      </div>
+    </div>
+
+    <!-- REPORTES -->
+    <div style="font-size:10px;letter-spacing:2px;color:var(--text2);font-weight:600;margin-bottom:12px">REPORTES</div>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:24px">
+      <div style="padding:16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-size:14px;font-weight:700">📊 Resumen general</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:2px">Todos los módulos</div>
+        </div>
+        <button onclick="generarReporte()" style="background:rgba(0,200,150,0.1);border:1px solid rgba(0,200,150,0.3);color:var(--green);border-radius:10px;padding:8px 14px;font-family:var(--sans);font-weight:700;font-size:13px;cursor:pointer">Ver</button>
+      </div>
+      <div style="padding:16px;display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-size:14px;font-weight:700">💾 Exportar datos</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:2px">Descarga un respaldo JSON</div>
+        </div>
+        <button onclick="exportarDatos()" style="background:rgba(240,165,0,0.1);border:1px solid rgba(240,165,0,0.3);color:var(--gold);border-radius:10px;padding:8px 14px;font-family:var(--sans);font-weight:700;font-size:13px;cursor:pointer">💾 Exportar</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL PIN -->
+<div class="modal-overlay" id="m-pin">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="pin-titulo">Configurar PIN</div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:16px">El PIN protege el acceso al módulo Hogar cuando se comparte</div>
+    <div class="form-group">
+      <label class="form-label">PIN (4 dígitos)</label>
+      <input class="form-input" id="pin-input" type="password" inputmode="numeric" maxlength="4" placeholder="••••" style="font-size:24px;letter-spacing:8px;text-align:center">
+    </div>
+    <div class="form-group">
+      <label class="form-label">CONFIRMAR PIN</label>
+      <input class="form-input" id="pin-confirm" type="password" inputmode="numeric" maxlength="4" placeholder="••••" style="font-size:24px;letter-spacing:8px;text-align:center">
+    </div>
+    <input type="hidden" id="pin-tipo" value="hogar">
+    <button class="form-submit" onclick="guardarPIN()">Guardar PIN</button>
+    <button class="btn-danger" onclick="eliminarPIN()" id="btn-eliminar-pin" style="display:none">🗑 Eliminar PIN</button>
+    <button class="btn-ghost" onclick="closeModal('m-pin')">Cancelar</button>
+  </div>
+</div>
+
+<!-- MODAL EDITAR NOMBRE -->
+<div class="modal-overlay" id="m-nombre">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Editar Nombre</div>
+    <div class="form-group">
+      <label class="form-label">TU NOMBRE</label>
+      <input class="form-input" id="nombre-input" placeholder="Tu nombre">
+    </div>
+    <button class="form-submit" onclick="guardarNombre()">Guardar</button>
+    <button class="btn-ghost" onclick="closeModal('m-nombre')">Cancelar</button>
+  </div>
+</div>
+
+<!-- MODAL HISTORIAL GLOBAL -->
+<div class="modal-overlay" id="m-historial-global" style="align-items:flex-start">
+  <div class="modal" style="border-radius:0 0 24px 24px;max-height:95vh;padding-top:16px">
+    <div class="modal-handle"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div class="modal-title" style="margin-bottom:0">📋 Historial Global</div>
+      <button onclick="closeModal('m-historial-global')" style="background:var(--bg3);border:1px solid var(--border);color:var(--text2);border-radius:10px;padding:6px 12px;font-size:12px;cursor:pointer;font-family:var(--sans)">✕ Cerrar</button>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:16px;overflow-x:auto;padding-bottom:4px" id="hg-tabs"></div>
+    <div id="hg-lista" style="overflow-y:auto;max-height:70vh"></div>
+  </div>
+</div>
+
+<!-- MODAL MOVIMIENTO BOLSILLO -->
+<div class="modal-overlay" id="m-mov-bolsillo">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="mb-titulo">Movimiento</div>
+    <div class="tipo-toggle">
+      <div class="tipo-btn active" id="mb-btn-ingreso" onclick="setMovBolsilloTipo('entrada')" style="background:rgba(0,200,150,0.15);border-color:var(--green);color:var(--green)">📥 Ingreso</div>
+      <div class="tipo-btn" id="mb-btn-gasto" onclick="setMovBolsilloTipo('salida')">📤 Gasto</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">CONCEPTO</label>
+      <input class="form-input" id="mb-concepto" placeholder="Descripción...">
+    </div>
+    <div class="form-group">
+      <label class="form-label">MONTO ($)</label>
+      <input class="form-input" id="mb-monto" type="number" placeholder="$0.00">
+    </div>
+    <div class="form-group">
+      <label class="form-label">FECHA</label>
+      <input class="form-input" id="mb-fecha" type="date">
+    </div>
+    <button class="form-submit" onclick="guardarMovBolsillo()">Registrar</button>
+    <button class="btn-ghost" onclick="closeModal('m-mov-bolsillo')">Cancelar</button>
+  </div>
+</div>
+
+<!-- MODAL BOLSILLOS OCULTOS -->
+<div class="modal-overlay" id="m-ocultos">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">🙈 Bolsillos Ocultos</div>
+    <div id="ocultos-lista"></div>
+    <button class="btn-ghost" onclick="closeModal('m-ocultos')" style="margin-top:16px">Cerrar</button>
+  </div>
+</div>
+
+<!-- MODAL HISTORIAL BOLSILLO -->
+<div class="modal-overlay" id="m-historial-bolsillo">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <div class="modal-title" id="hb-titulo" style="margin-bottom:0">Historial</div>
+      <div style="font-family:var(--mono);font-size:20px;font-weight:700;color:var(--green)" id="hb-saldo">$0</div>
+    </div>
+    <div id="hb-lista"></div>
+    <button class="btn-ghost" onclick="closeModal('m-historial-bolsillo')" style="margin-top:16px">Cerrar</button>
+  </div>
+</div>
+
+<!-- MODAL TRANSFERENCIA -->
+<div class="modal-overlay" id="m-transferencia">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">⇄ Transferencia</div>
+    <div class="form-group">
+      <label class="form-label">DE</label>
+      <select class="form-input" id="tr-origen"></select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">A</label>
+      <select class="form-input" id="tr-destino"></select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">MONTO ($)</label>
+      <input class="form-input" id="tr-monto" type="number" placeholder="$0.00">
+    </div>
+    <div class="form-group">
+      <label class="form-label">NOTA (OPCIONAL)</label>
+      <input class="form-input" id="tr-nota" placeholder="Concepto...">
+    </div>
+    <button class="form-submit" onclick="guardarTransferencia()">Transferir</button>
+    <button class="btn-ghost" onclick="closeModal('m-transferencia')">Cancelar</button>
+  </div>
+</div>
+
+<!-- MODAL BOLSILLO -->
+<div class="modal-overlay" id="m-bolsillo">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="m-bolsillo-titulo">Nuevo Bolsillo</div>
+    <div class="tipo-toggle">
+      <div class="tipo-btn active" id="bb-manual" onclick="setBolsilloTipo('manual')">✏️ Manual</div>
+      <div class="tipo-btn" id="bb-vinculado" onclick="setBolsilloTipo('vinculado')">🔗 De módulo</div>
+    </div>
+    <div id="b-vinc-campos" style="display:none">
+      <div class="form-group">
+        <label class="form-label">MÓDULO</label>
+        <select class="form-input" id="b-vinc-modulo" onchange="actualizarDatosModulo()">
+          <option value="">Selecciona módulo</option>
+          <option value="prest">PrestaExpress (Capital)</option>
+          <option value="prest_utilidad">PrestaExpress (Utilidad)</option>
+          <option value="cundina">CundinaPlus (Capital)</option>
+          <option value="cundina_entrega">CundinaPlus (Entrega)</option>
+          <option value="hogar">Hogar</option>
+          <option value="tortas">Tortas Pro</option>
+          <option value="inv">Inversiones</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">NOMBRE</label>
+      <input class="form-input" id="b-nombre" placeholder="Ej. Efectivo, BBVA...">
+    </div>
+    <div class="form-group">
+      <label class="form-label">SALDO</label>
+      <input class="form-input" id="b-saldo" type="number" placeholder="$0.00">
+    </div>
+    <button class="form-submit" onclick="guardarBolsillo()">Guardar</button>
+    <button class="btn-ghost" onclick="closeModal('m-bolsillo')">Cancelar</button>
+  </div>
+</div>
+
+<!-- MODAL OPTS MÓDULO -->
+<div class="modal-overlay" id="m-opts-modulo">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="m-opts-titulo">Opciones</div>
+    <div class="form-group">
+      <label class="form-label">NOMBRE DEL MÓDULO</label>
+      <input class="form-input" id="opts-nombre" placeholder="Nuevo nombre">
+    </div>
+    <div class="form-group">
+      <label class="form-label">EMOJI</label>
+      <input class="form-input" id="opts-emoji" placeholder="💰" style="font-size:24px;text-align:center">
+    </div>
+    <button class="form-submit" onclick="guardarOptsModulo()">Guardar</button>
+    <button class="btn-ghost" onclick="closeModal('m-opts-modulo')">Cancelar</button>
+  </div>
+</div>
+
+<!-- MODAL CONFIG TEÓRICO -->
+<div class="modal-overlay" id="m-config-teo">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Balance Teórico</div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:16px">Selecciona qué módulos se suman al teórico</div>
+    <div id="checks-teo"></div>
+    <button class="form-submit" onclick="guardarConfigTeo()">Guardar</button>
+    <button class="btn-ghost" onclick="closeModal('m-config-teo')">Cancelar</button>
+  </div>
+</div>
+
+<!-- MODAL CONFIG INVERSIÓN -->
+<div class="modal-overlay" id="m-config-inv">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Total Invertido</div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:16px">Selecciona qué módulos se suman al total invertido</div>
+    <div id="checks-inv"></div>
+    <button class="form-submit" onclick="guardarConfigInv()">Guardar</button>
+    <button class="btn-ghost" onclick="closeModal('m-config-inv')">Cancelar</button>
+  </div>
+</div>
+
+<script>
+const fmt = v => '$'+(v||0).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmt0 = v => '$'+(v||0).toLocaleString('es-MX',{minimumFractionDigits:0});
+
+let state = {
+  bolsillos: [],
+  modulos: {},
+  config: {enTeorico:[], enInversion:[]},
+  modulosNombres: {},
+  modulosEmojis: {},
+  modulosOcultos: []
+};
+
+let editBolsilloId = null;
+let moduloActivoKey = null;
+let bolsilloTipo = 'manual';
+
+const modulosDisp = {
+  prest:'PrestaExpress (Capital)',
+  prest_utilidad:'PrestaExpress (Utilidad)',
+  cundina:'CundinaPlus (Capital)',
+  cundina_entrega:'CundinaPlus (Entrega)',
+  hogar:'Hogar',
+  tortas:'Tortas Pro',
+  inv:'Inversiones',
+  cundinaanual_recaudado:'Cundina Anual (Recaudado)',
+  cundinaanual_ahorros:'Cundina Anual (Ahorros)'
+};
+
+// ── MODALES ──
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+  document.body.style.overflow = 'hidden';
+  if(id==='m-config-teo') renderChecks('checks-teo', state.config.enTeorico);
+  if(id==='m-config-inv') renderChecks('checks-inv', state.config.enInversion);
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.querySelectorAll('.modal-overlay').forEach(el=>{
+  el.addEventListener('click', e=>{ if(e.target===el) closeModal(el.id); });
+});
+
+// ── RENDER ──
+function renderAll() {
+  renderBolsillos();
+  renderModulos();
+  renderBalance();
+}
+
+function renderModulos() {
+  const m = state.modulos || {};
+  const n = state.modulosNombres || {};
+  const e = state.modulosEmojis || {};
+  const keys = ['prest','cundina','hogar','tortas','inv'];
+  keys.forEach(k=>{
+    const el = document.getElementById('mv-'+k);
+    if(el) el.textContent = fmt0(m[k]||0);
+    const nm = document.getElementById('mn-'+k);
+    if(nm && n[k]) nm.textContent = n[k];
+    const em = document.getElementById('me-'+k);
+    if(em && e[k]) em.textContent = e[k];
+  });
+  // Extras
+  const pu = document.getElementById('mx-prest-utilidad');
+  if(pu) pu.textContent = fmt0(m.prest_utilidad||0);
+
+  const elCAN = document.getElementById('mv-cundinaanual');
+  if(elCAN) elCAN.textContent = (m.cundinaanual||0)+' personas';
+  const cr = document.getElementById('mx-cundinaanual-recaudado');
+  if(cr) cr.textContent = fmt0(m.cundinaanual_recaudado||0);
+  const ca = document.getElementById('mx-cundinaanual-ahorros');
+  if(ca) ca.textContent = fmt0(m.cundinaanual_ahorros||0);  const ce = document.getElementById('mx-cundina-entrega');
+  if(ce) ce.textContent = fmt0(m.cundina_entrega||0);
+}
+
+function renderBalance() {
+  const m = state.modulos || {};
+  const cfg = state.config || {};
+  const enTeo = cfg.enTeorico || [];
+  const enInv = cfg.enInversion || [];
+  const fisico = (state.bolsillos||[]).reduce((a,b)=>a+(b.saldo||0),0);
+  const teorico = enTeo.reduce((a,k)=>a+(m[k]||0),0);
+  const invertido = enInv.reduce((a,k)=>a+(m[k]||0),0);
+  const fisicoInv = fisico + invertido;
+  const diff = fisicoInv - teorico;
+  document.getElementById('val-teorico').textContent = fmt(teorico);
+  document.getElementById('val-fisico').textContent = fmt(fisico);
+  document.getElementById('val-invertido').textContent = fmt(invertido);
+  document.getElementById('val-fisico-inv').textContent = fmt(fisicoInv);
+  document.getElementById('val-diferencia').textContent = fmt(diff);
+  document.getElementById('val-diferencia').style.color = diff>=0?'var(--green)':'var(--red)';
+}
+
+function renderBolsillos() {
+  const el = document.getElementById('bolsillos-list');
+  const bolsillos = state.bolsillos || [];
+  // Actualizar vinculados
+  bolsillos.forEach(b=>{
+    if(b.vinculadoKey && state.modulos[b.vinculadoKey]!==undefined) {
+      b.saldo = state.modulos[b.vinculadoKey];
+    }
+  });
+  const mostrarOcultos = false;
+  let html = bolsillos.filter(b=>!b.oculto).map(b=>`
+    <div class="bolsillo-card ${b.vinculadoKey?'vinculado':''}" onclick="verHistorialBolsillo(${b.id})">
+      <button onclick="event.stopPropagation();eliminarBolsillo('${b.id}')" style="position:absolute;top:6px;right:6px;background:none;border:none;color:var(--text2);font-size:13px;cursor:pointer">✕</button>
+      <div class="bolsillo-nombre">${b.vinculadoKey?'🔗':'💵'} ${b.nombre.toUpperCase()}</div>
+      <div class="bolsillo-val">${fmt0(b.saldo||0)}</div>
+      ${b.vinculadoKey?'<div class="bolsillo-tag">VINCULADO</div>':''}
+    </div>`).join('');
+  html += `<button class="btn-add-bolsillo" onclick="abrirNuevoBolsillo()">+ Agregar</button>`;
+  el.innerHTML = html;
+}
+
+function renderChecks(elId, seleccionados) {
+  const el = document.getElementById(elId);
+  el.innerHTML = Object.entries(modulosDisp).map(([k,v])=>`
+    <div class="check-item">
+      <span class="check-label">${v}</span>
+      <div class="check-box ${seleccionados.includes(k)?'checked':''}" id="chk-${elId}-${k}" onclick="toggleCheck('${elId}','${k}')">
+        ${seleccionados.includes(k)?'✓':''}
+      </div>
+    </div>`).join('');
+}
+
+function toggleCheck(elId, k) {
+  const el = document.getElementById('chk-'+elId+'-'+k);
+  el.classList.toggle('checked');
+  el.textContent = el.classList.contains('checked') ? '✓' : '';
+}
+
+// ── CONFIGURACIONES ──
+function abrirConfig() {
+  document.getElementById('s-config').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+  const nombre = state.config?.nombreUsuario || 'Jesús';
+  document.getElementById('cfg-nombre-display').textContent = nombre;
+  const pinGuardado = state.config?.pinHogar;
+  document.getElementById('btn-pin').textContent = pinGuardado ? '✏️ Cambiar' : 'Configurar';
+}
+
+function cerrarConfig() {
+  document.getElementById('s-config').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function editarNombre() {
+  document.getElementById('nombre-input').value = state.config?.nombreUsuario || 'Jesús';
+  openModal('m-nombre');
+}
+
+async function guardarNombre() {
+  const nombre = document.getElementById('nombre-input').value.trim();
+  if(!nombre) return alert('Ingresa tu nombre');
+  if(!state.config) state.config = {};
+  state.config.nombreUsuario = nombre;
+  document.getElementById('nombre-usuario').textContent = nombre;
+  document.getElementById('cfg-nombre-display').textContent = nombre;
+  await save(); closeModal('m-nombre');
+}
+
+function configurarPINPWA() {
+  document.getElementById('pin-input').value = '';
+  document.getElementById('pin-confirm').value = '';
+  const pinGuardado = state.config?.pinPWA;
+  document.getElementById('pin-titulo').textContent = pinGuardado ? 'Cambiar PIN PWA' : 'Configurar PIN PWA';
+  document.getElementById('btn-eliminar-pin').style.display = pinGuardado ? 'block' : 'none';
+  document.getElementById('pin-tipo').value = 'pwa';
+  const modal = document.getElementById('m-pin');
+  modal.style.zIndex = '400';
+  openModal('m-pin');
+}
+function configurarPIN() {
+  document.getElementById('pin-tipo').value = 'hogar';
+  document.getElementById('pin-input').value = '';
+  document.getElementById('pin-confirm').value = '';
+  const pinGuardado = state.config?.pinHogar;
+  document.getElementById('pin-titulo').textContent = pinGuardado ? 'Cambiar PIN' : 'Configurar PIN';
+  document.getElementById('btn-eliminar-pin').style.display = pinGuardado ? 'block' : 'none';
+  // Subir z-index del modal sobre la pantalla config
+  const modal = document.getElementById('m-pin');
+  modal.style.zIndex = '400';
+  openModal('m-pin');
+}
+
+async function guardarPIN() {
+  const pin = document.getElementById('pin-input').value;
+  const confirm = document.getElementById('pin-confirm').value;
+  if(pin.length !== 4) return alert('El PIN debe tener 4 dígitos');
+  if(pin !== confirm) return alert('Los PINs no coinciden');
+  if(!state.config) state.config = {};
+  const tipo = document.getElementById('pin-tipo').value;
+  if(tipo === 'pwa') {
+    state.config.pinPWA = pin;
+  } else {
+    state.config.pinHogar = pin;
+  }
+  await save();
+  await fetch('/api/config/pin', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({modulo: tipo, pin})});
+  closeModal('m-pin');
+  document.getElementById(tipo==='pwa'?'btn-pin-pwa':'btn-pin').textContent = '✏️ Cambiar';
+  alert('✅ PIN '+(tipo==='pwa'?'PWA':'Hogar')+' configurado');
+}
+
+async function eliminarPIN() {
+  if(!confirm('¿Eliminar el PIN de Hogar?')) return;
+  if(!state.config) state.config = {};
+  delete state.config.pinHogar;
+  await save();
+  await fetch('/api/config/pin', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({modulo:'hogar', pin:null})
+  });
+  closeModal('m-pin');
+  document.getElementById('btn-pin').textContent = 'Configurar';
+  alert('✅ PIN eliminado');
+}
+
+function copiarURL() {
+  navigator.clipboard.writeText('http://192.168.1.83:5000/modulo/hogar')
+    .then(()=>alert('✅ URL copiada'))
+    .catch(()=>alert('http://192.168.1.83:5000/modulo/hogar'));
+}
+
+async function sincronizarModulos() {
+  const ico = document.getElementById('btn-sync-ico');
+  if(ico) ico.textContent = '⏳';
+  try {
+    // Recalcular cundina
+    const rc = await fetch('/api/state/cundina');
+    if(rc.ok) {
+      const cundina = await rc.json();
+      if(cundina && cundina.ahorradores) {
+        let capital = 0, congelado = 0, bonif = 0;
+        cundina.ahorradores.forEach(ah => {
+          const aports = ah.aportaciones||[];
+          const totalAport = aports.reduce((a,ap)=>a+ap.monto,0);
+          const totalBonif = aports.reduce((a,ap)=>a+(ap.bonifAhorrar||0)+(ap.bonifRef||0),0);
+          const iniciales = (ah.saldoInicialMonto||0)+(ah.bonifInicial||0)+(ah.refInicial||0);
+          const saldo = iniciales + (ah.saldoCongelado||0) + totalAport + totalBonif - (ah.retirosUrgencia||0);
+          capital += saldo - (ah.saldoCongelado||0);
+          congelado += ah.saldoCongelado||0;
+          bonif += (ah.bonifInicial||0)+(ah.refInicial||0)+totalBonif;
+        });
+        const entrega = capital + congelado + bonif;
+        const ri = await fetch('/api/state');
+        if(ri.ok) {
+          const si = await ri.json();
+          if(!si.modulos) si.modulos={};
+          si.modulos.cundina = capital;
+          si.modulos.cundina_entrega = entrega;
+          await fetch('/api/state', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(si)});
+        }
+      }
+    }
+  } catch(e){ console.error(e); }
+
+  // Recalcular PrestaExpress
+  try {
+    const rp = await fetch('/api/state/pexpress');
+    if(rp.ok) {
+      const pexpress = await rp.json();
+      if(pexpress && pexpress.clientes) {
+        let capitalActivo = 0, intCobrados = 0;
+        pexpress.clientes.forEach(c => {
+          intCobrados += c.histIntereses||0;
+          (c.prestamos||[]).forEach(p => {
+            const capAb = (p.abonos||[]).reduce((a,ab)=>a+ab.capital,0);
+            const intAb = (p.abonos||[]).reduce((a,ab)=>a+(ab.interes||0),0);
+            intCobrados += intAb;
+            if(!p.pagado) capitalActivo += Math.max(0, p.monto - capAb);
+          });
+        });
+        const gastos = (pexpress.gastos||[]).reduce((a,g)=>a+g.monto,0);
+        const utilidad = intCobrados - gastos;
+        const ri2 = await fetch('/api/state');
+        if(ri2.ok) {
+          const si2 = await ri2.json();
+          if(!si2.modulos) si2.modulos={};
+          si2.modulos.prest = capitalActivo;
+          si2.modulos.prest_utilidad = utilidad;
+          // Actualizar bolsillo utilidad
+          const idx = (si2.bolsillos||[]).findIndex(b=>b.key==='pexpress-utilidad');
+          if(idx>=0) si2.bolsillos[idx].saldo = utilidad;
+          await fetch('/api/state', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(si2)});
+        }
+      }
+    }
+  } catch(e){ console.error(e); }
+
+  await load();
+  if(ico) ico.textContent = '🔄';
+}
+
+async function generarReporte() {
+  const m = state.modulos || {};
+  const txt = `📊 REPORTE HOPE FINANCE
+━━━━━━━━━━━━━━━━━━━━
+💰 PrestaExpress
+   Capital: ${fmt0(m.prest||0)}
+   Utilidad: ${fmt0(m.prest_utilidad||0)}
+
+💚 CundinaPlus
+   Capital: ${fmt0(m.cundina||0)}
+   Entrega: ${fmt0(m.cundina_entrega||0)}
+
+🏠 Hogar: ${fmt0(m.hogar||0)}
+🥪 Tortas Pro: ${fmt0(m.tortas||0)}
+📈 Inversiones: ${fmt0(m.inv||0)}
+🤝 Cundina Anual: ${fmt0(m.cundinaanual_recaudado||0)}
+━━━━━━━━━━━━━━━━━━━━
+Fecha: ${new Date().toLocaleDateString('es-MX')}`;
+  alert(txt);
+}
+
+async function exportarDatos() {
+  try {
+    const r = await fetch('/api/state');
+    const d = await r.json();
+    const blob = new Blob([JSON.stringify(d, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'hope_finance_'+new Date().toISOString().split('T')[0]+'.json';
+    a.click();
+  } catch(e){ alert('Error al exportar'); }
+}
+
+// ── HISTORIAL GLOBAL ──
+let tabHistorial = 'bolsillos';
+
+async function abrirHistorialGlobal() {
+  // Cargar últimos movimientos de cada módulo
+  openModal('m-historial-global');
+  renderHistorialTab('bolsillos');
+  // Render tabs
+  const tabs = [
+    {k:'bolsillos', label:'💵 Bolsillos'},
+    {k:'prestaexpress', label:'💰 Préstamos'},
+    {k:'hogar', label:'🏠 Hogar'},
+    {k:'tortas', label:'🥪 Tortas'},
+    {k:'cundinaanual', label:'🤝 Cundina'},
+  ];
+  document.getElementById('hg-tabs').innerHTML = tabs.map(t=>`
+    <button id="hgt-${t.k}" onclick="renderHistorialTab('${t.k}')"
+      style="flex-shrink:0;padding:8px 14px;border-radius:10px;border:1px solid var(--border);
+      background:${tabHistorial===t.k?'rgba(0,200,150,0.15)':'var(--bg3)'};
+      color:${tabHistorial===t.k?'var(--green)':'var(--text2)'};
+      font-family:var(--sans);font-weight:700;font-size:12px;cursor:pointer">
+      ${t.label}
+    </button>`).join('');
+}
+
+async function renderHistorialTab(tab) {
+  tabHistorial = tab;
+  // Actualizar tabs
+  document.querySelectorAll('[id^="hgt-"]').forEach(el=>{
+    const isActive = el.id === 'hgt-'+tab;
+    el.style.background = isActive?'rgba(0,200,150,0.15)':'var(--bg3)';
+    el.style.color = isActive?'var(--green)':'var(--text2)';
+  });
+
+  const el = document.getElementById('hg-lista');
+  let html = '';
+
+  if(tab === 'bolsillos') {
+    const bolsillos = (state.bolsillos||[]).filter(b=>!b.oculto);
+    if(!bolsillos.length){ el.innerHTML='<div style="text-align:center;padding:40px;color:var(--text2)">Sin bolsillos</div>'; return; }
+    bolsillos.forEach(b=>{
+      const movs = (b.movimientos||[]).slice(-5).reverse();
+      html += `<div style="margin-bottom:16px">
+        <div style="font-size:11px;letter-spacing:1px;color:var(--text2);font-weight:700;margin-bottom:8px">
+          ${b.vinculadoKey?'🔗':'💵'} ${b.nombre.toUpperCase()} · ${fmt0(b.saldo||0)}
+        </div>`;
+      if(!movs.length) html += `<div style="font-size:12px;color:var(--text2);padding:8px 0">Sin movimientos</div>`;
+      movs.forEach(m=>{
+        html += `<div style="background:var(--bg3);border-radius:10px;padding:10px 12px;margin-bottom:4px;display:flex;justify-content:space-between">
+          <div>
+            <div style="font-size:12px;font-weight:600">${m.concepto||''}</div>
+            <div style="font-size:10px;color:var(--text2)">${m.fecha||''}</div>
+          </div>
+          <span style="font-family:var(--mono);font-size:13px;font-weight:700;color:${m.tipo==='entrada'?'var(--green)':'var(--red)'}">
+            ${m.tipo==='entrada'?'+':'-'}${fmt0(m.monto)}
+          </span>
+        </div>`;
+      });
+      html += '</div>';
+    });
+    el.innerHTML = html;
+  } else {
+    // Cargar desde API
+    try {
+      const keyMap = {prestaexpress:'pexpress', hogar:'hogar', tortas:'tortas', cundinaanual:'cundinaanual'};
+      const key = keyMap[tab];
+      const r = await fetch('/api/state/'+key);
+      const d = await r.json();
+      let movs = [];
+      if(tab==='hogar'||tab==='tortas') {
+        movs = (d.movimientos||[]).slice(-5).reverse().map(m=>({
+          ...m,
+          tipo: m.tipo==='ingreso' ? 'entrada' : 'salida'
+        }));
+      }
+      if(tab==='cundinaanual') {
+        (d.participantes||[]).forEach(p=>{
+          (p.adelantos||[]).forEach(m=>movs.push({...m, concepto:'Adelanto · '+p.nombre, tipo:'entrada'}));
+          (p.ahorros||[]).forEach(m=>movs.push({...m, concepto:'Ahorro · '+p.nombre, tipo:'entrada'}));
+        });
+        (d.pagos||[]).forEach(p=>{
+          const part = (d.participantes||[]).find(pt=>pt.id===p.partId);
+          movs.push({...p, concepto:'Pago · '+(part?part.nombre:''), tipo:'salida'});
+        });
+        movs = movs.sort((a,b)=>b.id-a.id).slice(0,5);
+      }
+      if(tab==='prestaexpress') {
+        (d.clientes||[]).forEach(c=>{
+          (c.prestamos||[]).forEach(p=>{
+            movs.push({id:p.id, concepto:'Préstamo · '+c.nombre, monto:p.monto, fecha:p.fecha, tipo:'salida'});
+            (p.abonos||[]).forEach(a=>movs.push({id:a.id, concepto:'Abono · '+c.nombre, monto:a.total||a.monto, fecha:a.fecha, tipo:'entrada'}));
+          });
+        });
+        movs = movs.sort((a,b)=>b.id-a.id).slice(0,5);
+      }
+      if(!movs.length){ el.innerHTML='<div style="text-align:center;padding:40px;color:var(--text2)">Sin movimientos recientes</div>'; return; }
+      movs.forEach(m=>{
+        html += `<div style="background:var(--bg3);border-radius:12px;padding:12px 14px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-size:13px;font-weight:600">${m.concepto||''}</div>
+            <div style="font-size:10px;color:var(--text2)">${m.fecha||''}</div>
+          </div>
+          <span style="font-family:var(--mono);font-size:14px;font-weight:700;color:${m.tipo==='entrada'?'var(--green)':'var(--red)'}">
+            ${m.tipo==='entrada'?'+':'-'}${fmt0(m.monto||0)}
+          </span>
+        </div>`;
+      });
+      el.innerHTML = html;
+    } catch(e){ el.innerHTML='<div style="text-align:center;padding:40px;color:var(--text2)">Error cargando datos</div>'; }
+  }
+}
+
+// ── MOVIMIENTO DIRECTO BOLSILLO ──
+let bolsilloMovId = null;
+let movBolsilloTipo = 'entrada';
+
+function abrirMovBolsillo(id, tipo) {
+  bolsilloMovId = id;
+  const b = state.bolsillos.find(b=>b.id==id);
+  document.getElementById('mb-titulo').textContent = (tipo==='entrada'?'📥 Ingreso':'📤 Gasto')+' · '+(b?b.nombre:'');
+  document.getElementById('mb-concepto').value = '';
+  document.getElementById('mb-monto').value = '';
+  document.getElementById('mb-fecha').value = new Date().toISOString().split('T')[0];
+  setMovBolsilloTipo(tipo);
+  closeModal('m-historial-bolsillo');
+  openModal('m-mov-bolsillo');
+}
+
+function setMovBolsilloTipo(tipo) {
+  movBolsilloTipo = tipo;
+  const btnI = document.getElementById('mb-btn-ingreso');
+  const btnG = document.getElementById('mb-btn-gasto');
+  btnI.className = 'tipo-btn' + (tipo==='entrada'?' active':'');
+  btnI.style.background = tipo==='entrada'?'rgba(0,200,150,0.15)':'';
+  btnI.style.borderColor = tipo==='entrada'?'var(--green)':'';
+  btnI.style.color = tipo==='entrada'?'var(--green)':'';
+  btnG.className = 'tipo-btn' + (tipo==='salida'?' active':'');
+  btnG.style.background = tipo==='salida'?'rgba(255,77,109,0.1)':'';
+  btnG.style.borderColor = tipo==='salida'?'var(--red)':'';
+  btnG.style.color = tipo==='salida'?'var(--red)':'';
+}
+
+async function guardarMovBolsillo() {
+  const concepto = document.getElementById('mb-concepto').value.trim();
+  const monto = parseFloat(document.getElementById('mb-monto').value)||0;
+  const fecha = document.getElementById('mb-fecha').value;
+  if(!concepto||!monto) return alert('Completa los campos');
+  const b = state.bolsillos.find(b=>b.id==bolsilloMovId); if(!b) return;
+  if(!b.movimientos) b.movimientos=[];
+  b.movimientos.push({id:Date.now(), tipo:movBolsilloTipo, monto, concepto, fecha});
+  b.saldo = (b.saldo||0) + (movBolsilloTipo==='entrada' ? monto : -monto);
+  await save(); closeModal('m-mov-bolsillo'); renderBolsillos(); renderBalance();
+}
+
+// ── BOLSILLOS OCULTOS ──
+function verOcultos() {
+  const ocultos = (state.bolsillos||[]).filter(b=>b.oculto);
+  const el = document.getElementById('ocultos-lista');
+  if(!ocultos.length){
+    el.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--text2)">No hay bolsillos ocultos</div>';
+  } else {
+    el.innerHTML = ocultos.map(b=>`
+      <div style="background:var(--bg3);border-radius:14px;padding:14px 16px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-size:14px;font-weight:700">${b.nombre}</div>
+          <div style="font-family:var(--mono);font-size:13px;color:var(--text2);margin-top:2px">${fmt0(b.saldo||0)}</div>
+        </div>
+        <button onclick="reactivarBolsillo(${b.id})" style="background:rgba(0,200,150,0.15);border:1px solid rgba(0,200,150,0.3);color:var(--green);border-radius:10px;padding:8px 14px;font-family:var(--sans);font-weight:700;font-size:12px;cursor:pointer">
+          👁 Mostrar
+        </button>
+      </div>`).join('');
+  }
+  openModal('m-ocultos');
+}
+
+async function reactivarBolsillo(id) {
+  const b = state.bolsillos.find(b=>b.id===id); if(!b) return;
+  b.oculto = false;
+  await save();
+  renderBolsillos();
+  renderBalance();
+  verOcultos();
+}
+
+// ── HISTORIAL BOLSILLO ──
+function verHistorialBolsillo(id) {
+  const b = state.bolsillos.find(b=>b.id===id); if(!b) return;
+  document.getElementById('hb-titulo').textContent = (b.vinculadoKey?'🔗 ':'💵 ')+b.nombre;
+  document.getElementById('hb-saldo').textContent = fmt0(b.saldo||0);
+  const movs = (b.movimientos||[]).slice().reverse();
+  const el = document.getElementById('hb-lista');
+  if(!movs.length){
+    el.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--text2)">Sin movimientos registrados</div>';
+  } else {
+    el.innerHTML = movs.map(m=>`
+      <div style="background:var(--bg3);border-radius:12px;padding:12px 14px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-size:13px;font-weight:600">${m.concepto||''}</div>
+          <div style="font-size:10px;color:var(--text2)">${m.fecha||''}</div>
+        </div>
+        <span style="font-family:var(--mono);font-size:15px;font-weight:700;color:${m.tipo==='entrada'?'var(--green)':'var(--red)'}">
+          ${m.tipo==='entrada'?'+':'-'}${fmt0(m.monto)}
+        </span>
+      </div>`).join('');
+  }
+  // Botones
+  el.innerHTML += `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px">
+      <button onclick="abrirMovBolsillo(${id},'entrada')" style="background:rgba(0,200,150,0.15);border:1px solid var(--green);color:var(--green);border-radius:12px;padding:12px;font-family:var(--sans);font-weight:700;cursor:pointer">📥 Ingreso</button>
+      <button onclick="abrirMovBolsillo(${id},'salida')" style="background:rgba(255,77,109,0.1);border:1px solid rgba(255,77,109,0.2);color:var(--red);border-radius:12px;padding:12px;font-family:var(--sans);font-weight:700;cursor:pointer">📤 Gasto</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+      <button onclick="closeModal('m-historial-bolsillo');editarBolsillo(${id})" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:12px;padding:12px;font-family:var(--sans);font-weight:700;cursor:pointer">✏️ Editar</button>
+      <button onclick="ocultarBolsillo(${id})" style="background:var(--bg3);border:1px solid var(--border);color:var(--text2);border-radius:12px;padding:12px;font-family:var(--sans);font-weight:700;cursor:pointer">🙈 Ocultar</button>
+    </div>`;
+  openModal('m-historial-bolsillo');
+}
+
+async function ocultarBolsillo(id) {
+  if(!confirm('¿Ocultar este bolsillo? No se eliminarán sus datos.')) return;
+  const b = state.bolsillos.find(b=>b.id===id); if(!b) return;
+  b.oculto = true;
+  await save(); closeModal('m-historial-bolsillo'); renderBolsillos(); renderBalance();
+}
+
+// ── TRANSFERENCIA ──
+function abrirTransferencia() {
+  const bolsillos = state.bolsillos || [];
+  const opts = bolsillos.map(b=>`<option value="${b.id}">${b.nombre} (${fmt0(b.saldo||0)})</option>`).join('');
+  document.getElementById('tr-origen').innerHTML = opts;
+  document.getElementById('tr-destino').innerHTML = opts;
+  document.getElementById('tr-monto').value = '';
+  document.getElementById('tr-nota').value = '';
+  openModal('m-transferencia');
+}
+
+async function guardarTransferencia() {
+  const origenId = document.getElementById('tr-origen').value;
+  const destinoId = document.getElementById('tr-destino').value;
+  const monto = parseFloat(document.getElementById('tr-monto').value)||0;
+  if(!monto) return alert('Ingresa el monto');
+  if(origenId === destinoId) return alert('Selecciona bolsillos diferentes');
+  const origen = state.bolsillos.find(b=>b.id==origenId);
+  const destino = state.bolsillos.find(b=>b.id==destinoId);
+  if(!origen || !destino) return;
+  if((origen.saldo||0) < monto) return alert('Saldo insuficiente en '+origen.nombre);
+  origen.saldo = (origen.saldo||0) - monto;
+  destino.saldo = (destino.saldo||0) + monto;
+  const fecha = new Date().toISOString().split('T')[0];
+  const nota = document.getElementById('tr-nota').value.trim();
+  const concepto = nota || 'Transferencia a '+destino.nombre;
+  if(!origen.movimientos) origen.movimientos=[];
+  if(!destino.movimientos) destino.movimientos=[];
+  origen.movimientos.push({id:Date.now(), tipo:'salida', monto, concepto:'Transferencia a '+destino.nombre+(nota?' · '+nota:''), fecha});
+  destino.movimientos.push({id:Date.now()+1, tipo:'entrada', monto, concepto:'Transferencia de '+origen.nombre+(nota?' · '+nota:''), fecha});
+  await save(); closeModal('m-transferencia'); renderBolsillos(); renderBalance();
+  alert('✅ Transferencia exitosa');
+}
+
+// ── BOLSILLOS ──
+function abrirNuevoBolsillo() {
+  editBolsilloId = null;
+  document.getElementById('m-bolsillo-titulo').textContent = 'Nuevo Bolsillo';
+  document.getElementById('b-nombre').value = '';
+  document.getElementById('b-saldo').value = '';
+  document.getElementById('b-vinc-modulo').value = '';
+  setBolsilloTipo('manual');
+  openModal('m-bolsillo');
+}
+
+function editarBolsillo(id) {
+  const b = state.bolsillos.find(b=>b.id===id); if(!b) return;
+  editBolsilloId = id;
+  document.getElementById('m-bolsillo-titulo').textContent = 'Editar Bolsillo';
+  document.getElementById('b-nombre').value = b.nombre;
+  document.getElementById('b-saldo').value = b.saldo||0;
+  setBolsilloTipo(b.vinculadoKey?'vinculado':'manual');
+  if(b.vinculadoKey) document.getElementById('b-vinc-modulo').value = b.vinculadoKey;
+  openModal('m-bolsillo');
+}
+
+function setBolsilloTipo(tipo) {
+  bolsilloTipo = tipo;
+  document.getElementById('bb-manual').classList.toggle('active', tipo==='manual');
+  document.getElementById('bb-vinculado').classList.toggle('active', tipo==='vinculado');
+  document.getElementById('b-vinc-campos').style.display = tipo==='vinculado'?'block':'none';
+  if(tipo==='vinculado') {
+    document.getElementById('b-saldo').readOnly = true;
+    document.getElementById('b-saldo').style.opacity = '0.5';
+  } else {
+    document.getElementById('b-saldo').readOnly = false;
+    document.getElementById('b-saldo').style.opacity = '1';
+  }
+}
+
+function actualizarDatosModulo() {
+  const key = document.getElementById('b-vinc-modulo').value;
+  if(key && state.modulos[key]!==undefined) {
+    document.getElementById('b-saldo').value = state.modulos[key]||0;
+    document.getElementById('b-nombre').value = modulosDisp[key]||key;
+  }
+}
+
+async function guardarBolsillo() {
+  const nombre = document.getElementById('b-nombre').value.trim();
+  const saldo = parseFloat(document.getElementById('b-saldo').value)||0;
+  if(!nombre) return alert('Ingresa un nombre');
+  const vinculadoKey = bolsilloTipo==='vinculado' ? document.getElementById('b-vinc-modulo').value||null : null;
+  if(editBolsilloId) {
+    const b = state.bolsillos.find(b=>b.id===editBolsilloId);
+    if(b){ b.nombre=nombre; b.saldo=saldo; b.vinculadoKey=vinculadoKey||null; }
+  } else {
+    state.bolsillos.push({id:Date.now(), nombre, saldo, vinculadoKey});
+  }
+  await save(); closeModal('m-bolsillo'); renderBolsillos(); renderBalance();
+}
+
+async function eliminarBolsillo(id) {
+  if(!confirm('¿Eliminar este bolsillo?')) return;
+  state.bolsillos = state.bolsillos.filter(b=>b.id!=id);
+  await save(); renderBolsillos(); renderBalance();
+}
+
+// ── MÓDULOS OPTS ──
+function abrirOptsModulo(key, nombre) {
+  moduloActivoKey = key;
+  document.getElementById('m-opts-titulo').textContent = nombre;
+  document.getElementById('opts-nombre').value = state.modulosNombres?.[key]||nombre;
+  const em = document.getElementById('me-'+key);
+  document.getElementById('opts-emoji').value = state.modulosEmojis?.[key]||(em?em.textContent:'');
+  openModal('m-opts-modulo');
+}
+
+async function guardarOptsModulo() {
+  if(!moduloActivoKey) return;
+  if(!state.modulosNombres) state.modulosNombres={};
+  if(!state.modulosEmojis) state.modulosEmojis={};
+  const nombre = document.getElementById('opts-nombre').value.trim();
+  const emoji = document.getElementById('opts-emoji').value.trim();
+  if(nombre) state.modulosNombres[moduloActivoKey] = nombre;
+  if(emoji) {
+    state.modulosEmojis[moduloActivoKey] = emoji;
+    const em = document.getElementById('me-'+moduloActivoKey);
+    if(em) em.textContent = emoji;
+  }
+  await save(); closeModal('m-opts-modulo'); renderModulos();
+}
+
+// ── CONFIG BALANCE ──
+function getChecked(elId) {
+  return Object.keys(modulosDisp).filter(k=>{
+    const el = document.getElementById('chk-'+elId+'-'+k);
+    return el && el.classList.contains('checked');
+  });
+}
+
+async function guardarConfigTeo() {
+  state.config.enTeorico = getChecked('checks-teo');
+  await save(); closeModal('m-config-teo'); renderBalance();
+}
+
+async function guardarConfigInv() {
+  state.config.enInversion = getChecked('checks-inv');
+  await save(); closeModal('m-config-inv'); renderBalance();
+}
+
+// ── SAVE / LOAD ──
+async function save() {
+  try {
+    await fetch('/api/state', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(state)
+    });
+  } catch(e){}
+}
+
+async function load() {
+  try {
+    const r = await fetch('/api/state');
+    const d = await r.json();
+    if(d && typeof d === 'object') {
+      state = {
+        bolsillos: d.bolsillos || [],
+        modulos: d.modulos || {},
+        config: d.config || {enTeorico:[], enInversion:[]},
+        modulosNombres: d.modulosNombres || {},
+        modulosEmojis: d.modulosEmojis || {},
+        modulosOcultos: d.modulosOcultos || []
+      };
+    }
+  } catch(e){}
+  renderAll();
+}
+
+load();
+</script>
+</body>
+</html>

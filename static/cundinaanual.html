@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Cundina Anual</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --green:#00c896;--gold:#f0a500;--red:#ff4d6d;--blue:#4d9fff;--purple:#9d4dff;
+  --bg:#0a0e14;--bg2:#111620;--bg3:#1a2030;
+  --border:rgba(255,255,255,0.07);
+  --text:#f0f4ff;--text2:#6b7a99;
+  --mono:'JetBrains Mono',monospace;--sans:'Syne',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;padding-bottom:80px}
+.header{position:sticky;top:0;z-index:100;background:rgba(10,14,20,0.95);backdrop-filter:blur(12px);padding:16px 20px 12px;border-bottom:1px solid var(--border)}
+.header-top{display:flex;justify-content:space-between;align-items:center}
+.back-btn{background:none;border:none;color:var(--text);font-size:22px;cursor:pointer;padding:0;margin-right:8px}
+.app-title{font-size:11px;letter-spacing:3px;color:var(--text2);font-weight:600}
+.btn-icon{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:9px 14px;border-radius:10px;font-size:14px;cursor:pointer;margin-left:6px;font-family:var(--sans);font-weight:700}
+
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:16px 20px}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:12px 14px}
+.stat-card.full{grid-column:span 2}
+.stat-label{font-size:9px;letter-spacing:1.5px;color:var(--text2);font-weight:600;margin-bottom:4px}
+.stat-val{font-family:var(--mono);font-size:16px;font-weight:700}
+
+.section{padding:0 20px}
+.section-title{font-size:10px;letter-spacing:2px;color:var(--text2);font-weight:600;margin-bottom:12px}
+
+.participante-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:10px;position:relative;cursor:pointer}
+.participante-card.completo{border-color:rgba(0,200,150,0.3)}
+.participante-card.incompleto{border-color:rgba(255,77,109,0.2)}
+.part-header{display:flex;justify-content:space-between;align-items:flex-start}
+.part-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--blue));display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#fff;flex-shrink:0}
+.part-info{flex:1;margin-left:12px}
+.part-nombre{font-size:15px;font-weight:700}
+.part-tel{font-size:11px;color:var(--text2)}
+.part-turno{font-size:10px;padding:3px 8px;border-radius:6px;background:rgba(157,77,255,0.15);color:var(--purple);font-weight:700}
+.part-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.part-stat{background:var(--bg3);border-radius:10px;padding:10px;text-align:center}
+.part-stat-label{font-size:8px;letter-spacing:1px;color:var(--text2);font-weight:600;margin-bottom:3px}
+.part-stat-val{font-family:var(--mono);font-size:14px;font-weight:700}
+.progress-bar{height:6px;background:var(--bg3);border-radius:3px;margin-top:12px;overflow:hidden}
+.progress-fill{height:100%;border-radius:3px;background:var(--green);transition:width 0.3s}
+
+/* PANTALLA PARTICIPANTE */
+.back-bar{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(10,14,20,0.95);backdrop-filter:blur(12px);z-index:99}
+.screen{display:none}
+.screen.active{display:block}
+
+.mov-item{background:var(--bg3);border-radius:12px;padding:12px 14px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center}
+.mov-left{display:flex;align-items:center;gap:10px}
+.mov-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.mov-dot.ahorro{background:var(--blue)}
+.mov-dot.adelanto{background:var(--gold)}
+.mov-info{font-size:13px;font-weight:600}
+.mov-fecha{font-size:10px;color:var(--text2)}
+.mov-monto{font-family:var(--mono);font-size:14px;font-weight:700}
+
+.tabs{display:flex;gap:8px;margin:0 20px 16px}
+.tab{flex:1;padding:10px;border-radius:12px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-family:var(--sans);font-weight:700;font-size:13px;cursor:pointer;text-align:center}
+.tab.active.gold{background:rgba(240,165,0,0.15);border-color:var(--gold);color:var(--gold)}
+.tab.active.blue{background:rgba(77,159,255,0.15);border-color:var(--blue);color:var(--blue)}
+
+.fab{position:fixed;bottom:24px;right:20px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--blue));border:none;color:#fff;font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(157,77,255,0.4);z-index:50}
+
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:200;display:none;align-items:flex-end}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg2);border-radius:24px 24px 0 0;width:100%;padding:24px 20px 40px;border-top:1px solid var(--border);max-height:90vh;overflow-y:auto;animation:slideUp 0.25s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 20px}
+.modal-title{font-size:18px;font-weight:800;margin-bottom:20px}
+.form-group{margin-bottom:14px}
+.form-label{font-size:10px;letter-spacing:1.5px;color:var(--text2);font-weight:600;margin-bottom:8px;display:block}
+.form-input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:12px 14px;color:var(--text);font-family:var(--sans);font-size:15px;outline:none}
+.form-input:focus{border-color:var(--purple)}
+.form-submit{width:100%;background:linear-gradient(135deg,var(--purple),var(--blue));color:#fff;border:none;border-radius:14px;padding:15px;font-family:var(--sans);font-weight:800;font-size:16px;cursor:pointer;margin-top:8px}
+.btn-ghost{width:100%;background:transparent;color:var(--text2);border:1px solid var(--border);border-radius:12px;padding:12px;font-family:var(--sans);font-size:14px;cursor:pointer;margin-top:8px}
+.btn-danger{width:100%;background:rgba(255,77,109,0.1);color:var(--red);border:1px solid rgba(255,77,109,0.2);border-radius:14px;padding:14px;font-family:var(--sans);font-weight:700;font-size:14px;cursor:pointer;margin-top:8px}
+.tipo-toggle{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.tipo-btn{padding:12px;border-radius:12px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);font-family:var(--sans);font-weight:700;font-size:14px;cursor:pointer;text-align:center}
+.tipo-btn.gold.active{background:rgba(240,165,0,0.15);border-color:var(--gold);color:var(--gold)}
+.tipo-btn.blue.active{background:rgba(77,159,255,0.15);border-color:var(--blue);color:var(--blue)}
+</style>
+</head>
+<body>
+
+<!-- PANTALLA PRINCIPAL -->
+<div id="s-home" class="screen active">
+  <div class="header">
+    <div class="header-top">
+      <div style="display:flex;align-items:center">
+        <button class="back-btn" onclick="location.href='/'">←</button>
+        <div>
+          <div class="app-title">HOPE FINANCE</div>
+          <div style="font-size:16px;font-weight:800">Cundina Anual</div>
+        </div>
+      </div>
+      <div style="display:flex">
+        <button class="btn-icon" onclick="openModal('m-config')">⚙ Config</button>
+        <button class="btn-icon" onclick="abrirPagoMes();openModal('m-pago-mes')" style="margin-left:6px">💸 Pagar</button>
+        <button class="btn-icon" onclick="openModal('m-nuevo-part')" style="margin-left:6px">+ Persona</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">PARTICIPANTES</div>
+      <div class="stat-val" style="color:var(--purple)" id="h-total-part">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">CUOTA MENSUAL</div>
+      <div class="stat-val" style="color:var(--gold)" id="h-cuota">$0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">RECAUDADO MES</div>
+      <div class="stat-val" style="color:var(--green)" id="h-recaudado">$0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">COMPLETARON</div>
+      <div class="stat-val" style="color:var(--green)" id="h-completaron">0/0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">TOTAL AHORROS</div>
+      <div class="stat-val" style="color:var(--blue)" id="h-total-ahorros">$0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">POZO ACUMULADO</div>
+      <div class="stat-val" style="color:var(--gold)" id="h-pozo">$0</div>
+    </div>
+    <div class="stat-card full" style="background:rgba(255,77,109,0.06);border-color:rgba(255,77,109,0.15)">
+      <div class="stat-label">TOTAL ENTREGADO</div>
+      <div class="stat-val" style="color:var(--red)" id="h-entregado">$0</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title" style="margin-bottom:12px">PARTICIPANTES</div>
+    <div id="part-list"></div>
+  </div>
+</div>
+
+<!-- PANTALLA PARTICIPANTE -->
+<div id="s-participante" class="screen">
+  <div class="back-bar">
+    <button class="back-btn" onclick="volverHome()">←</button>
+    <div style="flex:1">
+      <div style="font-size:16px;font-weight:800" id="part-titulo">Participante</div>
+      <div style="font-size:11px;color:var(--text2)" id="part-sub">Turno mes 0</div>
+    </div>
+    <button class="btn-icon" onclick="openModal('m-mov')">+ Movimiento</button>
+  </div>
+
+  <div class="stats-grid" style="margin-top:16px">
+    <div class="stat-card">
+      <div class="stat-label">TOTAL AHORRADO</div>
+      <div class="stat-val" style="color:var(--blue)" id="p-ahorrado">$0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">TOTAL ADELANTO</div>
+      <div class="stat-val" style="color:var(--gold)" id="p-adelanto">$0</div>
+    </div>
+    <div class="stat-card full" style="background:rgba(0,200,150,0.06);border-color:rgba(0,200,150,0.2)">
+      <div class="stat-label">ADELANTO MES ACTUAL</div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="stat-val" style="color:var(--green)" id="p-adelanto-mes">$0 / $0</div>
+        <div style="font-size:11px;color:var(--text2)" id="p-falta">Falta $0</div>
+      </div>
+      <div class="progress-bar" style="margin-top:8px"><div class="progress-fill" id="p-progress" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active gold" id="tab-adelanto" onclick="cambiarTabPart('adelanto')">💰 Adelantos</div>
+    <div class="tab" id="tab-ahorro" onclick="cambiarTabPart('ahorro')">🔵 Ahorros</div>
+  </div>
+
+  <div style="padding:0 20px" id="part-movs"></div>
+  <div style="padding:0 20px" id="p-pagos-recibidos"></div>
+  <div style="height:80px"></div>
+</div>
+
+<button class="fab" id="fab" onclick="openModal('m-nuevo-part')">＋</button>
+
+<!-- MODAL CONFIG -->
+<div class="modal-overlay" id="m-config">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Configuración</div>
+    <div class="form-group">
+      <label class="form-label">CUOTA MENSUAL ($)</label>
+      <input class="form-input" id="cfg-cuota" type="number" placeholder="$1,000">
+    </div>
+    <div class="form-group">
+      <label class="form-label">MES ACTUAL (1-12)</label>
+      <input class="form-input" id="cfg-mes" type="number" min="1" max="12" placeholder="1">
+    </div>
+    <div class="form-group">
+      <label class="form-label">AÑO</label>
+      <input class="form-input" id="cfg-anio" type="number" placeholder="2026">
+    </div>
+    <button class="form-submit" onclick="guardarConfig()">Guardar</button>
+    <button class="btn-ghost" onclick="closeModal('m-config')">Cancelar</button>
+  </div>
+</div>
+
+<!-- MODAL PAGO MES -->
+<div class="modal-overlay" id="m-pago-mes">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">💸 Pago del Mes</div>
+    <div class="form-group">
+      <label class="form-label">PARTICIPANTE QUE RECIBE</label>
+      <select class="form-input" id="pago-participante"></select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">MONTO ENTREGADO ($)</label>
+      <input class="form-input" id="pago-monto" type="number" placeholder="$0.00">
+    </div>
+    <div class="form-group">
+      <label class="form-label">FECHA</label>
+      <input class="form-input" id="pago-fecha" type="date">
+    </div>
+    <div class="form-group">
+      <label class="form-label">ESTADO</label>
+      <select class="form-input" id="pago-estado">
+        <option value="parcial">Parcial</option>
+        <option value="completo">Completo</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">NOTA (OPCIONAL)</label>
+      <input class="form-input" id="pago-nota" placeholder="Observaciones...">
+    </div>
+    <div class="form-group">
+      <label class="form-label">💼 SALE DE BOLSILLO (OPCIONAL)</label>
+      <select class="form-input" id="pago-bolsillo">
+        <option value="">Sin afectar bolsillo</option>
+      </select>
+    </div>
+    <button class="form-submit" onclick="guardarPago()">Registrar Pago</button>
+    <button class="btn-ghost" onclick="closeModal('m-pago-mes')">Cancelar</button>
+  </div>
+</div>
+
+<!-- MODAL NUEVO PARTICIPANTE -->
+<div class="modal-overlay" id="m-nuevo-part">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="m-part-titulo">Nuevo Participante</div>
+    <div class="form-group">
+      <label class="form-label">NOMBRE</label>
+      <input class="form-input" id="p-nombre" placeholder="Nombre completo">
+    </div>
+    <div class="form-group">
+      <label class="form-label">TELÉFONO</label>
+      <input class="form-input" id="p-tel" type="tel" placeholder="6371234567">
+    </div>
+    <div class="form-group">
+      <label class="form-label">TURNO (MES QUE LE TOCA)</label>
+      <input class="form-input" id="p-turno" type="number" min="1" max="12" placeholder="1-12">
+    </div>
+    <button class="form-submit" onclick="guardarParticipante()">Guardar</button>
+    <button class="btn-ghost" onclick="closeModal('m-nuevo-part')">Cancelar</button>
+  </div>
+</div>
+
+<!-- MODAL MOVIMIENTO -->
+<div class="modal-overlay" id="m-mov">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Nuevo Movimiento</div>
+    <div class="tipo-toggle">
+      <div class="tipo-btn gold active" id="btn-adelanto" onclick="setMovTipo('adelanto')">💰 Adelanto</div>
+      <div class="tipo-btn blue" id="btn-ahorro" onclick="setMovTipo('ahorro')">🔵 Ahorro</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">MONTO ($)</label>
+      <input class="form-input" id="mov-monto" type="number" placeholder="$0.00">
+    </div>
+    <div class="form-group">
+      <label class="form-label">FECHA</label>
+      <input class="form-input" id="mov-fecha" type="date">
+    </div>
+    <div class="form-group">
+      <label class="form-label">NOTA (OPCIONAL)</label>
+      <input class="form-input" id="mov-nota" placeholder="Semana 1...">
+    </div>
+    <div class="form-group">
+      <label class="form-label">💼 ENTRA A BOLSILLO (OPCIONAL)</label>
+      <select class="form-input" id="mov-bolsillo">
+        <option value="">Sin afectar bolsillo</option>
+      </select>
+    </div>
+    <button class="form-submit" onclick="guardarMov()">Registrar</button>
+    <button class="btn-ghost" onclick="closeModal('m-mov')">Cancelar</button>
+  </div>
+</div>
+
+<div id="save-ind" style="position:fixed;bottom:88px;right:16px;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:600;z-index:999;opacity:0;transition:opacity 0.3s;pointer-events:none"></div>
+
+<script>
+let state = {
+  config: {cuota:1000, mes:1, anio:2026},
+  participantes: []
+};
+let partActivoId = null;
+let tabPart = 'adelanto';
+let movTipo = 'adelanto';
+let editPartId = null;
+
+const fmt = v => '$'+(v||0).toLocaleString('es-MX',{minimumFractionDigits:0});
+
+function mostrarInd(ok) {
+  const el = document.getElementById('save-ind');
+  el.style.background = ok?'var(--green)':'var(--red)';
+  el.style.color = ok?'#000':'#fff';
+  el.textContent = ok?'✓ Guardado':'⚠ Error';
+  el.style.opacity='1';
+  setTimeout(()=>el.style.opacity='0',2000);
+}
+
+async function cargarBolsillos() {
+  try {
+    const r = await fetch('/api/state');
+    if(r.ok) {
+      const d = await r.json();
+      return d.bolsillos || [];
+    }
+  } catch(e){}
+  return [];
+}
+
+async function llenarSelectBolsillos(selectId) {
+  const bolsillos = await cargarBolsillos();
+  const sel = document.getElementById(selectId);
+  sel.innerHTML = '<option value="">Sin afectar bolsillo</option>' +
+    bolsillos.map(b=>`<option value="${b.id}">${b.nombre} (${fmt(b.saldo||0)})</option>`).join('');
+}
+
+async function actualizarBolsillo(bolsilloId, monto, tipo) {
+  if(!bolsilloId) return;
+  try {
+    const r = await fetch('/api/state');
+    if(!r.ok) return;
+    const d = await r.json();
+    const b = (d.bolsillos||[]).find(b=>b.id==bolsilloId);
+    if(!b) return;
+    if(tipo==='entrada') b.saldo = (b.saldo||0) + monto;
+    else b.saldo = (b.saldo||0) - monto;
+    await fetch('/api/state', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(d)});
+  } catch(e){}
+}
+
+async function save() {
+  try { localStorage.setItem('cundinaanual_v1', JSON.stringify(state)); } catch(e){}
+  try {
+    const r = await fetch('/api/state/cundinaanual', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(state)
+    });
+    // Sync total ahorros al main
+    const totalAhorros = state.participantes.reduce((a,p)=>
+      a + (p.ahorros||[]).reduce((b,m)=>b+m.monto,0), 0);
+    const mesActual = state.config.mes||1;
+    const recaudadoMes = state.participantes.reduce((a,p)=>
+      a + (p.adelantos||[]).filter(m=>m.mes===mesActual).reduce((b,m)=>b+m.monto,0), 0);
+    const ri = await fetch('/api/state');
+    if(ri.ok){
+      const si = await ri.json();
+      if(!si.modulos) si.modulos={};
+      si.modulos.cundinaanual = state.participantes.length;
+      const totalPagadoSync = (state.pagos||[]).reduce((a,p)=>a+p.monto,0);
+      si.modulos.cundinaanual_recaudado = recaudadoMes;
+      si.modulos.cundinaanual_ahorros = totalAhorros;
+      await fetch('/api/state',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(si)});
+    }
+    mostrarInd(r.ok);
+  } catch(e){ mostrarInd(false); }
+}
+
+async function load() {
+  try {
+    const r = await fetch('/api/state/cundinaanual');
+    if(r.ok){ const d=await r.json(); if(d&&d.participantes){ state=d; renderAll(); return; } }
+  } catch(e){}
+  try{ const d=localStorage.getItem('cundinaanual_v1'); if(d){ const p=JSON.parse(d); if(p.participantes) state=p; } }catch(e){}
+  renderAll();
+}
+
+function calcPart(p) {
+  const cuota = state.config.cuota||1000;
+  const mesActual = state.config.mes||1;
+  const totalAhorrado = (p.ahorros||[]).reduce((a,m)=>a+m.monto,0);
+  const totalAdelanto = (p.adelantos||[]).reduce((a,m)=>a+m.monto,0);
+  const adelantoMes = (p.adelantos||[])
+    .filter(m=>m.mes===mesActual)
+    .reduce((a,m)=>a+m.monto,0);
+  const falta = Math.max(0, cuota - adelantoMes);
+  const pct = Math.min(100, (adelantoMes/cuota)*100);
+  return {totalAhorrado, totalAdelanto, adelantoMes, falta, pct, completo: adelantoMes>=cuota};
+}
+
+function renderAll() { renderStats(); renderLista(); }
+
+function renderStats() {
+  const parts = state.participantes||[];
+  const cuota = state.config.cuota||1000;
+  const mesActual = state.config.mes||1;
+  let recaudado=0, completaron=0, totalAhorros=0;
+  parts.forEach(p=>{
+    const d = calcPart(p);
+    recaudado += d.totalAdelanto;
+    if(d.completo) completaron++;
+    totalAhorros += d.totalAhorrado;
+  });
+  const pozo = cuota * parts.length;
+  document.getElementById('h-total-part').textContent = parts.length;
+  document.getElementById('h-cuota').textContent = fmt(cuota);
+  const totalPagado = (state.pagos||[]).reduce((a,p)=>a+p.monto,0);
+  const recaudadoNeto = recaudado - totalPagado;
+  document.getElementById('h-recaudado').textContent = fmt(recaudadoNeto);
+  document.getElementById('h-completaron').textContent = completaron+'/'+parts.length;
+  document.getElementById('h-total-ahorros').textContent = fmt(totalAhorros);
+  document.getElementById('h-pozo').textContent = fmt(pozo);
+  const totalEntregado = (state.pagos||[]).reduce((a,p)=>a+p.monto,0);
+  document.getElementById('h-entregado').textContent = fmt(totalEntregado);
+}
+
+function renderLista() {
+  const el = document.getElementById('part-list');
+  const parts = state.participantes||[];
+  if(!parts.length){
+    el.innerHTML = `<div style="text-align:center;padding:60px 20px;color:var(--text2)"><div style="font-size:48px;margin-bottom:12px">👥</div><div>Sin participantes aún</div></div>`;
+    return;
+  }
+  el.innerHTML = parts.map(p=>{
+    const d = calcPart(p);
+    const ini = p.nombre.charAt(0).toUpperCase();
+    return `<div class="participante-card ${d.completo?'completo':'incompleto'}" onclick="abrirParticipante(${p.id})">
+      <button onclick="event.stopPropagation();eliminarParticipante(${p.id})" style="position:absolute;top:10px;right:10px;background:rgba(255,77,109,0.1);border:1px solid rgba(255,77,109,0.2);color:var(--red);border-radius:8px;padding:4px 10px;font-size:12px;cursor:pointer">✕</button>
+      <div class="part-header">
+        <div class="part-avatar">${ini}</div>
+        <div class="part-info">
+          <div class="part-nombre">${p.nombre}</div>
+          <div class="part-tel">${p.tel||''}</div>
+        </div>
+        <div class="part-turno">Mes ${p.turno}</div>
+      </div>
+      <div class="part-stats">
+        <div class="part-stat">
+          <div class="part-stat-label">AHORRADO</div>
+          <div class="part-stat-val" style="color:var(--blue)">${fmt(d.totalAhorrado)}</div>
+        </div>
+        <div class="part-stat">
+          <div class="part-stat-label">ADELANTO MES</div>
+          <div class="part-stat-val" style="color:${d.completo?'var(--green)':'var(--gold)'}">${fmt(d.adelantoMes)}</div>
+        </div>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" style="width:${d.pct}%;background:${d.completo?'var(--green)':'var(--gold)'}"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:6px">
+        <span style="font-size:10px;color:var(--text2)">${d.completo?'✅ Cuota completa':'⏳ Falta '+fmt(d.falta)}</span>
+        <span style="font-size:10px;color:var(--text2)">${Math.round(d.pct)}%</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function abrirParticipante(id) {
+  partActivoId = id;
+  const p = state.participantes.find(p=>p.id===id); if(!p) return;
+  const d = calcPart(p);
+  const cuota = state.config.cuota||1000;
+  document.getElementById('part-titulo').textContent = p.nombre;
+  document.getElementById('part-sub').textContent = `Turno mes ${p.turno} · ${p.tel||''}`;
+  document.getElementById('p-ahorrado').textContent = fmt(d.totalAhorrado);
+  document.getElementById('p-adelanto').textContent = fmt(d.totalAdelanto);
+  document.getElementById('p-adelanto-mes').textContent = fmt(d.adelantoMes)+' / '+fmt(cuota);
+  document.getElementById('p-falta').textContent = d.completo?'✅ Completo':'Falta '+fmt(d.falta);
+  document.getElementById('p-progress').style.width = d.pct+'%';
+  document.getElementById('p-progress').style.background = d.completo?'var(--green)':'var(--gold)';
+  // Mostrar pagos recibidos
+  const pagosEl = document.getElementById('p-pagos-recibidos');
+  if(pagosEl) pagosEl.innerHTML = renderPagosPart(p);
+  cambiarTabPart('adelanto');
+  mostrarScreen('s-participante');
+}
+
+function renderPagosPart(p) {
+  const pagos = (state.pagos||[]).filter(pg=>pg.partId===p.id);
+  if(!pagos.length) return '';
+  const totalRecibido = pagos.reduce((a,pg)=>a+pg.monto,0);
+  const pozo = (state.config.cuota||1000) * state.participantes.length;
+  return `<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
+    <div style="font-size:9px;letter-spacing:1px;color:var(--text2);margin-bottom:8px">PAGOS RECIBIDOS · ${fmt(totalRecibido)} / ${fmt(pozo)}</div>
+    ${pagos.map(pg=>`
+      <div style="background:var(--bg3);border-radius:10px;padding:10px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-size:12px;font-weight:700">Mes ${pg.mes} · ${pg.estado==='completo'?'✅ Completo':'⏳ Parcial'}</div>
+          <div style="font-size:10px;color:var(--text2)">${pg.fecha||''}${pg.nota?' · '+pg.nota:''}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--green)">${fmt(pg.monto)}</span>
+          <button onclick="eliminarPago(${pg.id})" style="background:none;border:none;color:var(--text2);font-size:13px;cursor:pointer">✕</button>
+        </div>
+      </div>`).join('')}
+  </div>`;
+}
+
+async function eliminarPago(id) {
+  if(!confirm('¿Eliminar este pago?')) return;
+  const pago = (state.pagos||[]).find(p=>p.id===id);
+  if(pago && pago.bolsilloId) await actualizarBolsillo(pago.bolsilloId, pago.monto, 'entrada');
+  state.pagos = (state.pagos||[]).filter(p=>p.id!==id);
+  await save(); abrirParticipante(partActivoId);
+}
+
+function cambiarTabPart(tab) {
+  tabPart = tab;
+  document.getElementById('tab-adelanto').className = 'tab'+(tab==='adelanto'?' active gold':'');
+  document.getElementById('tab-ahorro').className = 'tab'+(tab==='ahorro'?' active blue':'');
+  renderMovsPart();
+}
+
+function renderMovsPart() {
+  const p = state.participantes.find(p=>p.id===partActivoId); if(!p) return;
+  const el = document.getElementById('part-movs');
+  const movs = tabPart==='adelanto' ? (p.adelantos||[]) : (p.ahorros||[]);
+  if(!movs.length){
+    el.innerHTML=`<div style="text-align:center;padding:40px 0;color:var(--text2)">Sin movimientos aún</div>`;
+    return;
+  }
+  el.innerHTML = movs.slice().reverse().map(m=>`
+    <div class="mov-item">
+      <div class="mov-left">
+        <div class="mov-dot ${tabPart}"></div>
+        <div>
+          <div class="mov-info">${tabPart==='adelanto'?'Adelanto':'Ahorro'}${m.nota?' · '+m.nota:''}</div>
+          <div class="mov-fecha">${m.fecha||''}${m.mes?' · Mes '+m.mes:''}</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="mov-monto" style="color:${tabPart==='adelanto'?'var(--gold)':'var(--blue)'}">${fmt(m.monto)}</span>
+        <button onclick="eliminarMov('${tabPart}',${m.id})" style="background:none;border:none;color:var(--text2);font-size:14px;cursor:pointer">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+function mostrarScreen(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.getElementById('fab').style.display = id==='s-home'?'flex':'none';
+  window.scrollTo(0,0);
+}
+
+function volverHome() {
+  mostrarScreen('s-home');
+  partActivoId = null;
+  renderAll();
+}
+
+function openModal(id) {
+  if(id==='m-config'){
+    document.getElementById('cfg-cuota').value = state.config.cuota||1000;
+    document.getElementById('cfg-mes').value = state.config.mes||1;
+    document.getElementById('cfg-anio').value = state.config.anio||2026;
+  }
+  if(id==='m-mov'){
+    document.getElementById('mov-fecha').value = new Date().toISOString().split('T')[0];
+    document.getElementById('mov-monto').value='';
+    document.getElementById('mov-nota').value='';
+    setMovTipo('adelanto');
+    llenarSelectBolsillos('mov-bolsillo');
+  }
+  if(id==='m-nuevo-part'){
+    editPartId=null;
+    document.getElementById('m-part-titulo').textContent='Nuevo Participante';
+    document.getElementById('p-nombre').value='';
+    document.getElementById('p-tel').value='';
+    document.getElementById('p-turno').value='';
+  }
+  document.getElementById(id).classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeModal(id){ document.getElementById(id).classList.remove('open'); document.body.style.overflow=''; }
+document.querySelectorAll('.modal-overlay').forEach(el=>{ el.addEventListener('click',e=>{ if(e.target===el) closeModal(el.id); }); });
+
+function setMovTipo(tipo) {
+  movTipo = tipo;
+  document.getElementById('btn-adelanto').classList.toggle('active', tipo==='adelanto');
+  document.getElementById('btn-ahorro').classList.toggle('active', tipo==='ahorro');
+}
+
+async function guardarConfig() {
+  state.config.cuota = parseFloat(document.getElementById('cfg-cuota').value)||1000;
+  state.config.mes = parseInt(document.getElementById('cfg-mes').value)||1;
+  state.config.anio = parseInt(document.getElementById('cfg-anio').value)||2026;
+  await save(); closeModal('m-config'); renderAll();
+}
+
+async function guardarParticipante() {
+  const nombre = document.getElementById('p-nombre').value.trim();
+  const tel = document.getElementById('p-tel').value.trim();
+  const turno = parseInt(document.getElementById('p-turno').value)||1;
+  if(!nombre) return alert('Ingresa el nombre');
+  if(editPartId) {
+    const p = state.participantes.find(p=>p.id===editPartId);
+    if(p){ p.nombre=nombre; p.tel=tel; p.turno=turno; }
+  } else {
+    state.participantes.push({id:Date.now(), nombre, tel, turno, adelantos:[], ahorros:[]});
+  }
+  await save(); closeModal('m-nuevo-part'); renderAll();
+}
+
+async function guardarMov() {
+  const monto = parseFloat(document.getElementById('mov-monto').value)||0;
+  if(!monto) return alert('Ingresa el monto');
+  const fecha = document.getElementById('mov-fecha').value;
+  const nota = document.getElementById('mov-nota').value.trim();
+  const bolsilloId = document.getElementById('mov-bolsillo').value;
+  const p = state.participantes.find(p=>p.id===partActivoId); if(!p) return;
+  const mov = {id:Date.now(), monto, fecha, nota, bolsilloId};
+  if(movTipo==='adelanto') {
+    mov.mes = state.config.mes;
+    if(!p.adelantos) p.adelantos=[];
+    p.adelantos.push(mov);
+  } else {
+    if(!p.ahorros) p.ahorros=[];
+    p.ahorros.push(mov);
+  }
+  await actualizarBolsillo(bolsilloId, monto, 'entrada');
+  await save(); closeModal('m-mov'); abrirParticipante(partActivoId);
+}
+
+async function eliminarMov(tipo, id) {
+  if(!confirm('¿Eliminar?')) return;
+  const p = state.participantes.find(p=>p.id===partActivoId); if(!p) return;
+  if(tipo==='adelanto') {
+    const mov = p.adelantos.find(m=>m.id===id);
+    if(mov && mov.bolsilloId) await actualizarBolsillo(mov.bolsilloId, mov.monto, 'salida');
+    p.adelantos = p.adelantos.filter(m=>m.id!==id);
+  } else {
+    const mov = p.ahorros.find(m=>m.id===id);
+    if(mov && mov.bolsilloId) await actualizarBolsillo(mov.bolsilloId, mov.monto, 'salida');
+    p.ahorros = p.ahorros.filter(m=>m.id!==id);
+  }
+  await save(); abrirParticipante(partActivoId);
+}
+
+async function eliminarParticipante(id) {
+  if(!confirm('¿Eliminar participante?')) return;
+  state.participantes = state.participantes.filter(p=>p.id!==id);
+  await save(); renderAll();
+}
+
+function abrirPagoMes() {
+  llenarSelectBolsillos('pago-bolsillo');
+  const sel = document.getElementById('pago-participante');
+  sel.innerHTML = state.participantes.map(p=>
+    `<option value="${p.id}">${p.nombre} (Turno mes ${p.turno})</option>`
+  ).join('');
+  document.getElementById('pago-fecha').value = new Date().toISOString().split('T')[0];
+  document.getElementById('pago-monto').value = '';
+  document.getElementById('pago-nota').value = '';
+  // Sugerir pozo completo
+  const pozo = (state.config.cuota||1000) * state.participantes.length;
+  document.getElementById('pago-monto').placeholder = '$'+pozo.toLocaleString('es-MX');
+}
+
+async function guardarPago() {
+  const partId = parseInt(document.getElementById('pago-participante').value);
+  const monto = parseFloat(document.getElementById('pago-monto').value)||0;
+  const fecha = document.getElementById('pago-fecha').value;
+  const estado = document.getElementById('pago-estado').value;
+  const nota = document.getElementById('pago-nota').value.trim();
+  const bolsilloId = document.getElementById('pago-bolsillo').value;
+  if(!monto) return alert('Ingresa el monto');
+  if(!state.pagos) state.pagos = [];
+  state.pagos.push({id:Date.now(), partId, monto, fecha, estado, nota, bolsilloId});
+  await actualizarBolsillo(bolsilloId, monto, 'salida');
+  await save(); closeModal('m-pago-mes'); renderAll();
+}
+
+load();
+</script>
+<script src="/static/bolsillos.js"></script>
+</body>
+</html>

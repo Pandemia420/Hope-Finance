@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Inversiones</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --green:#00c896;--green2:#00a87e;--gold:#f0a500;
+  --red:#ff4d6d;--blue:#4d9fff;--purple:#9d4dff;
+  --bg:#0a0e14;--bg2:#111620;--bg3:#1a2030;
+  --border:rgba(255,255,255,0.07);
+  --text:#f0f4ff;--text2:#6b7a99;
+  --mono:'JetBrains Mono',monospace;
+  --sans:'Syne',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;padding-bottom:80px}
+.header{position:sticky;top:0;z-index:100;background:rgba(10,14,20,0.95);backdrop-filter:blur(12px);padding:16px 20px 12px;border-bottom:1px solid var(--border)}
+.header-top{display:flex;justify-content:space-between;align-items:center}
+.back-btn{background:none;border:none;color:var(--text);font-size:22px;cursor:pointer;padding:0;margin-right:8px}
+.app-title{font-size:11px;letter-spacing:3px;color:var(--text2);font-weight:600}
+.header-titulo{display:flex;align-items:center}
+.btn-icon{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:10px;font-size:15px;cursor:pointer;margin-left:6px}
+
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:16px 20px}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:12px 14px}
+.stat-card.full{grid-column:span 2}
+.stat-label{font-size:9px;letter-spacing:1.5px;color:var(--text2);font-weight:600;margin-bottom:4px}
+.stat-val{font-family:var(--mono);font-size:15px;font-weight:700}
+
+.tabs{display:flex;gap:8px;margin:0 20px 16px;overflow-x:auto;padding-bottom:4px}
+.tab{flex-shrink:0;padding:9px 16px;border-radius:12px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-family:var(--sans);font-weight:600;font-size:13px;cursor:pointer}
+.tab.active{background:var(--gold);color:#000;border-color:var(--gold)}
+.tab.active.blue{background:var(--blue);border-color:var(--blue)}
+
+.section{padding:0 20px}
+.section-title{font-size:10px;letter-spacing:2px;color:var(--text2);font-weight:600;margin-bottom:12px}
+
+/* CRIPTO CARDS */
+.cripto-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:10px}
+.cripto-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.cripto-badge{padding:4px 12px;border-radius:8px;font-size:11px;font-weight:700;font-family:var(--mono)}
+.cripto-badge.xrp{background:rgba(0,153,255,0.15);color:#09f}
+.cripto-badge.oro{background:rgba(240,165,0,0.15);color:var(--gold)}
+.cripto-badge.atom{background:rgba(157,77,255,0.15);color:var(--purple)}
+.cripto-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.cripto-stat{background:var(--bg3);border-radius:10px;padding:10px;text-align:center}
+.cripto-stat-label{font-size:8px;letter-spacing:1px;color:var(--text2);font-weight:600;margin-bottom:4px}
+.cripto-stat-val{font-family:var(--mono);font-size:13px;font-weight:700}
+
+/* INVERSIÓN SIMPLE */
+.inv-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:10px;border-left:3px solid var(--blue);position:relative}
+.inv-nombre{font-size:15px;font-weight:700}
+.inv-meta{font-size:11px;color:var(--text2);margin-top:2px}
+.inv-saldo{font-family:var(--mono);font-size:18px;font-weight:700;color:var(--green)}
+
+/* MOV ITEM */
+.mov-item{background:var(--bg3);border-radius:12px;padding:12px 14px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center}
+.mov-left{display:flex;align-items:center;gap:10px}
+.mov-dot{width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0}
+.mov-dot.retiro{background:var(--red)}
+.mov-info{font-size:13px;font-weight:600}
+.mov-fecha{font-size:10px;color:var(--text2)}
+.mov-monto{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--green)}
+.mov-monto.retiro{color:var(--red)}
+
+.fab{position:fixed;bottom:24px;right:20px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#c88000);border:none;color:#000;font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(240,165,0,0.4);z-index:50}
+
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:200;display:none;align-items:flex-end}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg2);border-radius:24px 24px 0 0;width:100%;padding:24px 20px 40px;border-top:1px solid var(--border);max-height:90vh;overflow-y:auto;animation:slideUp 0.25s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 20px}
+.modal-title{font-size:18px;font-weight:800;margin-bottom:20px}
+.form-group{margin-bottom:16px}
+.form-label{font-size:11px;letter-spacing:1.5px;color:var(--text2);font-weight:600;margin-bottom:8px;display:block}
+.form-input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:13px 16px;color:var(--text);font-family:var(--sans);font-size:15px;outline:none}
+.form-input:focus{border-color:var(--gold)}
+.form-input::placeholder{color:var(--text2)}
+.form-submit{width:100%;background:var(--gold);color:#000;border:none;border-radius:14px;padding:15px;font-family:var(--sans);font-weight:800;font-size:16px;cursor:pointer;margin-top:8px}
+.btn-ghost{width:100%;background:transparent;color:var(--text2);border:1px solid var(--border);border-radius:12px;padding:12px;font-family:var(--sans);font-size:14px;cursor:pointer;margin-top:8px}
+.btn-danger{width:100%;background:rgba(255,77,109,0.1);color:var(--red);border:1px solid rgba(255,77,109,0.2);border-radius:14px;padding:14px;font-family:var(--sans);font-weight:700;font-size:14px;cursor:pointer;margin-top:8px}
+.tipo-toggle{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.tipo-btn{padding:12px;border-radius:12px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);font-family:var(--sans);font-weight:700;font-size:14px;cursor:pointer;text-align:center}
+.tipo-btn.dep.active{background:rgba(0,200,150,0.15);border-color:var(--green);color:var(--green)}
+.tipo-btn.ret.active{background:rgba(255,77,109,0.15);border-color:var(--red);color:var(--red)}
+#save-indicator{position:fixed;bottom:88px;right:16px;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:600;z-index:999;opacity:0;transition:opacity 0.3s;pointer-events:none}
+
+.screen{display:none}
+.screen.active{display:block}
+.back-bar{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(10,14,20,0.95);backdrop-filter:blur(12px);z-index:99}
+</style>
+</head>
+<body>
+
+<!-- PANTALLA PRINCIPAL -->
+<div id="s-home" class="screen active">
+  <div class="header">
+    <div class="header-top">
+      <div class="header-titulo">
+        <button class="back-btn" onclick="location.href='/'">←</button>
+        <div>
+          <div class="app-title">HOPE FINANCE</div>
+          <div style="font-size:16px;font-weight:800">Inversiones</div>
+        </div>
+      </div>
+      <div style="display:flex">
+        <button class="btn-icon" onclick="openModal('m-nueva-inv')">📊+</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">TOTAL INVERTIDO</div>
+      <div class="stat-val" style="color:var(--gold)" id="h-total-inv">$0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">TOTAL RETIRADO</div>
+      <div class="stat-val" style="color:var(--red)" id="h-total-ret">$0</div>
+    </div>
+    <div class="stat-card full" style="background:rgba(240,165,0,0.06);border-color:rgba(240,165,0,0.2)">
+      <div class="stat-label">SALDO ACTIVO TOTAL</div>
+      <div class="stat-val" id="h-saldo-total" style="font-size:22px;color:var(--gold)">$0</div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" id="tab-todo" onclick="cambiarTab('todo')">Todo</div>
+    <div class="tab" id="tab-bitso" onclick="cambiarTab('bitso')">Bitso</div>
+    <div class="tab" id="tab-simples" onclick="cambiarTab('simples')">Otras</div>
+  </div>
+
+  <div class="section">
+    <div id="inv-list"></div>
+  </div>
+</div>
+
+<!-- PANTALLA BITSO CRIPTO -->
+<div id="s-cripto" class="screen">
+  <div class="back-bar">
+    <button class="back-btn" onclick="volverHome()">←</button>
+    <div>
+      <div style="font-size:16px;font-weight:800" id="cripto-titulo">XRP</div>
+      <div style="font-size:11px;color:var(--text2)">Bitso</div>
+    </div>
+    <div style="margin-left:auto;display:flex;gap:8px">
+      <button class="btn-icon" onclick="openModal('m-mov-cripto')">+ MOV</button>
+    </div>
+  </div>
+
+  <div class="stats-grid" style="margin-top:16px">
+    <div class="stat-card"><div class="stat-label">INVERTIDO</div><div class="stat-val" style="color:var(--gold)" id="c-invertido">$0</div></div>
+    <div class="stat-card"><div class="stat-label">RETIRADO</div><div class="stat-val" style="color:var(--red)" id="c-retirado">$0</div></div>
+    <div class="stat-card"><div class="stat-label">MONEDAS</div><div class="stat-val" style="color:var(--blue)" id="c-monedas">0</div></div>
+    <div class="stat-card"><div class="stat-label">PRECIO PROM.</div><div class="stat-val" style="color:var(--text)" id="c-precio-prom">$0</div></div>
+    <div class="stat-card full" style="background:rgba(240,165,0,0.06);border-color:rgba(240,165,0,0.2)">
+      <div class="stat-label">NETO INVERTIDO</div>
+      <div class="stat-val" style="font-size:20px;color:var(--gold)" id="c-neto">$0</div>
+    </div>
+  </div>
+
+  <div style="padding:0 20px 8px"><div class="section-title">MOVIMIENTOS</div></div>
+  <div id="cripto-movs" style="padding:0 20px"></div>
+  <div style="height:80px"></div>
+</div>
+
+<!-- PANTALLA INV SIMPLE -->
+<div id="s-inv-simple" class="screen">
+  <div class="back-bar">
+    <button class="back-btn" onclick="volverHome()">←</button>
+    <div>
+      <div style="font-size:16px;font-weight:800" id="inv-simple-titulo">Inversión</div>
+      <div style="font-size:11px;color:var(--text2)" id="inv-simple-sub">$0</div>
+    </div>
+    <div style="margin-left:auto">
+      <button class="btn-icon" onclick="openModal('m-mov-simple')">+ MOV</button>
+    </div>
+  </div>
+
+  <div class="stats-grid" style="margin-top:16px">
+    <div class="stat-card"><div class="stat-label">INVERTIDO</div><div class="stat-val" style="color:var(--gold)" id="s-invertido">$0</div></div>
+    <div class="stat-card"><div class="stat-label">RETIRADO</div><div class="stat-val" style="color:var(--red)" id="s-retirado">$0</div></div>
+    <div class="stat-card full" style="background:rgba(0,200,150,0.06);border-color:rgba(0,200,150,0.2)">
+      <div class="stat-label">SALDO ACTUAL</div>
+      <div class="stat-val" style="font-size:20px;color:var(--green)" id="s-saldo">$0</div>
+    </div>
+  </div>
+
+  <div style="padding:0 20px 8px"><div class="section-title">MOVIMIENTOS</div></div>
+  <div id="simple-movs" style="padding:0 20px"></div>
+  <div style="height:80px"></div>
+</div>
+
+<button class="fab" id="fab" onclick="abrirNuevaInv()">＋</button>
+
+<!-- MODAL NUEVA INVERSIÓN -->
+<div class="modal-overlay" id="m-nueva-inv">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Nueva Inversión</div>
+    <div class="tipo-toggle">
+      <div class="tipo-btn dep active" id="btn-bitso" onclick="setTipoInv('bitso')">₿ Bitso</div>
+      <div class="tipo-btn ret" id="btn-simple" onclick="setTipoInv('simple')">📊 Otra</div>
+    </div>
+    <div id="form-nueva-bitso">
+      <div class="form-group">
+        <label class="form-label">CRIPTO</label>
+        <select class="form-input" id="nueva-cripto">
+          <option value="XRP">XRP</option>
+          <option value="ORO">ORO</option>
+          <option value="ATOM">ATOM</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">MONTO INVERTIDO ($)</label>
+        <input class="form-input" id="nueva-monto-cripto" type="number" placeholder="$0.00">
+      </div>
+      <div class="form-group">
+        <label class="form-label">MONEDAS ADQUIRIDAS</label>
+        <input class="form-input" id="nueva-monedas" type="number" placeholder="0.00" step="0.0001">
+      </div>
+      <div class="form-group">
+        <label class="form-label">PRECIO PROMEDIO ($)</label>
+        <input class="form-input" id="nueva-precio" type="number" placeholder="$0.00">
+      </div>
+      <div class="form-group">
+        <label class="form-label">FECHA</label>
+        <input class="form-input" id="nueva-fecha-cripto" type="date">
+      </div>
+    </div>
+    <div id="form-nueva-simple" style="display:none">
+      <div class="form-group">
+        <label class="form-label">NOMBRE</label>
+        <input class="form-input" id="nueva-inv-nombre" placeholder="Ej: Stori, Yo te presto">
+      </div>
+      <div class="form-group">
+        <label class="form-label">CAPITAL INICIAL ($)</label>
+        <input class="form-input" id="nueva-inv-capital" type="number" placeholder="$0.00">
+      </div>
+      <div class="form-group">
+        <label class="form-label">FECHA INICIO</label>
+        <input class="form-input" id="nueva-inv-fecha" type="date">
+      </div>
+      <div class="form-group">
+        <label class="form-label">NOTA (OPCIONAL)</label>
+        <input class="form-input" id="nueva-inv-nota" placeholder="Descripción">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">💼 ORIGEN (opcional)</label>
+      <select class="form-input" id="m-nueva-inv-origen">
+        <option value="">Sin afectar bolsillo</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">💼 DESTINO (opcional)</label>
+      <select class="form-input" id="m-nueva-inv-destino">
+        <option value="">Sin afectar bolsillo</option>
+      </select>
+    </div>
+    <button class="form-submit" onclick="guardarNuevaInv()">Guardar</button>
+    <button class="btn-ghost" onclick="closeModal('m-nueva-inv')">Cancelar</button>
+  </div>
+</div>
+
+<!-- MODAL MOV CRIPTO -->
+<div class="modal-overlay" id="m-mov-cripto">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="m-mov-cripto-titulo">Movimiento</div>
+    <div class="tipo-toggle">
+      <div class="tipo-btn dep active" id="btn-dep" onclick="setMovTipo('deposito')">↑ Depósito</div>
+      <div class="tipo-btn ret" id="btn-ret" onclick="setMovTipo('retiro')">↓ Retiro</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">MONTO ($)</label>
+      <input class="form-input" id="mov-monto" type="number" placeholder="$0.00">
+    </div>
+    <div id="campos-deposito">
+      <div class="form-group">
+        <label class="form-label">MONEDAS ADQUIRIDAS</label>
+        <input class="form-input" id="mov-monedas" type="number" placeholder="0.00" step="0.0001">
+      </div>
+      <div class="form-group">
+        <label class="form-label">PRECIO PROMEDIO ($)</label>
+        <input class="form-input" id="mov-precio" type="number" placeholder="$0.00">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">FECHA</label>
+      <input class="form-input" id="mov-fecha" type="date">
+    </div>
+    <div class="form-group">
+      <label class="form-label">💼 ORIGEN (opcional)</label>
+      <select class="form-input" id="m-mov-cripto-origen">
+        <option value="">Sin afectar bolsillo</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">💼 DESTINO (opcional)</label>
+      <select class="form-input" id="m-mov-cripto-destino">
+        <option value="">Sin afectar bolsillo</option>
+      </select>
+    </div>
+    <button class="form-submit" onclick="guardarMovCripto()">Registrar</button>
+    <button class="btn-ghost" onclick="closeModal('m-mov-cripto')">Cancelar</button>
+  </div>
+</div>
+
+<!-- MODAL MOV SIMPLE -->
+<div class="modal-overlay" id="m-mov-simple">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Movimiento</div>
+    <div class="tipo-toggle">
+      <div class="tipo-btn dep active" id="btn-sdep" onclick="setMovSimpleTipo('deposito')">↑ Depósito</div>
+      <div class="tipo-btn ret" id="btn-sret" onclick="setMovSimpleTipo('retiro')">↓ Retiro</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">MONTO ($)</label>
+      <input class="form-input" id="smov-monto" type="number" placeholder="$0.00">
+    </div>
+    <div class="form-group">
+      <label class="form-label">NOTA (OPCIONAL)</label>
+      <input class="form-input" id="smov-nota" placeholder="Descripción">
+    </div>
+    <div class="form-group">
+      <label class="form-label">FECHA</label>
+      <input class="form-input" id="smov-fecha" type="date">
+    </div>
+    <div class="form-group">
+      <label class="form-label">💼 ORIGEN (opcional)</label>
+      <select class="form-input" id="m-mov-simple-origen">
+        <option value="">Sin afectar bolsillo</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">💼 DESTINO (opcional)</label>
+      <select class="form-input" id="m-mov-simple-destino">
+        <option value="">Sin afectar bolsillo</option>
+      </select>
+    </div>
+    <button class="form-submit" onclick="guardarMovSimple()">Registrar</button>
+    <button class="btn-ghost" onclick="closeModal('m-mov-simple')">Cancelar</button>
+  </div>
+</div>
+
+<div id="save-indicator"></div>
+
+<script>
+let state = {criptos:{XRP:[],ORO:[],ATOM:[]}, inversiones:[]};
+let tabActual = 'todo';
+let criptoActiva = null;
+let invActivaId = null;
+let movTipo = 'deposito';
+let movSimpleTipo = 'deposito';
+let tipoNuevaInv = 'bitso';
+
+const fmt = v => '$'+v.toLocaleString('es-MX',{minimumFractionDigits:0,maximumFractionDigits:2});
+const fmtN = v => v.toLocaleString('es-MX',{minimumFractionDigits:0,maximumFractionDigits:4});
+
+function mostrarIndicador(ok) {
+  const el = document.getElementById('save-indicator');
+  el.style.background = ok ? 'var(--green)' : 'var(--red)';
+  el.style.color = ok ? '#000' : '#fff';
+  el.textContent = ok ? '✓ Guardado' : '⚠ Sin conexión';
+  el.style.opacity = '1';
+  setTimeout(()=>{ el.style.opacity='0'; }, 2000);
+}
+
+async function save() {
+  try { localStorage.setItem('inv_v1', JSON.stringify(state)); } catch(e){}
+  try {
+    const saldoTotal = calcularSaldoTotal();
+    const ri = await fetch('/api/state');
+    if(ri.ok) {
+      const si = await ri.json();
+      if(!si.modulos) si.modulos={};
+      si.modulos.inv = saldoTotal;
+      await fetch('/api/state',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(si)});
+    }
+    const r = await fetch('/api/state/inv',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(state)});
+    mostrarIndicador(r.ok);
+  } catch(e){ mostrarIndicador(false); }
+}
+
+async function load() {
+  try {
+    const r = await fetch('/api/state/inv');
+    if(r.ok){ const d=await r.json(); if(d&&d.criptos){ state=d; renderAll(); return; } }
+  } catch(e){}
+  try{ const d=localStorage.getItem('inv_v1'); if(d){ const p=JSON.parse(d); if(p.criptos) state=p; } } catch(e){}
+  renderAll();
+}
+
+function calcularCripto(nombre) {
+  const movs = state.criptos[nombre]||[];
+  let invertido=0, retirado=0, monedas=0, sumPrecio=0, cntDep=0;
+  movs.forEach(m=>{
+    if(m.tipo==='deposito'){
+      invertido += m.monto;
+      monedas += m.monedas||0;
+      sumPrecio += m.precio||0;
+      cntDep++;
+    } else {
+      retirado += m.monto;
+      monedas -= m.monedas||0;
+    }
+  });
+  return {invertido, retirado, monedas:Math.max(0,monedas), precioProm: cntDep>0?sumPrecio/cntDep:0, neto:invertido-retirado};
+}
+
+function calcularInvSimple(inv) {
+  const movs = inv.movimientos||[];
+  const totalDep = (inv.capitalInicial||0) + movs.filter(m=>m.tipo==='deposito').reduce((a,m)=>a+m.monto,0);
+  const totalRet = movs.filter(m=>m.tipo==='retiro').reduce((a,m)=>a+m.monto,0);
+  return {invertido:totalDep, retirado:totalRet, saldo:totalDep-totalRet};
+}
+
+function calcularSaldoTotal() {
+  let total = 0;
+  ['XRP','ORO','ATOM'].forEach(c=>{ total += calcularCripto(c).neto; });
+  (state.inversiones||[]).forEach(inv=>{ total += calcularInvSimple(inv).saldo; });
+  return total;
+}
+
+function renderAll() { renderStats(); renderLista(); }
+
+function renderStats() {
+  let totalInv=0, totalRet=0;
+  ['XRP','ORO','ATOM'].forEach(c=>{ const d=calcularCripto(c); totalInv+=d.invertido; totalRet+=d.retirado; });
+  (state.inversiones||[]).forEach(inv=>{ const d=calcularInvSimple(inv); totalInv+=d.invertido; totalRet+=d.retirado; });
+  const saldo = totalInv - totalRet;
+  document.getElementById('h-total-inv').textContent = fmt(totalInv);
+  document.getElementById('h-total-ret').textContent = fmt(totalRet);
+  document.getElementById('h-saldo-total').textContent = fmt(saldo);
+}
+
+function renderLista() {
+  const el = document.getElementById('inv-list');
+  let html = '';
+
+  if(tabActual==='todo'||tabActual==='bitso') {
+    html += `<div class="section-title" style="margin-bottom:12px">BITSO</div>`;
+    ['XRP','ORO','ATOM'].forEach(c=>{
+      const d = calcularCripto(c);
+      const clase = c.toLowerCase();
+      html += `<div class="cripto-card" onclick="abrirCripto('${c}')">
+        <div class="cripto-header">
+          <span class="cripto-badge ${clase}">${c}</span>
+          <span style="font-family:var(--mono);font-size:16px;font-weight:700;color:var(--gold)">${fmt(d.neto)}</span>
+        </div>
+        <div class="cripto-stats">
+          <div class="cripto-stat"><div class="cripto-stat-label">INVERTIDO</div><div class="cripto-stat-val" style="color:var(--gold)">${fmt(d.invertido)}</div></div>
+          <div class="cripto-stat"><div class="cripto-stat-label">MONEDAS</div><div class="cripto-stat-val" style="color:var(--blue)">${fmtN(d.monedas)}</div></div>
+          <div class="cripto-stat"><div class="cripto-stat-label">P. PROM</div><div class="cripto-stat-val">${fmt(d.precioProm)}</div></div>
+        </div>
+      </div>`;
+    });
+  }
+
+  if(tabActual==='todo'||tabActual==='simples') {
+    const invs = state.inversiones||[];
+    if(invs.length||tabActual==='simples') {
+      html += `<div class="section-title" style="margin:16px 0 12px">OTRAS INVERSIONES</div>`;
+      if(!invs.length) html += `<div style="text-align:center;padding:30px 0;color:var(--text2)">Sin inversiones<br>Toca + para agregar</div>`;
+      invs.forEach(inv=>{
+        const d = calcularInvSimple(inv);
+        html += `<div class="inv-card" onclick="abrirInvSimple(${inv.id})">
+          <button onclick="event.stopPropagation();eliminarInv(${inv.id})" style="position:absolute;top:10px;right:10px;background:rgba(255,77,109,0.1);border:1px solid rgba(255,77,109,0.2);color:var(--red);border-radius:8px;padding:4px 10px;font-size:12px;cursor:pointer">✕</button>
+          <div class="inv-nombre">${inv.nombre}</div>
+          <div class="inv-meta">${inv.fecha||''} ${inv.nota?'· '+inv.nota:''}</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
+            <div>
+              <div style="font-size:9px;color:var(--text2);letter-spacing:1px">SALDO</div>
+              <div class="inv-saldo">${fmt(d.saldo)}</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:9px;color:var(--text2);letter-spacing:1px">RETIRADO</div>
+              <div style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--red)">${fmt(d.retirado)}</div>
+            </div>
+          </div>
+        </div>`;
+      });
+    }
+  }
+
+  if(!html) html = `<div style="text-align:center;padding:60px 20px;color:var(--text2)"><div style="font-size:48px;margin-bottom:12px">📈</div><div>Sin inversiones aún</div></div>`;
+  el.innerHTML = html;
+}
+
+function cambiarTab(tab) {
+  tabActual = tab;
+  ['todo','bitso','simples'].forEach(t=>{ document.getElementById('tab-'+t).classList.toggle('active', t===tab); });
+  renderLista();
+}
+
+function abrirCripto(nombre) {
+  criptoActiva = nombre;
+  document.getElementById('cripto-titulo').textContent = nombre;
+  const d = calcularCripto(nombre);
+  document.getElementById('c-invertido').textContent = fmt(d.invertido);
+  document.getElementById('c-retirado').textContent = fmt(d.retirado);
+  document.getElementById('c-monedas').textContent = fmtN(d.monedas);
+  document.getElementById('c-precio-prom').textContent = fmt(d.precioProm);
+  document.getElementById('c-neto').textContent = fmt(d.neto);
+  renderMovsCripto();
+  mostrarScreen('s-cripto');
+}
+
+function renderMovsCripto() {
+  const movs = (state.criptos[criptoActiva]||[]).slice().reverse();
+  const el = document.getElementById('cripto-movs');
+  if(!movs.length){ el.innerHTML=`<div style="text-align:center;padding:40px 0;color:var(--text2)">Sin movimientos aún</div>`; return; }
+  el.innerHTML = movs.map(m=>`
+    <div class="mov-item">
+      <div class="mov-left">
+        <div class="mov-dot ${m.tipo==='retiro'?'retiro':''}"></div>
+        <div>
+          <div class="mov-info">${m.tipo==='deposito'?'Depósito':'Retiro'} · ${m.monedas?fmtN(m.monedas)+' monedas':''}</div>
+          <div class="mov-fecha">${m.fecha||''} ${m.precio?'· P: '+fmt(m.precio):''}</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="mov-monto ${m.tipo==='retiro'?'retiro':''}">${m.tipo==='retiro'?'-':'+'} ${fmt(m.monto)}</span>
+        <button onclick="eliminarMovCripto(${m.id})" style="background:none;border:none;color:var(--text2);font-size:14px;cursor:pointer">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+function abrirInvSimple(id) {
+  invActivaId = id;
+  const inv = state.inversiones.find(i=>i.id===id); if(!inv) return;
+  const d = calcularInvSimple(inv);
+  document.getElementById('inv-simple-titulo').textContent = inv.nombre;
+  document.getElementById('inv-simple-sub').textContent = fmt(d.saldo);
+  document.getElementById('s-invertido').textContent = fmt(d.invertido);
+  document.getElementById('s-retirado').textContent = fmt(d.retirado);
+  document.getElementById('s-saldo').textContent = fmt(d.saldo);
+  renderMovsSimple();
+  mostrarScreen('s-inv-simple');
+}
+
+function renderMovsSimple() {
+  const inv = state.inversiones.find(i=>i.id===invActivaId); if(!inv) return;
+  const movs = (inv.movimientos||[]).slice().reverse();
+  const el = document.getElementById('simple-movs');
+  if(!movs.length){ el.innerHTML=`<div style="text-align:center;padding:40px 0;color:var(--text2)">Sin movimientos aún</div>`; return; }
+  el.innerHTML = movs.map(m=>`
+    <div class="mov-item">
+      <div class="mov-left">
+        <div class="mov-dot ${m.tipo==='retiro'?'retiro':''}"></div>
+        <div>
+          <div class="mov-info">${m.tipo==='deposito'?'Depósito':'Retiro'}${m.nota?' · '+m.nota:''}</div>
+          <div class="mov-fecha">${m.fecha||''}</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="mov-monto ${m.tipo==='retiro'?'retiro':''}">${m.tipo==='retiro'?'-':'+'} ${fmt(m.monto)}</span>
+        <button onclick="eliminarMovSimple(${m.id})" style="background:none;border:none;color:var(--text2);font-size:14px;cursor:pointer">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+function mostrarScreen(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.getElementById('fab').style.display = id==='s-home'?'flex':'none';
+  window.scrollTo(0,0);
+}
+
+function volverHome() {
+  mostrarScreen('s-home');
+  criptoActiva = null; invActivaId = null;
+  renderAll();
+}
+
+function openModal(id) {
+  if(id==='m-mov-cripto') {
+    document.getElementById('m-mov-cripto-titulo').textContent = 'Movimiento · '+criptoActiva;
+    document.getElementById('mov-fecha').value = new Date().toISOString().split('T')[0];
+    setMovTipo('deposito');
+  }
+  if(id==='m-mov-simple') {
+    document.getElementById('smov-fecha').value = new Date().toISOString().split('T')[0];
+    setMovSimpleTipo('deposito');
+  }
+  document.getElementById(id).classList.add('open');
+  document.body.style.overflow='hidden';
+
+  const _bIds=['m-nueva-inv','m-mov-cripto','m-mov-simple'];
+  if(_bIds.includes(id)){ hf_llenarSelect(id+'-origen'); hf_llenarSelect(id+'-destino'); }
+}
+function closeModal(id){ document.getElementById(id).classList.remove('open'); document.body.style.overflow=''; }
+document.querySelectorAll('.modal-overlay').forEach(el=>{ el.addEventListener('click',e=>{ if(e.target===el) closeModal(el.id); }); });
+
+function abrirNuevaInv() {
+  document.getElementById('nueva-fecha-cripto').value = new Date().toISOString().split('T')[0];
+  document.getElementById('nueva-inv-fecha').value = new Date().toISOString().split('T')[0];
+  setTipoInv('bitso');
+  openModal('m-nueva-inv');
+}
+
+function setTipoInv(tipo) {
+  tipoNuevaInv = tipo;
+  document.getElementById('btn-bitso').classList.toggle('active', tipo==='bitso');
+  document.getElementById('btn-simple').classList.toggle('active', tipo==='simple');
+  document.getElementById('form-nueva-bitso').style.display = tipo==='bitso'?'block':'none';
+  document.getElementById('form-nueva-simple').style.display = tipo==='simple'?'block':'none';
+}
+
+function setMovTipo(tipo) {
+  movTipo = tipo;
+  document.getElementById('btn-dep').classList.toggle('active', tipo==='deposito');
+  document.getElementById('btn-ret').classList.toggle('active', tipo==='retiro');
+  document.getElementById('campos-deposito').style.display = tipo==='deposito'?'block':'none';
+}
+
+function setMovSimpleTipo(tipo) {
+  movSimpleTipo = tipo;
+  document.getElementById('btn-sdep').classList.toggle('active', tipo==='deposito');
+  document.getElementById('btn-sret').classList.toggle('active', tipo==='retiro');
+}
+
+async function guardarNuevaInv() {
+  if(tipoNuevaInv==='bitso') {
+    const cripto = document.getElementById('nueva-cripto').value;
+    const monto = parseFloat(document.getElementById('nueva-monto-cripto').value)||0;
+    const monedas = parseFloat(document.getElementById('nueva-monedas').value)||0;
+    const precio = parseFloat(document.getElementById('nueva-precio').value)||0;
+    const fecha = document.getElementById('nueva-fecha-cripto').value;
+    if(!monto) return alert('Ingresa el monto');
+    if(!state.criptos) state.criptos={XRP:[],ORO:[],ATOM:[]};
+    state.criptos[cripto].push({id:Date.now(), tipo:'deposito', monto, monedas, precio, fecha});
+  } else {
+    const nombre = document.getElementById('nueva-inv-nombre').value.trim();
+    const capital = parseFloat(document.getElementById('nueva-inv-capital').value)||0;
+    const fecha = document.getElementById('nueva-inv-fecha').value;
+    const nota = document.getElementById('nueva-inv-nota').value.trim();
+    if(!nombre||!capital) return alert('Completa los campos');
+    if(!state.inversiones) state.inversiones=[];
+    state.inversiones.push({id:Date.now(), nombre, capitalInicial:capital, fecha, nota, movimientos:[]});
+  }
+  await save(); closeModal('m-nueva-inv'); renderAll();
+
+  await hf_pedirBolsillo(monto, 'Nueva Inversión', fecha||new Date().toISOString().split('T')[0], ()=>{});
+
+  const _guardarNuevaInv_origen = document.getElementById('m-nueva-inv-origen')?.value;
+  const _guardarNuevaInv_destino = document.getElementById('m-nueva-inv-destino')?.value;
+  if(_guardarNuevaInv_origen) await hf_actualizarBolsillo(_guardarNuevaInv_origen, parseFloat(document.getElementById('inv-monto')?.value)||0, 'salida', 'Nueva inversión', document.getElementById('inv-fecha')?.value||new Date().toISOString().split('T')[0]);
+  if(_guardarNuevaInv_destino) await hf_actualizarBolsillo(_guardarNuevaInv_destino, parseFloat(document.getElementById('inv-monto')?.value)||0, 'entrada', 'Nueva inversión', document.getElementById('inv-fecha')?.value||new Date().toISOString().split('T')[0]);
+}
+
+async function guardarMovCripto() {
+  const monto = parseFloat(document.getElementById('mov-monto').value)||0;
+  if(!monto) return alert('Ingresa el monto');
+  const monedas = movTipo==='deposito'?parseFloat(document.getElementById('mov-monedas').value)||0:0;
+  const precio = movTipo==='deposito'?parseFloat(document.getElementById('mov-precio').value)||0:0;
+  const fecha = document.getElementById('mov-fecha').value;
+  state.criptos[criptoActiva].push({id:Date.now(), tipo:movTipo, monto, monedas, precio, fecha});
+  await save(); closeModal('m-mov-cripto'); abrirCripto(criptoActiva);
+
+  await hf_pedirBolsillo(monto, 'Movimiento Cripto', fecha||new Date().toISOString().split('T')[0], ()=>{});
+
+  const _guardarMovCripto_origen = document.getElementById('m-mov-cripto-origen')?.value;
+  const _guardarMovCripto_destino = document.getElementById('m-mov-cripto-destino')?.value;
+  if(_guardarMovCripto_origen) await hf_actualizarBolsillo(_guardarMovCripto_origen, parseFloat(document.getElementById('mc-monto')?.value)||0, 'salida', 'Movimiento cripto', document.getElementById('mc-fecha')?.value||new Date().toISOString().split('T')[0]);
+  if(_guardarMovCripto_destino) await hf_actualizarBolsillo(_guardarMovCripto_destino, parseFloat(document.getElementById('mc-monto')?.value)||0, 'entrada', 'Movimiento cripto', document.getElementById('mc-fecha')?.value||new Date().toISOString().split('T')[0]);
+}
+
+async function guardarMovSimple() {
+  const monto = parseFloat(document.getElementById('smov-monto').value)||0;
+  if(!monto) return alert('Ingresa el monto');
+  const nota = document.getElementById('smov-nota').value.trim();
+  const fecha = document.getElementById('smov-fecha').value;
+  const inv = state.inversiones.find(i=>i.id===invActivaId); if(!inv) return;
+  if(!inv.movimientos) inv.movimientos=[];
+  inv.movimientos.push({id:Date.now(), tipo:movSimpleTipo, monto, nota, fecha});
+  await save(); closeModal('m-mov-simple'); abrirInvSimple(invActivaId);
+
+  await hf_pedirBolsillo(monto, 'Movimiento Inversión', fecha||new Date().toISOString().split('T')[0], ()=>{});
+
+  const _guardarMovSimple_origen = document.getElementById('m-mov-simple-origen')?.value;
+  const _guardarMovSimple_destino = document.getElementById('m-mov-simple-destino')?.value;
+  if(_guardarMovSimple_origen) await hf_actualizarBolsillo(_guardarMovSimple_origen, parseFloat(document.getElementById('ms-monto')?.value)||0, 'salida', 'Movimiento inversión', document.getElementById('ms-fecha')?.value||new Date().toISOString().split('T')[0]);
+  if(_guardarMovSimple_destino) await hf_actualizarBolsillo(_guardarMovSimple_destino, parseFloat(document.getElementById('ms-monto')?.value)||0, 'entrada', 'Movimiento inversión', document.getElementById('ms-fecha')?.value||new Date().toISOString().split('T')[0]);
+}
+
+async function eliminarMovCripto(id) {
+  if(!confirm('¿Eliminar?')) return;
+  state.criptos[criptoActiva] = state.criptos[criptoActiva].filter(m=>m.id!==id);
+  await save(); abrirCripto(criptoActiva);
+}
+
+async function eliminarMovSimple(id) {
+  if(!confirm('¿Eliminar?')) return;
+  const inv = state.inversiones.find(i=>i.id===invActivaId); if(!inv) return;
+  inv.movimientos = inv.movimientos.filter(m=>m.id!==id);
+  await save(); abrirInvSimple(invActivaId);
+}
+
+async function eliminarInv(id) {
+  if(!confirm('¿Eliminar esta inversión?')) return;
+  state.inversiones = state.inversiones.filter(i=>i.id!==id);
+  await save(); renderAll();
+}
+
+const hoy = new Date().toISOString().split('T')[0];
+document.getElementById('nueva-fecha-cripto').value = hoy;
+document.getElementById('nueva-inv-fecha').value = hoy;
+load();
+</script>
+<script src="/static/bolsillos.js"></script>
+</body>
+</html>

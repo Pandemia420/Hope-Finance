@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>PrestaExpress</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --green:#00c896;--green2:#00a87e;--gold:#f0a500;
+  --red:#ff4d6d;--blue:#4d9fff;
+  --bg:#0a0e14;--bg2:#111620;--bg3:#1a2030;
+  --border:rgba(255,255,255,0.07);
+  --text:#f0f4ff;--text2:#6b7a99;
+  --mono:'JetBrains Mono',monospace;
+  --sans:'Syne',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;padding-bottom:80px}
+.header{position:sticky;top:0;z-index:100;background:rgba(10,14,20,0.95);backdrop-filter:blur(12px);padding:16px 20px 12px;border-bottom:1px solid var(--border)}
+.header-top{display:flex;justify-content:space-between;align-items:center}
+.back-btn{background:none;border:none;color:var(--text);font-size:22px;cursor:pointer;padding:0;margin-right:8px}
+.app-title{font-size:11px;letter-spacing:3px;color:var(--text2);font-weight:600}
+.header-titulo{display:flex;align-items:center}
+.btn-icon{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:10px;font-size:15px;cursor:pointer}
+
+/* STATS GRID */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:16px 20px}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:12px 14px}
+.stat-label{font-size:9px;letter-spacing:1.5px;color:var(--text2);font-weight:600;margin-bottom:4px}
+.stat-val{font-family:var(--mono);font-size:15px;font-weight:700}
+
+/* GASTOS BTN */
+.gastos-bar{margin:0 20px 16px;display:flex;gap:8px}
+.btn-gasto{flex:1;background:rgba(255,77,109,0.1);border:1px solid rgba(255,77,109,0.2);color:var(--red);border-radius:12px;padding:10px;font-family:var(--sans);font-weight:700;font-size:13px;cursor:pointer}
+.btn-gasto-ver{flex:1;background:var(--bg2);border:1px solid var(--border);color:var(--text2);border-radius:12px;padding:10px;font-family:var(--sans);font-size:13px;cursor:pointer}
+
+/* SEARCH */
+.search-wrap{position:relative;padding:0 20px 12px}
+.search-ico{position:absolute;left:34px;top:50%;transform:translateY(-60%);color:var(--text2);pointer-events:none}
+.search-input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:11px 16px 11px 40px;color:var(--text);font-family:var(--sans);font-size:14px;outline:none}
+.search-input::placeholder{color:var(--text2)}
+
+.section{padding:0 20px}
+.section-title{font-size:10px;letter-spacing:2px;color:var(--text2);font-weight:600;margin-bottom:12px}
+
+/* CLIENTE CARD */
+.cliente-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:10px;cursor:pointer;border-left:3px solid var(--green)}
+.cliente-card:active{transform:scale(0.99)}
+.cliente-row{display:flex;justify-content:space-between;align-items:center}
+.cliente-avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--blue));display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#000;font-family:var(--mono);flex-shrink:0}
+.cliente-info{display:flex;align-items:center;gap:12px}
+.cliente-nombre{font-size:15px;font-weight:700}
+.cliente-meta{font-size:11px;color:var(--text2);margin-top:2px}
+.cliente-saldo{font-family:var(--mono);font-size:16px;font-weight:700;color:var(--green)}
+.cliente-count{font-size:10px;color:var(--text2);margin-top:2px;text-align:right}
+.empty-state{text-align:center;padding:60px 20px;color:var(--text2)}
+.empty-ico{font-size:48px;margin-bottom:12px}
+
+/* PANTALLA CLIENTE */
+.screen{display:none}
+.screen.active{display:block}
+.back-bar{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(10,14,20,0.95);backdrop-filter:blur(12px);z-index:99}
+.back-title{font-size:16px;font-weight:700}
+.back-sub{font-size:11px;color:var(--text2)}
+.cliente-header-card{margin:16px 20px;background:linear-gradient(135deg,rgba(0,200,150,0.08),rgba(77,159,255,0.04));border:1px solid rgba(0,200,150,0.2);border-radius:20px;padding:20px}
+.cliente-header-top{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+.cliente-avatar-big{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--blue));display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;color:#000;font-family:var(--mono);flex-shrink:0}
+.cliente-header-name{font-size:20px;font-weight:800}
+.cliente-header-tel{font-size:12px;color:var(--text2);margin-top:2px}
+.stats-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat-box{background:rgba(0,0,0,0.3);border-radius:12px;padding:12px;border:1px solid var(--border)}
+.stat-box-label{font-size:9px;letter-spacing:1.5px;color:var(--text2);font-weight:600;margin-bottom:4px}
+.stat-box-val{font-family:var(--mono);font-size:15px;font-weight:700}
+
+/* PRESTAMO CARD */
+.prestamo-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;margin:0 20px 10px;overflow:hidden}
+.prestamo-header{padding:14px 16px;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+.prestamo-badge{font-size:10px;padding:3px 8px;border-radius:6px;font-weight:600}
+.prestamo-badge.activo{background:rgba(0,200,150,0.15);color:var(--green)}
+.prestamo-badge.pagado{background:rgba(107,122,153,0.2);color:var(--text2)}
+.prestamo-monto{font-family:var(--mono);font-size:18px;font-weight:700}
+.prestamo-info{font-size:11px;color:var(--text2);margin-top:2px}
+.prestamo-body{border-top:1px solid var(--border);padding:14px 16px}
+.prog-label{display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-bottom:6px}
+.prog-bar{height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-bottom:14px}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--blue));border-radius:3px}
+.detalles-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.detalle-item{background:var(--bg3);border-radius:10px;padding:10px}
+.detalle-label{font-size:9px;color:var(--text2);letter-spacing:1px;margin-bottom:3px}
+.detalle-val{font-family:var(--mono);font-size:13px;font-weight:600}
+.abonos-title{font-size:10px;letter-spacing:2px;color:var(--text2);margin-bottom:8px}
+.abono-item{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--bg3);border-radius:10px;margin-bottom:6px}
+.abono-left{display:flex;align-items:center;gap:10px}
+.abono-dot{width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0}
+.abono-concepto{font-size:13px;font-weight:600}
+.abono-fecha{font-size:10px;color:var(--text2)}
+.prestamo-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.btn-abono{flex:1;background:var(--green);color:#000;border:none;border-radius:10px;padding:11px;font-family:var(--sans);font-weight:700;font-size:13px;cursor:pointer}
+.btn-wha{background:rgba(37,211,102,0.15);color:#25d366;border:1px solid rgba(37,211,102,0.3);border-radius:10px;padding:11px 14px;font-size:16px;cursor:pointer}
+.btn-del{background:rgba(255,77,109,0.1);color:var(--red);border:1px solid rgba(255,77,109,0.2);border-radius:10px;padding:11px 14px;font-size:12px;cursor:pointer;font-family:var(--sans);font-weight:600}
+
+/* FAB */
+.fab{position:fixed;bottom:24px;right:20px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--green2));border:none;color:#000;font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,200,150,0.4);z-index:50}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:200;display:none;align-items:flex-end}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg2);border-radius:24px 24px 0 0;width:100%;padding:24px 20px 40px;border-top:1px solid var(--border);max-height:90vh;overflow-y:auto;animation:slideUp 0.25s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 20px}
+.modal-title{font-size:18px;font-weight:800;margin-bottom:20px}
+.form-group{margin-bottom:16px}
+.form-label{font-size:11px;letter-spacing:1.5px;color:var(--text2);font-weight:600;margin-bottom:8px;display:block}
+.form-input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:13px 16px;color:var(--text);font-family:var(--sans);font-size:15px;outline:none}
+.form-input:focus{border-color:var(--green)}
+.form-input::placeholder{color:var(--text2)}
+select.form-input{appearance:none}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-submit{width:100%;background:var(--green);color:#000;border:none;border-radius:14px;padding:15px;font-family:var(--sans);font-weight:800;font-size:16px;cursor:pointer;margin-top:8px}
+.btn-ghost{width:100%;background:transparent;color:var(--text2);border:1px solid var(--border);border-radius:12px;padding:12px;font-family:var(--sans);font-size:14px;cursor:pointer;margin-top:8px}
+.hist-section{background:var(--bg3);border-radius:12px;padding:14px;margin-bottom:16px}
+.hist-title{font-size:10px;letter-spacing:2px;color:var(--text2);font-weight:600;margin-bottom:12px}
+#save-indicator{position:fixed;bottom:88px;right:16px;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:600;z-index:999;opacity:0;transition:opacity 0.3s;pointer-events:none}
+</style>
+</head>
+<body>
+
+<!-- PANTALLA LISTA -->
+<div id="s-home" class="screen active">
+  <div class="header">
+    <div class="header-top">
+      <div class="header-titulo">
+        <button class="back-btn" onclick="location.href='/'">←</button>
+        <div>
+          <div class="app-title">HOPE FINANCE</div>
+          <div style="font-size:16px;font-weight:800">PrestaExpress</div>
+        </div>
+      </div>
+      <button class="btn-icon" onclick="openModal('m-cliente')">👤+</button>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">TOTAL PRESTADO</div>
+      <div class="stat-val" id="h-total-prestado">$0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">TOTAL PAGADO</div>
+      <div class="stat-val" style="color:var(--blue)" id="h-total-pagado">$0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">CAPITAL ACTIVO</div>
+      <div class="stat-val" style="color:var(--green)" id="h-capital-activo">$0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">INT. X COBRAR</div>
+      <div class="stat-val" style="color:var(--gold)" id="h-int-xcobrar">$0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">INT. COBRADOS</div>
+      <div class="stat-val" style="color:var(--green)" id="h-int-cobrados">$0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">DIFERENCIA</div>
+      <div class="stat-val" id="h-diferencia">$0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">GASTOS</div>
+      <div class="stat-val" style="color:var(--red)" id="h-gastos">$0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">UTILIDAD</div>
+      <div class="stat-val" id="h-utilidad">$0</div>
+    </div>
+  </div>
+
+  <div class="gastos-bar">
+    <button class="btn-gasto" onclick="openModal('m-gasto')">+ Registrar Gasto</button>
+    <button class="btn-gasto-ver" onclick="verGastos()">Ver Gastos</button>
+  </div>
+
+  <div class="search-wrap">
+    <span class="search-ico">🔍</span>
+    <input class="search-input" placeholder="Buscar cliente..." id="search-input" oninput="renderLista(this.value)">
+  </div>
+
+  <div class="section">
+    <div class="section-title">CLIENTES</div>
+    <div id="clientes-list"></div>
+  </div>
+</div>
+
+<!-- PANTALLA CLIENTE -->
+<div id="s-cliente" class="screen">
+  <div class="back-bar">
+    <button class="back-btn" onclick="volverLista()">←</button>
+    <div>
+      <div class="back-title" id="c-back-nombre">Cliente</div>
+      <div class="back-sub" id="c-back-sub">PrestaExpress</div>
+    </div>
+    <div style="margin-left:auto;display:flex;gap:8px">
+      <button class="btn-icon" onclick="abrirNuevoPrestamo()">+💰</button>
+      <button class="btn-icon" onclick="verEstadoCuenta()" title="Estado de cuenta">📋</button>
+      <button class="btn-icon" onclick="editarCliente()">✏️</button>
+    </div>
+  </div>
+
+  <div class="cliente-header-card">
+    <div class="cliente-header-top">
+      <div class="cliente-avatar-big" id="c-avatar">J</div>
+      <div>
+        <div class="cliente-header-name" id="c-nombre-big">Nombre</div>
+        <div class="cliente-header-tel" id="c-tel-big">Sin teléfono</div>
+      </div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-box"><div class="stat-box-label">CAPITAL</div><div class="stat-box-val" id="c-capital" style="color:var(--text)">$0</div></div>
+      <div class="stat-box"><div class="stat-box-label">DEUDA</div><div class="stat-box-val" id="c-deuda" style="color:var(--red)">$0</div></div>
+      <div class="stat-box"><div class="stat-box-label">INT. X COBRAR</div><div class="stat-box-val" id="c-int-xcobrar" style="color:var(--gold)">$0</div></div>
+      <div class="stat-box"><div class="stat-box-label">INT. COBRADOS</div><div class="stat-box-val" id="c-int-cobrados" style="color:var(--green)">$0</div></div>
+      <div class="stat-box"><div class="stat-box-label">TOTAL PAGADO</div><div class="stat-box-val" id="c-total-pagado" style="color:var(--blue)">$0</div></div>
+      <div class="stat-box"><div class="stat-box-label">DIFERENCIA</div><div class="stat-box-val" id="c-diferencia">$0</div></div>
+      <div class="stat-box" style="grid-column:span 2;background:rgba(255,77,109,0.08);border-color:rgba(255,77,109,0.2)"><div class="stat-box-label">PENDIENTE POR PAGAR</div><div class="stat-box-val" id="c-pendiente" style="color:var(--red);font-size:20px">$0</div></div>
+    </div>
+  </div>
+
+  <img id="c-ine-img" src="" style="display:none;width:calc(100% - 40px);margin:0 20px 16px;border-radius:16px;max-height:200px;object-fit:cover;border:1px solid var(--border)">
+  <div style="padding:0 20px 8px"><div class="section-title">PRÉSTAMOS</div></div>
+  <div id="prestamos-list"></div>
+  <div style="height:80px"></div>
+</div>
+
+<button class="fab" id="fab" onclick="openModal('m-cliente')">＋</button>
+
+<!-- MODAL CLIENTE -->
+<div class="modal-overlay" id="m-cliente">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="m-cliente-titulo">Nuevo Cliente</div>
+    <div class="form-group">
+      <label class="form-label">NOMBRE</label>
+      <input class="form-input" id="c-nombre" placeholder="Nombre completo">
+    </div>
+    <div class="form-group">
+      <label class="form-label">TELÉFONO</label>
+      <input class="form-input" id="c-tel" placeholder="10 dígitos" type="tel">
+    </div>
+    <div class="form-group">
+      <label class="form-label">NOTA</label>
+      <input class="form-input" id="c-nota" placeholder="Referencia opcional">
+    </div>
+    <div class="form-group">
+      <label class="form-label">IDENTIFICACIÓN (FOTO)</label>
+      <input type="file" accept="image/*" id="c-ine" onchange="previewINE(this)" style="display:none">
+      <div onclick="document.getElementById('c-ine').click()" style="background:var(--bg3);border:1px dashed var(--border);border-radius:12px;padding:16px;text-align:center;cursor:pointer;color:var(--text2);font-size:13px">
+        📷 Toca para subir foto de INE
+      </div>
+      <img id="c-ine-preview" src="" style="display:none;width:100%;border-radius:12px;margin-top:10px;max-height:180px;object-fit:cover">
+    </div>
+    <div class="hist-section">
+      <div class="hist-title">HISTORIAL PREVIO (DE TU CUADERNO)</div>
+      <div class="form-group">
+        <label class="form-label">TOTAL PRESTADO HISTÓRICO</label>
+        <input class="form-input" id="c-hist-prestado" placeholder="$0.00" type="number">
+      </div>
+      <div class="form-group">
+        <label class="form-label">TOTAL PAGADO HISTÓRICO</label>
+        <input class="form-input" id="c-hist-pagado" placeholder="$0.00" type="number">
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">INTERESES PAGADOS HISTÓRICOS</label>
+        <input class="form-input" id="c-hist-intereses" placeholder="$0.00" type="number">
+      </div>
+    </div>
+    <button class="form-submit" onclick="guardarCliente()">Guardar</button>
+    <button class="btn-ghost" onclick="closeModal('m-cliente')">Cancelar</button>
+  </div>
+</div>
+
+<!-- MODAL PRÉSTAMO -->
+<div class="modal-overlay" id="m-prestamo">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Nuevo Préstamo</div>
+    <div class="form-group">
+      <label class="form-label">MONTO (CAPITAL)</label>
+      <input class="form-input" id="p-monto" placeholder="$0.00" type="number">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">INTERÉS %</label>
+        <input class="form-input" id="p-interes" placeholder="Ej. 10" type="number">
+      </div>
+      <div class="form-group">
+        <label class="form-label">MODALIDAD</label>
+        <select class="form-input" id="p-modalidad">
+          <option value="semanal">Semanal</option>
+          <option value="quincenal">Quincenal</option>
+          <option value="mensual">Mensual</option>
+          <option value="trimestral">Trimestral</option>
+          <option value="cuatrimestral">Cuatrimestral</option>
+          <option value="semestral">Semestral</option>
+          <option value="ochomestral">Ochomestral</option>
+          <option value="anual">Anual</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">FECHA INICIO</label>
+        <input class="form-input" id="p-fecha" type="date">
+      </div>
+      <div class="form-group">
+        <label class="form-label">FECHA LÍMITE</label>
+        <input class="form-input" id="p-fecha-limite" type="date">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">NOTA</label>
+      <input class="form-input" id="p-nota" placeholder="Para qué es">
+    </div>
+    <div class="form-group">
+      <label class="form-label">💼 ORIGEN (opcional)</label>
+      <select class="form-input" id="m-prestamo-origen">
+        <option value="">Sin afectar bolsillo</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">💼 DESTINO (opcional)</label>
+      <select class="form-input" id="m-prestamo-destino">
+        <option value="">Sin afectar bolsillo</option>
+      </select>
+    </div>
+    <button class="form-submit" onclick="guardarPrestamo()">Registrar</button>
+    <button class="btn-ghost" onclick="closeModal('m-prestamo')">Cancelar</button>
+  </div>
+</div>
+
+<!-- MODAL ABONO -->
+<div class="modal-overlay" id="m-abono">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Registrar Abono</div>
+    <div id="abono-resumen" style="background:var(--bg3);border-radius:12px;padding:14px;margin-bottom:16px;font-size:13px;color:var(--text2)"></div>
+    <div class="form-group">
+      <label class="form-label">MONTO TOTAL</label>
+      <input class="form-input" id="a-monto" placeholder="$0.00" type="number">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">CAPITAL</label>
+        <input class="form-input" id="a-capital" placeholder="$0.00" type="number">
+      </div>
+      <div class="form-group">
+        <label class="form-label">INTERÉS</label>
+        <input class="form-input" id="a-interes" placeholder="$0.00" type="number">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">FECHA</label>
+      <input class="form-input" id="a-fecha" type="date">
+    </div>
+    <div class="form-group">
+      <label class="form-label">NOTA</label>
+      <input class="form-input" id="a-nota" placeholder="Referencia">
+    </div>
+    <div class="form-group">
+      <label class="form-label">💼 ORIGEN (opcional)</label>
+      <select class="form-input" id="m-abono-origen">
+        <option value="">Sin afectar bolsillo</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">💼 DESTINO (opcional)</label>
+      <select class="form-input" id="m-abono-destino">
+        <option value="">Sin afectar bolsillo</option>
+      </select>
+    </div>
+    <button class="form-submit" onclick="guardarAbono()">Registrar</button>
+    <button class="btn-ghost" onclick="closeModal('m-abono')">Cancelar</button>
+  </div>
+</div>
+
+<!-- MODAL VER GASTOS -->
+<div class="modal-overlay" id="m-ver-gastos">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Gastos</div>
+    <div id="gastos-lista"></div>
+    <button class="btn-ghost" onclick="closeModal('m-ver-gastos')">Cerrar</button>
+  </div>
+</div>
+
+<!-- MODAL VER GASTOS -->
+<div class="modal-overlay" id="m-ver-gastos">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Gastos</div>
+    <div id="gastos-lista"></div>
+    <button class="btn-ghost" onclick="closeModal('m-ver-gastos')">Cerrar</button>
+  </div>
+</div>
+
+<!-- MODAL GASTO -->
+<div class="modal-overlay" id="m-gasto">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Registrar Gasto</div>
+    <div class="form-group">
+      <label class="form-label">CONCEPTO</label>
+      <input class="form-input" id="g-concepto" placeholder="Descripción del gasto">
+    </div>
+    <div class="form-group">
+      <label class="form-label">MONTO</label>
+      <input class="form-input" id="g-monto" placeholder="$0.00" type="number">
+    </div>
+    <div class="form-group">
+      <label class="form-label">FECHA</label>
+      <input class="form-input" id="g-fecha" type="date">
+    </div>
+    <div class="form-group">
+      <label class="form-label">💼 ORIGEN (opcional)</label>
+      <select class="form-input" id="m-gasto-origen">
+        <option value="">Sin afectar bolsillo</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">💼 DESTINO (opcional)</label>
+      <select class="form-input" id="m-gasto-destino">
+        <option value="">Sin afectar bolsillo</option>
+      </select>
+    </div>
+    <button class="form-submit" onclick="guardarGasto()">Guardar</button>
+    <button class="btn-ghost" onclick="closeModal('m-gasto')">Cancelar</button>
+  </div>
+</div>
+
+<div id="save-indicator"></div>
+
+<script>
+let state = {clientes:[], gastos:[]};
+let clienteActivoId = null;
+let prestamoActivoId = null;
+let editClienteId = null;
+
+function mostrarIndicador(ok) {
+  const el = document.getElementById('save-indicator');
+  el.style.background = ok ? 'var(--green)' : 'var(--red)';
+  el.style.color = ok ? '#000' : '#fff';
+  el.textContent = ok ? '✓ Guardado' : '⚠ Sin conexión';
+  el.style.opacity = '1';
+  setTimeout(()=>{ el.style.opacity='0'; }, 2000);
+}
+
+let prestamoRenovarId = null;
+
+function renovarPrestamo(pid) {
+  let prestamo = null, cliente = null;
+  for(const c of state.clientes) {
+    const p = c.prestamos.find(p=>p.id===pid);
+    if(p) { prestamo=p; cliente=c; break; }
+  }
+  if(!prestamo) return;
+  prestamoRenovarId = pid;
+  const interes = prestamo.monto * (prestamo.interes||0) / 100;
+  const fmt = v => '$'+v.toLocaleString('es-MX');
+  document.getElementById('renovar-info').innerHTML = `
+    <div style="margin-bottom:6px"><b>${cliente.nombre}</b></div>
+    <div>Capital: <b style="color:var(--text)">${fmt(prestamo.monto)}</b></div>
+    <div>Interés sugerido: <b style="color:var(--gold)">${fmt(interes)}</b> (${prestamo.interes}%)</div>
+    <div>Modalidad: <b style="color:var(--text)">${prestamo.modalidad}</b></div>
+    <div style="margin-top:6px;font-size:11px">El capital quedará igual y se generará un nuevo período</div>`;
+  document.getElementById('renovar-monto').value = (prestamo.monto*(prestamo.interes||0)/100).toFixed(0);
+  document.getElementById('renovar-fecha').value = new Date().toISOString().split('T')[0];
+  document.getElementById('renovar-nota').value = '';
+  openModal('m-renovar');
+}
+
+async function confirmarRenovacion() {
+  const monto = parseFloat(document.getElementById('renovar-monto').value)||0;
+  const fecha = document.getElementById('renovar-fecha').value;
+  const nota = document.getElementById('renovar-nota').value.trim();
+  if(!monto) return alert('Ingresa el monto de interés');
+  let prestamo = null;
+  for(const c of state.clientes) {
+    const p = c.prestamos.find(p=>p.id===prestamoRenovarId);
+    if(p) { prestamo=p; break; }
+  }
+  if(!prestamo) return;
+  // Calcular nueva fecha límite
+  const fechaInicio = new Date(fecha);
+  let nuevaFechaLimite = new Date(fechaInicio);
+  if(prestamo.modalidad==='semanal') nuevaFechaLimite.setDate(fechaInicio.getDate()+7);
+  else if(prestamo.modalidad==='quincenal') nuevaFechaLimite.setDate(fechaInicio.getDate()+15);
+  else nuevaFechaLimite.setMonth(fechaInicio.getMonth()+1);
+  // Registrar pago de intereses como abono especial
+  const interes = monto;
+  if(!prestamo.abonos) prestamo.abonos=[];
+  prestamo.abonos.push({
+    id: Date.now(),
+    fecha,
+    tipo: 'renovacion',
+    interes,
+    capital: 0,
+    total: interes,
+    nota: nota || 'Renovación — solo intereses'
+  });
+  // Actualizar fechas
+  prestamo.fecha = fecha;
+  prestamo.fechaLimite = nuevaFechaLimite.toISOString().split('T')[0];
+  // Registrar en historial
+  if(!prestamo.historial) prestamo.historial=[];
+  prestamo.historial.push({
+    tipo:'renovacion',
+    fecha,
+    nota: nota||'Renovación'
+  });
+  await save();
+  closeModal('m-renovar');
+  renderAll();
+  alert('✅ Préstamo renovado hasta '+prestamo.fechaLimite);
+
+  const _confirmarRenovacion_origen = document.getElementById('m-renovar-origen')?.value;
+  const _confirmarRenovacion_destino = document.getElementById('m-renovar-destino')?.value;
+  const _movs_ren=[]; if(_confirmarRenovacion_origen) _movs_ren.push({id:_confirmarRenovacion_origen,monto,tipo:'salida',concepto:'Renovación préstamo',fecha}); if(_confirmarRenovacion_destino) _movs_ren.push({id:_confirmarRenovacion_destino,monto,tipo:'entrada',concepto:'Renovación préstamo',fecha}); if(_movs_ren.length) await hf_actualizarBolsillos(_movs_ren);
+}
+
+async function save() {
+  try { localStorage.setItem('pexpress_v2', JSON.stringify(state)); } catch(e){}
+  try {
+    // Sincronizar con interfaz
+    const t = calcularTotales();
+    const ri = await fetch('/api/state');
+    if(ri.ok) {
+      const si = await ri.json();
+      if(!si.modulos) si.modulos = {};
+      si.modulos.prest = t.capitalActivo;
+      si.modulos.prest_utilidad = t.utilidad;
+
+      await fetch('/api/state', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(si)});
+    }
+    // Guardar state de prestaexpress en su propia key
+    const r = await fetch('/api/state/pexpress', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(state)});
+    mostrarIndicador(r.ok);
+  } catch(e){ mostrarIndicador(false); }
+}
+
+async function load() {
+  try {
+    const r = await fetch('/api/state/pexpress');
+    if(r.ok){ const d=await r.json(); if(d&&d.clientes){ state=d; renderAll(); return; } }
+  } catch(e){}
+  try{ const d=localStorage.getItem('pexpress_v2'); if(d){ const p=JSON.parse(d); if(p.clientes) state=p; } } catch(e){}
+  renderAll();
+}
+
+
+
+// ── CÁLCULOS GLOBALES ──
+function calcularTotales() {
+  let totalPrestado=0, totalPagado=0, capitalActivo=0, intXCobrar=0, intCobrados=0;
+
+  state.clientes.forEach(c => {
+    // Histórico del cuaderno
+    totalPrestado += c.histPrestado||0;
+    totalPagado   += c.histPagado||0;
+    intCobrados   += c.histIntereses||0;
+
+    (c.prestamos||[]).forEach(p => {
+      totalPrestado += p.monto;
+      const capAb = (p.abonos||[]).reduce((a,ab)=>a+ab.capital,0);
+      const intAb = (p.abonos||[]).reduce((a,ab)=>a+(ab.interes||0),0);
+      totalPagado += capAb + intAb;
+      intCobrados += intAb;
+      if(!p.pagado){
+        capitalActivo += Math.max(0, p.monto - capAb);
+        intXCobrar    += p.monto * (p.interes||0) / 100;
+      }
+    });
+  });
+
+  const totalGastos = (state.gastos||[]).reduce((a,g)=>a+g.monto,0);
+  const diferencia  = totalPagado - totalPrestado;
+  const utilidad    = intCobrados - totalGastos;
+
+  return {totalPrestado, totalPagado, capitalActivo, intXCobrar, intCobrados, totalGastos, diferencia, utilidad};
+}
+
+function renderAll() { renderStats(); renderLista(); if(clienteActivoId) renderCliente(clienteActivoId); }
+
+function renderStats() {
+  const t = calcularTotales();
+  const fmt = v => '$'+v.toLocaleString('es-MX',{minimumFractionDigits:0});
+  document.getElementById('h-total-prestado').textContent  = fmt(t.totalPrestado);
+  document.getElementById('h-total-pagado').textContent    = fmt(t.totalPagado);
+  document.getElementById('h-capital-activo').textContent  = fmt(t.capitalActivo);
+  document.getElementById('h-int-xcobrar').textContent     = fmt(t.intXCobrar);
+  document.getElementById('h-int-cobrados').textContent    = fmt(t.intCobrados);
+  document.getElementById('h-gastos').textContent          = fmt(t.totalGastos);
+  const difEl = document.getElementById('h-diferencia');
+  difEl.textContent = (t.diferencia>=0?'+':'')+fmt(t.diferencia);
+  difEl.style.color = t.diferencia>=0 ? 'var(--green)' : 'var(--red)';
+  const utEl = document.getElementById('h-utilidad');
+  utEl.textContent = (t.utilidad>=0?'+':'')+fmt(t.utilidad);
+  utEl.style.color = t.utilidad>=0 ? 'var(--green)' : 'var(--red)';
+}
+
+function renderLista(filtro='') { try {
+  const lista = state.clientes.filter(c=>!filtro||c.nombre.toLowerCase().includes(filtro.toLowerCase()));
+  const el = document.getElementById('clientes-list');
+  if(!lista.length){ el.innerHTML=`<div class="empty-state"><div class="empty-ico">💰</div><div>${filtro?'Sin resultados':'Toca + para agregar tu primer cliente'}</div></div>`; return; }
+  el.innerHTML = lista.map(c => {
+    const activos = (c.prestamos||[]).filter(p=>!p.pagado);
+    let saldo=0;
+    activos.forEach(p=>{ const ab=(p.abonos||[]).reduce((a,ab)=>a+ab.capital,0); saldo+=Math.max(0,p.monto-ab); });
+    return `<div class="cliente-card" style="position:relative" onclick="abrirCliente(${c.id})">
+      <button onclick="event.stopPropagation();eliminarCliente(${c.id})" style="position:absolute;top:10px;right:10px;background:rgba(255,77,109,0.1);border:1px solid rgba(255,77,109,0.2);color:var(--red);border-radius:8px;padding:4px 10px;font-size:12px;cursor:pointer;font-family:var(--sans);font-weight:600">✕</button>
+      <div class="cliente-row">
+        <div class="cliente-info">
+          <div class="cliente-avatar">${c.nombre.charAt(0).toUpperCase()}</div>
+          <div>
+            <div class="cliente-nombre">${c.nombre}</div>
+            <div class="cliente-meta">${c.tel||'Sin teléfono'}${c.nota?' · '+c.nota:''}</div>
+          </div>
+        </div>
+        <div>
+          <div class="cliente-saldo">$${saldo.toLocaleString('es-MX',{minimumFractionDigits:0})}</div>
+          <div class="cliente-count">${activos.length} activo${activos.length!==1?'s':''}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join(''); } catch(e){ alert('Error renderLista: '+e.message); }
+}
+
+function renderCliente(id) {
+  const c = state.clientes.find(c=>c.id===id); if(!c) return;
+  document.getElementById('c-back-nombre').textContent = c.nombre;
+  document.getElementById('c-back-sub').textContent = c.tel||'PrestaExpress';
+  document.getElementById('c-avatar').textContent = c.nombre.charAt(0).toUpperCase();
+  document.getElementById('c-nombre-big').textContent = c.nombre;
+  document.getElementById('c-tel-big').textContent = c.tel||'Sin teléfono';
+  const ineEl = document.getElementById('c-ine-img');
+  if(ineEl){ ineEl.src = c.ine||''; ineEl.style.display = c.ine ? 'block' : 'none'; }
+
+  let capital=0, deuda=0, intXCobrar=0, intCobrados=0, totalPagado=0;
+  capital     += c.histPrestado||0;
+  totalPagado += c.histPagado||0;
+  intCobrados += c.histIntereses||0;
+
+  (c.prestamos||[]).forEach(p => {
+    capital += p.monto;
+    const capAb = (p.abonos||[]).reduce((a,ab)=>a+ab.capital,0);
+    const intAb = (p.abonos||[]).reduce((a,ab)=>a+(ab.interes||0),0);
+    totalPagado += capAb + intAb;
+    intCobrados += intAb;
+    if(!p.pagado){ deuda += Math.max(0,p.monto-capAb); intXCobrar += Math.max(0, p.monto*(p.interes||0)/100 - intAb); }
+  });
+
+  const diferencia = (totalPagado + intCobrados) - capital;
+  // Pendiente = suma de (capital+interés de cada préstamo activo) - todo lo pagado
+  let totalConInteres = 0;
+  (c.prestamos||[]).filter(p=>!p.pagado).forEach(p => {
+    totalConInteres += p.monto * (1 + (p.interes||0)/100);
+  });
+  const totalPagadoActivos = (c.prestamos||[]).filter(p=>!p.pagado).reduce((a,p)=>{
+    return a + (p.abonos||[]).filter(ab=>ab.tipo!=='renovacion').reduce((b,ab)=>b+(ab.total??ab.monto??0),0);
+  },0);
+  const pendiente = Math.max(0, totalConInteres - totalPagadoActivos);
+  const fmt = v => '$'+v.toLocaleString('es-MX',{minimumFractionDigits:0});
+  document.getElementById('c-capital').textContent      = fmt(capital);
+  document.getElementById('c-deuda').textContent        = fmt(deuda);
+  document.getElementById('c-int-xcobrar').textContent  = fmt(intXCobrar);
+  document.getElementById('c-int-cobrados').textContent = fmt(intCobrados);
+  document.getElementById('c-total-pagado').textContent = fmt(totalPagado);
+  document.getElementById('c-pendiente').textContent    = fmt(pendiente);
+  const difEl = document.getElementById('c-diferencia');
+  difEl.textContent = (diferencia>=0?'+':'')+fmt(diferencia);
+  difEl.style.color = diferencia>=0 ? 'var(--green)' : 'var(--red)';
+
+  const el = document.getElementById('prestamos-list');
+  const prestamos = c.prestamos||[];
+  if(!prestamos.length){ el.innerHTML=`<div class="empty-state"><div class="empty-ico">📋</div><div>Sin préstamos<br>Toca +💰 para registrar uno</div></div>`; return; }
+
+  el.innerHTML = prestamos.slice().reverse().map(p => {
+    const abonos = p.abonos||[];
+    const capAb  = abonos.reduce((a,ab)=>a+ab.capital,0);
+    const intAb  = abonos.reduce((a,ab)=>a+(ab.interes||0),0);
+    const saldo  = Math.max(0, p.monto-capAb);
+    const pct    = Math.min(100,(capAb/p.monto)*100);
+    const conInt = p.monto*(1+(p.interes||0)/100);
+    return `<div class="prestamo-card">
+      <div class="prestamo-header" onclick="togglePrestamo(${p.id})">
+        <div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+            <span class="prestamo-monto">$${p.monto.toLocaleString()}</span>
+            <span class="prestamo-badge ${p.pagado?'pagado':'activo'}">${p.pagado?'Pagado':'Activo'}</span>
+          </div>
+          <div class="prestamo-info">${p.interes||0}% ${p.modalidad||'mensual'} · ${p.fecha||''}${p.fechaLimite?' → '+p.fechaLimite:''}${p.nota?' · '+p.nota:''}</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-family:var(--mono);font-size:14px;font-weight:700;color:${p.pagado?'var(--text2)':'var(--red)'}">$${saldo.toLocaleString()}</div>
+          <div style="font-size:10px;color:var(--text2)">pendiente</div>
+        </div>
+      </div>
+      <div class="prestamo-body" id="body-${p.id}" style="display:none">
+        <div class="prog-label"><span>Progreso de pago</span><span>${pct.toFixed(0)}%</span></div>
+        <div class="prog-bar"><div class="prog-fill" style="width:${pct}%"></div></div>
+        <div class="detalles-grid">
+          <div class="detalle-item"><div class="detalle-label">CAPITAL</div><div class="detalle-val">$${p.monto.toLocaleString()}</div></div>
+          <div class="detalle-item"><div class="detalle-label">CON INTERÉS</div><div class="detalle-val" style="color:var(--gold)">$${conInt.toLocaleString('es-MX',{maximumFractionDigits:0})}</div></div>
+          <div class="detalle-item"><div class="detalle-label">ABONADO CAP.</div><div class="detalle-val" style="color:var(--green)">$${capAb.toLocaleString()}</div></div>
+          <div class="detalle-item"><div class="detalle-label">INT. COBRADO</div><div class="detalle-val" style="color:var(--green)">$${intAb.toLocaleString()}</div></div>
+          <div class="detalle-item"><div class="detalle-label">SALDO CAPITAL</div><div class="detalle-val" style="color:var(--red)">$${saldo.toLocaleString()}</div></div>
+          <div class="detalle-item"><div class="detalle-label">FECHA LÍMITE</div><div class="detalle-val" style="font-size:11px">${p.fechaLimite||'N/A'}</div></div>
+        </div>
+        ${abonos.length?`<div class="abonos-title">HISTORIAL DE ABONOS</div>
+          ${abonos.slice().reverse().map(ab=>`
+          <div class="abono-item" style="${ab.tipo==='renovacion'?'border-left:3px solid var(--gold)':''}">
+            <div class="abono-left">
+              <div class="abono-dot" style="${ab.tipo==='renovacion'?'background:var(--gold)':''}"></div>
+              <div>
+                <div class="abono-concepto">${ab.tipo==='renovacion'?'↺ Renovación':''}$${(ab.total||ab.monto||0).toLocaleString()}${ab.nota?' · '+ab.nota:''}</div>
+                <div class="abono-fecha">${ab.fecha||''} · ${ab.tipo==='renovacion'?'Solo intereses':'Cap:$'+((ab.capital||0).toLocaleString())+' Int:$'+((ab.interes||0).toLocaleString())}</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--green)">$${(ab.total??ab.monto??0).toLocaleString()}</span>
+              <button onclick="eliminarAbono(${p.id},${ab.id})" style="background:none;border:none;color:var(--text2);font-size:14px;cursor:pointer">✕</button>
+            </div>
+          </div>`).join('')}`:''}
+        <div class="prestamo-actions">
+          ${!p.pagado?`<button class="btn-abono" onclick="abrirAbono(${p.id})">+ Abono</button>`:''}
+          ${!p.pagado?`<button class="btn-abono" style="background:rgba(240,165,0,0.15);border-color:var(--gold);color:var(--gold)" onclick="renovarPrestamo(${p.id})">↺ Renovar</button>`:''}
+          <button class="btn-wha" onclick="enviarWhatsApp(${p.id})">📲</button>
+          ${!p.pagado?`<button class="btn-del" onclick="marcarPagado(${p.id})">✓ Pagado</button>`:''}
+          <button onclick="eliminarPrestamo(${p.id})" style="background:rgba(255,77,109,0.1);border:1px solid rgba(255,77,109,0.2);color:var(--red);border-radius:10px;padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer">🗑 Eliminar</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── NAVEGACIÓN ──
+function abrirCliente(id) {
+  clienteActivoId=id; renderCliente(id);
+  document.getElementById('s-home').classList.remove('active');
+  document.getElementById('s-cliente').classList.add('active');
+  document.getElementById('fab').style.display='none';
+  window.scrollTo(0,0);
+}
+function volverLista() {
+  clienteActivoId=null;
+  document.getElementById('s-cliente').classList.remove('active');
+  document.getElementById('s-home').classList.add('active');
+  document.getElementById('fab').style.display='flex';
+  renderAll();
+}
+
+async function openModal(id){
+  document.getElementById(id).classList.add('open');
+  document.body.style.overflow='hidden';
+  const _bIds=['m-prestamo','m-abono','m-gasto','m-renovar'];
+  if(_bIds.includes(id)){
+    await Promise.all([hf_llenarSelect(id+'-origen'), hf_llenarSelect(id+'-destino')]);
+  }
+}
+function closeModal(id){ document.getElementById(id).classList.remove('open'); document.body.style.overflow=''; }
+document.querySelectorAll('.modal-overlay').forEach(el=>{ el.addEventListener('click',e=>{ if(e.target===el) closeModal(el.id); }); });
+
+// ── CLIENTES ──
+async function guardarCliente() {
+  const nombre = document.getElementById('c-nombre').value.trim();
+  if(!nombre) return alert('El nombre es requerido');
+  const inePreview = document.getElementById('c-ine-preview');
+  const datos = {
+    nombre, tel:document.getElementById('c-tel').value.trim(),
+    nota:document.getElementById('c-nota').value.trim(),
+    histPrestado:parseFloat(document.getElementById('c-hist-prestado').value)||0,
+    histPagado:parseFloat(document.getElementById('c-hist-pagado').value)||0,
+    histIntereses:parseFloat(document.getElementById('c-hist-intereses').value)||0,
+    ine: inePreview.style.display!=='none' ? inePreview.src : null
+  };
+  if(editClienteId){ Object.assign(state.clientes.find(c=>c.id===editClienteId), datos); editClienteId=null; }
+  else { state.clientes.push({id:Date.now(), prestamos:[], ...datos}); }
+  await save(); closeModal('m-cliente');
+  ['c-nombre','c-tel','c-nota','c-hist-prestado','c-hist-pagado','c-hist-intereses'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('c-ine-preview').style.display='none';
+  document.getElementById('c-ine-preview').src='';
+  document.getElementById('m-cliente-titulo').textContent='Nuevo Cliente';
+  renderAll();
+
+}
+
+async function eliminarCliente(id) {
+  if(!confirm('¿Eliminar este cliente y todos sus préstamos?')) return;
+  state.clientes = state.clientes.filter(c=>c.id!==id);
+  await save(); renderAll();
+}
+
+function previewINE(input) {
+  const file = input.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = document.getElementById('c-ine-preview');
+    img.src = e.target.result;
+    img.style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
+function editarCliente() {
+  const c=state.clientes.find(c=>c.id===clienteActivoId); if(!c) return;
+  editClienteId=c.id;
+  document.getElementById('c-nombre').value=c.nombre;
+  document.getElementById('c-tel').value=c.tel||'';
+  document.getElementById('c-nota').value=c.nota||'';
+  document.getElementById('c-hist-prestado').value=c.histPrestado||'';
+  document.getElementById('c-hist-pagado').value=c.histPagado||'';
+  document.getElementById('c-hist-intereses').value=c.histIntereses||'';
+  document.getElementById('m-cliente-titulo').textContent='Editar Cliente';
+  openModal('m-cliente');
+}
+
+// ── PRÉSTAMOS ──
+function verEstadoCuenta() {
+  const c = state.clientes.find(c=>c.id===clienteActivoId); if(!c) return;
+  const pendientes = (c.prestamos||[]).filter(p=>!p.pagado);
+  if(!pendientes.length) return alert('No hay préstamos pendientes');
+  const datos = pendientes.map(p => {
+    const capAb = (p.abonos||[]).reduce((a,ab)=>a+ab.capital,0);
+    const intAb = (p.abonos||[]).reduce((a,ab)=>a+(ab.interes||0),0);
+    const limiteFmt = p.fechaLimite ? p.fechaLimite.split('-').reverse().join('/') : '—';
+    return {
+      monto: p.monto,
+      interes: p.interes||0,
+      modalidad: p.modalidad||'',
+      pagado: capAb + intAb,
+      limite: limiteFmt
+    };
+  });
+  const url = `/static/comprobante_estado.html?nombre=${encodeURIComponent(c.nombre)}&tel=${encodeURIComponent(c.tel||'')}&prestamos=${encodeURIComponent(JSON.stringify(datos))}`;
+  location.href = url;
+}
+
+function abrirNuevoPrestamo() {
+  document.getElementById('p-fecha').value=new Date().toISOString().split('T')[0];
+  ['p-monto','p-interes','p-nota','p-fecha-limite'].forEach(id=>document.getElementById(id).value='');
+  openModal('m-prestamo');
+}
+async function guardarPrestamo() {
+  const monto=parseFloat(document.getElementById('p-monto').value)||0;
+  if(!monto) return alert('Ingresa el monto');
+  const c=state.clientes.find(c=>c.id===clienteActivoId); if(!c) return;
+  c.prestamos.push({id:Date.now(),monto,interes:parseFloat(document.getElementById('p-interes').value)||0,modalidad:document.getElementById('p-modalidad').value,fecha:document.getElementById('p-fecha').value,fechaLimite:document.getElementById('p-fecha-limite').value,nota:document.getElementById('p-nota').value.trim(),pagado:false,abonos:[]});
+  await save(); closeModal('m-prestamo'); renderCliente(clienteActivoId); renderStats();
+  // Comprobante nuevo préstamo
+  const _cp = c.prestamos[c.prestamos.length-1];
+  const _fechaFmt = _cp.fecha ? _cp.fecha.split('-').reverse().join('/') : new Date().toLocaleDateString('es-MX');
+  const _limiteFmt = _cp.fechaLimite ? _cp.fechaLimite.split('-').reverse().join('/') : '—';
+  location.href = `/static/comprobante_prestamo.html?nombre=${encodeURIComponent(c.nombre)}&monto=${_cp.monto}&interes=${_cp.interes||0}&modalidad=${encodeURIComponent(_cp.modalidad||'')}&limite=${_limiteFmt}&fecha=${_fechaFmt}&tel=${encodeURIComponent(c.tel||'')}`;
+
+  await hf_pedirBolsillo(monto, 'Préstamo entregado', fecha||new Date().toISOString().split('T')[0], ()=>{});
+
+  const _guardarPrestamo_origen = document.getElementById('m-prestamo-origen')?.value;
+  const _guardarPrestamo_destino = document.getElementById('m-prestamo-destino')?.value;
+  const _movs_pr=[]; const _pf=document.getElementById('p-fecha')?.value||new Date().toISOString().split('T')[0]; if(_guardarPrestamo_origen) _movs_pr.push({id:_guardarPrestamo_origen,monto,tipo:'salida',concepto:'Préstamo entregado',fecha:_pf}); if(_guardarPrestamo_destino) _movs_pr.push({id:_guardarPrestamo_destino,monto,tipo:'entrada',concepto:'Préstamo entregado',fecha:_pf}); if(_movs_pr.length) await hf_actualizarBolsillos(_movs_pr);
+}
+async function eliminarPrestamo(pid) {
+  if(!confirm('¿Eliminar este préstamo? Esta acción no se puede deshacer.')) return;
+  const c = state.clientes.find(c=>c.id===clienteActivoId); if(!c) return;
+  c.prestamos = c.prestamos.filter(p=>p.id!==pid);
+  await save(); renderCliente(clienteActivoId); renderStats();
+}
+
+async function marcarPagado(pid) {
+  if(!confirm('¿Marcar como pagado?')) return;
+  const c=state.clientes.find(c=>c.id===clienteActivoId);
+  const p=c?.prestamos.find(p=>p.id===pid); if(p) p.pagado=true;
+  await save(); renderCliente(clienteActivoId); renderStats();
+}
+function togglePrestamo(id){ const b=document.getElementById('body-'+id); if(b) b.style.display=b.style.display==='none'?'block':'none'; }
+
+// ── ABONOS ──
+function abrirAbono(pid) {
+  prestamoActivoId=pid;
+  const c=state.clientes.find(c=>c.id===clienteActivoId);
+  const p=c?.prestamos.find(p=>p.id===pid); if(!p) return;
+  const capAb=(p.abonos||[]).reduce((a,ab)=>a+ab.capital,0);
+  const saldo=Math.max(0,p.monto-capAb);
+  const intPend=p.monto*(p.interes||0)/100;
+  document.getElementById('abono-resumen').innerHTML=`
+    <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>Capital pendiente</span><span style="font-family:var(--mono);color:var(--red)">$${saldo.toLocaleString()}</span></div>
+    <div style="display:flex;justify-content:space-between"><span>Interés pendiente</span><span style="font-family:var(--mono);color:var(--gold)">$${intPend.toLocaleString('es-MX',{maximumFractionDigits:0})}</span></div>`;
+  ['a-monto','a-capital','a-interes','a-nota'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('a-fecha').value=new Date().toISOString().split('T')[0];
+  openModal('m-abono');
+}
+async function guardarAbono() {
+  const monto=parseFloat(document.getElementById('a-monto').value)||0;
+  if(!monto) return alert('Ingresa el monto');
+  const capital=parseFloat(document.getElementById('a-capital').value)||monto;
+  const interes=parseFloat(document.getElementById('a-interes').value)||0;
+  const c=state.clientes.find(c=>c.id===clienteActivoId);
+  const p=c?.prestamos.find(p=>p.id===prestamoActivoId); if(!p) return;
+  p.abonos.push({id:Date.now(),monto,capital,interes,fecha:document.getElementById('a-fecha').value,nota:document.getElementById('a-nota').value.trim()});
+  if(p.abonos.reduce((a,ab)=>a+ab.capital,0)>=p.monto) p.pagado=true;
+  await save(); closeModal('m-abono'); renderCliente(clienteActivoId); renderStats();
+  setTimeout(()=>{ const b=document.getElementById('body-'+prestamoActivoId); if(b) b.style.display='block'; },100);
+  // Comprobante abono
+  const _capAb = p.abonos.reduce((a,ab)=>a+ab.capital,0);
+  const _intAb = p.abonos.reduce((a,ab)=>a+(ab.interes||0),0);
+  const _totalAPagar = p.monto * (1 + (p.interes||0)/100);
+  const _saldo = Math.max(0, _totalAPagar - _capAb - _intAb);
+  const _limiteFmt = p.fechaLimite ? p.fechaLimite.split('-').reverse().join('/') : '—';
+  const _fechaFmt = document.getElementById('a-fecha').value.split('-').reverse().join('/');
+  location.href = `/static/comprobante_abono_presta.html?nombre=${encodeURIComponent(c.nombre)}&monto=${monto}&capital=${capital}&interes=${interes}&saldo=${_saldo}&limite=${_limiteFmt}&fecha=${_fechaFmt}&total_capital=${_capAb}&tel=${encodeURIComponent(c.tel||'')}`;
+
+  await hf_pedirBolsillo(monto, 'Abono préstamo', fecha||new Date().toISOString().split('T')[0], ()=>{});
+
+  const _guardarAbono_origen = document.getElementById('m-abono-origen')?.value;
+  const _guardarAbono_destino = document.getElementById('m-abono-destino')?.value;
+  const _movs_ab=[]; const _af=document.getElementById('a-fecha')?.value||new Date().toISOString().split('T')[0]; if(_guardarAbono_origen) _movs_ab.push({id:_guardarAbono_origen,monto,tipo:'salida',concepto:'Abono préstamo',fecha:_af}); if(_guardarAbono_destino) _movs_ab.push({id:_guardarAbono_destino,monto,tipo:'entrada',concepto:'Abono préstamo',fecha:_af}); if(_movs_ab.length) await hf_actualizarBolsillos(_movs_ab);
+}
+async function eliminarAbono(pid,aid) {
+  if(!confirm('¿Eliminar este abono?')) return;
+  const c=state.clientes.find(c=>c.id===clienteActivoId);
+  const p=c?.prestamos.find(p=>p.id===pid); if(!p) return;
+  const ab = p.abonos.find(a=>a.id===aid);
+  p.abonos=p.abonos.filter(ab=>ab.id!==aid);
+  if(p.abonos.reduce((a,ab)=>a+ab.capital,0)<p.monto) p.pagado=false;
+  await save();
+  // Eliminar movimiento correspondiente en bolsillos
+  if(ab) {
+    try {
+      const si = await fetch('/api/state').then(r=>r.json());
+      let changed = false;
+      (si.bolsillos||[]).forEach(b=>{
+        const idx = (b.movimientos||[]).findIndex(m=>
+          m.monto===ab.monto && m.tipo==='entrada' &&
+          Math.abs(m.id - ab.id) < 5000
+        );
+        if(idx>=0){
+          const mov = b.movimientos[idx];
+          b.saldo = (b.saldo||0) - (mov.tipo==='entrada'?mov.monto:-mov.monto);
+          b.movimientos.splice(idx,1);
+          changed = true;
+        }
+      });
+      if(changed) await fetch('/api/state',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(si)});
+    } catch(e){ console.error('bolsillo sync error',e); }
+  }
+  renderCliente(clienteActivoId); renderStats();
+}
+
+// ── GASTOS ──
+async function guardarGasto() {
+  const concepto=document.getElementById('g-concepto').value.trim();
+  const monto=parseFloat(document.getElementById('g-monto').value)||0;
+  if(!concepto||!monto) return alert('Completa los campos');
+  if(!state.gastos) state.gastos=[];
+  state.gastos.push({id:Date.now(),concepto,monto,fecha:document.getElementById('g-fecha').value});
+  await save(); closeModal('m-gasto');
+  ['g-concepto','g-monto'].forEach(id=>document.getElementById(id).value='');
+  renderStats();
+
+  await hf_pedirBolsillo(monto, concepto||'Gasto PrestaExpress', fecha||new Date().toISOString().split('T')[0], ()=>{});
+
+  const _guardarGasto_origen = document.getElementById('m-gasto-origen')?.value;
+  const _guardarGasto_destino = document.getElementById('m-gasto-destino')?.value;
+  const _movs_g=[]; const _gf=document.getElementById('g-fecha')?.value||new Date().toISOString().split('T')[0]; if(_guardarGasto_origen) _movs_g.push({id:_guardarGasto_origen,monto,tipo:'salida',concepto,fecha:_gf}); if(_guardarGasto_destino) _movs_g.push({id:_guardarGasto_destino,monto,tipo:'entrada',concepto,fecha:_gf}); if(_movs_g.length) await hf_actualizarBolsillos(_movs_g);
+}
+function verGastos() {
+  if(!state.gastos||!state.gastos.length) return alert('Sin gastos registrados');
+  const el = document.getElementById('gastos-lista');
+  el.innerHTML = state.gastos.slice().reverse().map(g=>`
+    <div class="abono-item">
+      <div class="abono-left">
+        <div class="abono-dot" style="background:var(--red)"></div>
+        <div>
+          <div class="abono-concepto">${g.concepto}</div>
+          <div class="abono-fecha">${g.fecha||''}</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--red)">$${g.monto.toLocaleString()}</span>
+        <button onclick="eliminarGasto(${g.id})" style="background:none;border:none;color:var(--text2);font-size:14px;cursor:pointer">✕</button>
+      </div>
+    </div>`).join('');
+  openModal('m-ver-gastos');
+}
+
+async function eliminarGasto(id) {
+  if(!confirm('\u00bfEliminar este gasto?')) return;
+  state.gastos = state.gastos.filter(g=>g.id!==id);
+  await save(); renderStats(); verGastos();
+}
+
+// ── WHATSAPP ──
+function enviarWhatsApp(pid) {
+  const c=state.clientes.find(c=>c.id===clienteActivoId);
+  const p=c?.prestamos.find(p=>p.id===pid); if(!p) return;
+  const capAb=(p.abonos||[]).reduce((a,ab)=>a+ab.capital,0);
+  const intAb=(p.abonos||[]).reduce((a,ab)=>a+(ab.interes||0),0);
+  const saldo=Math.max(0,p.monto-capAb);
+  const conInt=p.monto*(1+(p.interes||0)/100);
+  const porPagar=saldo*(1+(p.interes||0)/100);
+  const ult=p.abonos.length?p.abonos[p.abonos.length-1]:null;
+  const msg=`💰 *PrestaExpress*\n\n`+
+    `👤 *${c.nombre}*\n`+
+    `📋 Préstamo: $${p.monto.toLocaleString()} al ${p.interes||0}% ${p.modalidad||''}\n`+
+    `📅 Inicio: ${p.fecha||'N/A'}${p.fechaLimite?' | Límite: '+p.fechaLimite:''}\n\n`+
+    `✅ Capital abonado: $${capAb.toLocaleString()}\n`+
+    `💚 Interés cobrado: $${intAb.toLocaleString()}\n`+
+    `🔴 Capital pendiente: $${saldo.toLocaleString()}\n`+
+    `💳 Total por pagar: $${porPagar.toLocaleString('es-MX',{maximumFractionDigits:0})}\n`+
+    (p.fechaLimite?`📆 Fecha límite: ${p.fechaLimite}\n`:'')+
+    (ult?`\n📩 Último abono: $${ult.monto.toLocaleString()} el ${ult.fecha||'N/A'}`:'');
+  const tel=c.tel?c.tel.replace(/\D/g,''):'';
+  window.open(`https://wa.me/${tel?'52'+tel:''}?text=${encodeURIComponent(msg)}`,'_blank');
+}
+
+load();
+</script>
+<!-- MODAL RENOVAR PRÉSTAMO -->
+<div class="modal-overlay" id="m-renovar">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">↺ Renovar Préstamo</div>
+    <div id="renovar-info" style="background:var(--bg3);border-radius:12px;padding:14px;margin-bottom:16px;font-size:13px;color:var(--text2)"></div>
+    <div class="form-group">
+      <label class="form-label">MONTO DE INTERÉS A PAGAR ($)</label>
+      <input class="form-input" id="renovar-monto" type="number" placeholder="$0.00">
+    </div>
+    <div class="form-group">
+      <label class="form-label">FECHA DE RENOVACIÓN</label>
+      <input class="form-input" id="renovar-fecha" type="date">
+    </div>
+    <div class="form-group">
+      <label class="form-label">NOTA (OPCIONAL)</label>
+      <input class="form-input" id="renovar-nota" placeholder="Pagó intereses, renovó...">
+    </div>
+    <div class="form-group">
+      <label class="form-label">💼 ORIGEN (opcional)</label>
+      <select class="form-input" id="m-renovar-origen">
+        <option value="">Sin afectar bolsillo</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">💼 DESTINO (opcional)</label>
+      <select class="form-input" id="m-renovar-destino">
+        <option value="">Sin afectar bolsillo</option>
+      </select>
+    </div>
+    <button class="form-submit" onclick="confirmarRenovacion()">Confirmar Renovación</button>
+    <button class="btn-ghost" onclick="closeModal('m-renovar')">Cancelar</button>
+  </div>
+</div>
+
+<script src="/static/bolsillos.js"></script>
+</body>
+</html>

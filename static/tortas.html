@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Tortas Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --green:#00c896;--green2:#00a87e;--gold:#f0a500;
+  --red:#ff4d6d;--blue:#4d9fff;
+  --bg:#0a0e14;--bg2:#111620;--bg3:#1a2030;
+  --border:rgba(255,255,255,0.07);
+  --text:#f0f4ff;--text2:#6b7a99;
+  --mono:'JetBrains Mono',monospace;
+  --sans:'Syne',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;padding-bottom:80px}
+.header{position:sticky;top:0;z-index:100;background:rgba(10,14,20,0.95);backdrop-filter:blur(12px);padding:16px 20px 12px;border-bottom:1px solid var(--border)}
+.header-top{display:flex;justify-content:space-between;align-items:center}
+.back-btn{background:none;border:none;color:var(--text);font-size:22px;cursor:pointer;padding:0;margin-right:8px}
+.app-title{font-size:11px;letter-spacing:3px;color:var(--text2);font-weight:600}
+.header-titulo{display:flex;align-items:center}
+
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:16px 20px}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:12px 14px}
+.stat-card.full{grid-column:span 2;background:rgba(0,200,150,0.06);border-color:rgba(0,200,150,0.2)}
+.stat-label{font-size:9px;letter-spacing:1.5px;color:var(--text2);font-weight:600;margin-bottom:4px}
+.stat-val{font-family:var(--mono);font-size:15px;font-weight:700}
+
+.tabs{display:flex;gap:8px;margin:0 20px 16px}
+.tab{flex:1;padding:10px;border-radius:12px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-family:var(--sans);font-weight:600;font-size:13px;cursor:pointer;text-align:center}
+.tab.active{background:var(--green);color:#000;border-color:var(--green)}
+
+.lista{padding:0 20px}
+.section-title{font-size:10px;letter-spacing:2px;color:var(--text2);font-weight:600;margin-bottom:12px}
+.mov-item{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;border-left:3px solid var(--green)}
+.mov-item.gasto{border-left-color:var(--red)}
+.mov-concepto{font-size:14px;font-weight:700}
+.mov-fecha{font-size:11px;color:var(--text2);margin-top:2px}
+.mov-monto{font-family:var(--mono);font-size:16px;font-weight:700;color:var(--green)}
+.mov-monto.gasto{color:var(--red)}
+.empty-state{text-align:center;padding:60px 20px;color:var(--text2)}
+.empty-ico{font-size:48px;margin-bottom:12px}
+
+.fab{position:fixed;bottom:24px;right:20px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--green2));border:none;color:#000;font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,200,150,0.4);z-index:50}
+
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:200;display:none;align-items:flex-end}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg2);border-radius:24px 24px 0 0;width:100%;padding:24px 20px 40px;border-top:1px solid var(--border);max-height:90vh;overflow-y:auto;animation:slideUp 0.25s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 20px}
+.modal-title{font-size:18px;font-weight:800;margin-bottom:20px}
+.form-group{margin-bottom:16px}
+.form-label{font-size:11px;letter-spacing:1.5px;color:var(--text2);font-weight:600;margin-bottom:8px;display:block}
+.form-input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:13px 16px;color:var(--text);font-family:var(--sans);font-size:15px;outline:none}
+.form-input:focus{border-color:var(--green)}
+.form-input::placeholder{color:var(--text2)}
+.form-submit{width:100%;background:var(--green);color:#000;border:none;border-radius:14px;padding:15px;font-family:var(--sans);font-weight:800;font-size:16px;cursor:pointer;margin-top:8px}
+.btn-ghost{width:100%;background:transparent;color:var(--text2);border:1px solid var(--border);border-radius:12px;padding:12px;font-family:var(--sans);font-size:14px;cursor:pointer;margin-top:8px}
+.tipo-toggle{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.tipo-btn{padding:12px;border-radius:12px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);font-family:var(--sans);font-weight:700;font-size:14px;cursor:pointer;text-align:center}
+.tipo-btn.ingreso.active{background:rgba(0,200,150,0.15);border-color:var(--green);color:var(--green)}
+.tipo-btn.gasto.active{background:rgba(255,77,109,0.15);border-color:var(--red);color:var(--red)}
+#save-indicator{position:fixed;bottom:88px;right:16px;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:600;z-index:999;opacity:0;transition:opacity 0.3s;pointer-events:none}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div class="header-titulo">
+      <button class="back-btn" onclick="location.href='/'">←</button>
+      <div>
+        <div class="app-title">HOPE FINANCE</div>
+        <div style="font-size:16px;font-weight:800">Tortas Pro</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-label">INGRESOS</div>
+    <div class="stat-val" style="color:var(--green)" id="h-ingresos">$0</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">GASTOS</div>
+    <div class="stat-val" style="color:var(--red)" id="h-gastos">$0</div>
+  </div>
+  <div class="stat-card full">
+    <div class="stat-label">NETO TOTAL</div>
+    <div class="stat-val" id="h-neto" style="font-size:22px">$0</div>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" id="tab-todos" onclick="cambiarTab('todos')">Todos</div>
+  <div class="tab" id="tab-ingresos" onclick="cambiarTab('ingresos')">Ingresos</div>
+  <div class="tab" id="tab-gastos" onclick="cambiarTab('gastos')">Gastos</div>
+</div>
+
+<div class="lista">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <div class="section-title" id="lista-titulo">MOVIMIENTOS</div>
+  </div>
+  <div id="movimientos-list"></div>
+</div>
+
+<!-- SECCIÓN CRÉDITOS -->
+<div class="lista" style="margin-top:8px">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <div class="section-title">CRÉDITOS</div>
+    <button onclick="openModal('m-credito')" style="background:rgba(255,77,109,0.1);border:1px solid rgba(255,77,109,0.2);color:var(--red);border-radius:10px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--sans)">+ Crédito</button>
+  </div>
+  <div id="creditos-list"></div>
+</div>
+
+<button class="fab" onclick="openModal('m-movimiento')">＋</button>
+
+<div class="modal-overlay" id="m-movimiento">
+  <div class="modal" style="overflow-y:auto;max-height:90vh;">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Nuevo Movimiento</div>
+    <div class="tipo-toggle">
+      <div class="tipo-btn ingreso active" id="btn-ingreso" onclick="setTipo('ingreso')">↑ Ingreso</div>
+      <div class="tipo-btn gasto" id="btn-gasto" onclick="setTipo('gasto')">↓ Gasto</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">CONCEPTO</label>
+      <input class="form-input" id="m-concepto" placeholder="Descripción">
+    </div>
+    <div class="form-group">
+      <label class="form-label">MONTO</label>
+      <input class="form-input" id="m-monto" placeholder="$0.00" type="number">
+    </div>
+    <div class="form-group">
+      <label class="form-label">FECHA</label>
+      <input class="form-input" id="m-fecha" type="date">
+    </div>
+    <div class="form-group">
+      <label class="form-label">💼 ORIGEN (opcional)</label>
+      <select class="form-input" id="m-movimiento-origen">
+        <option value="">Sin afectar bolsillo</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">💼 DESTINO (opcional)</label>
+      <select class="form-input" id="m-movimiento-destino">
+        <option value="">Sin afectar bolsillo</option>
+      </select>
+    </div>
+    <button class="form-submit" onclick="guardarMovimiento()">Guardar</button>
+    <button class="btn-ghost" onclick="closeModal('m-movimiento')">Cancelar</button>
+  </div>
+</div>
+
+<div id="save-indicator"></div>
+
+<!-- MODAL BOLSILLO POST-MOVIMIENTO -->
+
+
+<!-- MODAL NUEVO CRÉDITO -->
+<div class="modal-overlay" id="m-credito">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">💳 Nuevo Crédito</div>
+    <div class="form-group">
+      <label class="form-label">DE QUIÉN</label>
+      <input class="form-input" id="cred-origen" placeholder="CundinaPlus, persona...">
+    </div>
+    <div class="form-group">
+      <label class="form-label">MONTO ($)</label>
+      <input class="form-input" id="cred-monto" type="number" placeholder="$0.00">
+    </div>
+    <div class="form-group">
+      <label class="form-label">FECHA</label>
+      <input class="form-input" id="cred-fecha" type="date">
+    </div>
+    <div class="form-group">
+      <label class="form-label">NOTA (OPCIONAL)</label>
+      <input class="form-input" id="cred-nota" placeholder="Concepto...">
+    </div>
+    <button class="form-submit" onclick="guardarCredito()">Guardar</button>
+    <button class="btn-ghost" onclick="closeModal('m-credito')">Cancelar</button>
+  </div>
+</div>
+
+<!-- MODAL ABONO CRÉDITO -->
+<div class="modal-overlay" id="m-abono-credito">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">💸 Registrar Abono</div>
+    <div class="form-group">
+      <label class="form-label">MONTO ($)</label>
+      <input class="form-input" id="abono-monto" type="number" placeholder="$0.00">
+    </div>
+    <div class="form-group">
+      <label class="form-label">FECHA</label>
+      <input class="form-input" id="abono-fecha" type="date">
+    </div>
+    <div class="form-group">
+      <label class="form-label">💼 SALE DE BOLSILLO (OPCIONAL)</label>
+      <select class="form-input" id="abono-bolsillo">
+        <option value="">Sin afectar bolsillo</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">NOTA (OPCIONAL)</label>
+      <input class="form-input" id="abono-nota" placeholder="Abono...">
+    </div>
+    <div class="form-group">
+      <label class="form-label">💼 ORIGEN (opcional)</label>
+      <select class="form-input" id="m-abono-credito-origen">
+        <option value="">Sin afectar bolsillo</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">💼 DESTINO (opcional)</label>
+      <select class="form-input" id="m-abono-credito-destino">
+        <option value="">Sin afectar bolsillo</option>
+      </select>
+    </div>
+    <button class="form-submit" onclick="guardarAbono()">Registrar Abono</button>
+    <button class="btn-ghost" onclick="closeModal('m-abono-credito')">Cancelar</button>
+  </div>
+</div>
+
+<script>
+let state = {movimientos:[], creditos:[]};
+let creditoActivoId = null;
+
+async function cargarBolsillos() {
+  try {
+    const r = await fetch('/api/state');
+    if(r.ok) { const d = await r.json(); return d.bolsillos || []; }
+  } catch(e){}
+  return [];
+}
+
+async function llenarSelectBolsillos(selectId) {
+  const bolsillos = await cargarBolsillos();
+  const sel = document.getElementById(selectId);
+  if(!sel) return;
+  sel.innerHTML = '<option value="">Sin afectar bolsillo</option>' +
+    bolsillos.map(b=>`<option value="${b.id}">${b.nombre} ($${(b.saldo||0).toLocaleString('es-MX')})</option>`).join('');
+}
+
+async function actualizarBolsillo(bolsilloId, monto, tipo) {
+  if(!bolsilloId) return;
+  try {
+    const r = await fetch('/api/state');
+    if(!r.ok) return;
+    const d = await r.json();
+    const b = (d.bolsillos||[]).find(b=>b.id==bolsilloId);
+    if(!b) return;
+    b.saldo = (b.saldo||0) + (tipo==='entrada' ? monto : -monto);
+    await fetch('/api/state',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
+  } catch(e){}
+}
+let tabActual = 'todos';
+let tipoActual = 'ingreso';
+
+function mostrarIndicador(ok) {
+  const el = document.getElementById('save-indicator');
+  el.style.background = ok ? 'var(--green)' : 'var(--red)';
+  el.style.color = ok ? '#000' : '#fff';
+  el.textContent = ok ? '✓ Guardado' : '⚠ Sin conexión';
+  el.style.opacity = '1';
+  setTimeout(()=>{ el.style.opacity='0'; }, 2000);
+}
+
+async function save() {
+  try { localStorage.setItem('tortas_v1', JSON.stringify(state)); } catch(e){}
+  try {
+    // Sincronizar neto con interfaz
+    const neto = calcularNeto();
+    const ri = await fetch('/api/state');
+    if(ri.ok) {
+      const si = await ri.json();
+      if(!si.modulos) si.modulos = {};
+      si.modulos.tortas = neto;
+      await fetch('/api/state', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(si)});
+    }
+    const r = await fetch('/api/state/tortas', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(state)});
+    mostrarIndicador(r.ok);
+  } catch(e){ mostrarIndicador(false); }
+}
+
+async function load() {
+  try {
+    const r = await fetch('/api/state/tortas');
+    if(r.ok){ const d=await r.json(); if(d&&d.movimientos){ state=d; if(!state.creditos) state.creditos=[]; renderAll(); return; } }
+  } catch(e){}
+  renderAll();
+}
+
+function calcularNeto() {
+  const movs = state.movimientos||[];
+  const ingresos = movs.filter(m=>m.tipo==='ingreso').reduce((a,m)=>a+m.monto,0);
+  const gastos   = movs.filter(m=>m.tipo==='gasto').reduce((a,m)=>a+m.monto,0);
+  return ingresos - gastos;
+}
+
+function renderAll() {
+  const movs = state.movimientos||[];
+  const ingresos = movs.filter(m=>m.tipo==='ingreso').reduce((a,m)=>a+m.monto,0);
+  const gastos   = movs.filter(m=>m.tipo==='gasto').reduce((a,m)=>a+m.monto,0);
+  const neto     = ingresos - gastos;
+  const fmt = v => '$'+v.toLocaleString('es-MX',{minimumFractionDigits:0});
+
+  document.getElementById('h-ingresos').textContent = fmt(ingresos);
+  document.getElementById('h-gastos').textContent   = fmt(gastos);
+  const netoEl = document.getElementById('h-neto');
+  netoEl.textContent = (neto>=0?'+':'')+fmt(neto);
+  netoEl.style.color = neto>=0 ? 'var(--green)' : 'var(--red)';
+
+  let lista = movs.slice().reverse();
+  if(tabActual==='ingresos') lista = lista.filter(m=>m.tipo==='ingreso');
+  if(tabActual==='gastos')   lista = lista.filter(m=>m.tipo==='gasto');
+
+  const el = document.getElementById('movimientos-list');
+  if(!lista.length){
+    el.innerHTML=`<div class="empty-state"><div class="empty-ico">🎂</div><div>Sin movimientos<br>Toca + para agregar</div></div>`;
+    return;
+  }
+  el.innerHTML = lista.map(m=>`
+    <div class="mov-item ${m.tipo==='gasto'?'gasto':''}">
+      <div>
+        <div class="mov-concepto">${m.concepto}</div>
+        <div class="mov-fecha">${m.fecha||''} · ${m.tipo==='ingreso'?'Ingreso':'Gasto'}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="mov-monto ${m.tipo==='gasto'?'gasto':''}">${m.tipo==='gasto'?'-':'+'} ${fmt(m.monto)}</span>
+        <button onclick="eliminarMov(${m.id})" style="background:none;border:none;color:var(--text2);font-size:14px;cursor:pointer">✕</button>
+      </div>
+    </div>`).join('');
+  renderCreditos();
+  sincronizarDeuda();
+}
+
+function cambiarTab(tab) {
+  tabActual = tab;
+  ['todos','ingresos','gastos'].forEach(t=>{
+    document.getElementById('tab-'+t).classList.toggle('active', t===tab);
+  });
+  renderAll();
+}
+
+function setTipo(tipo) {
+  tipoActual = tipo;
+  document.getElementById('btn-ingreso').classList.toggle('active', tipo==='ingreso');
+  document.getElementById('btn-gasto').classList.toggle('active', tipo==='gasto');
+}
+
+async function openModal(id){
+  document.getElementById(id).classList.add('open');
+  document.body.style.overflow='hidden';
+  const _bIds=['m-movimiento','m-abono-credito'];
+  if(_bIds.includes(id)){ hf_llenarSelect(id+'-origen'); hf_llenarSelect(id+'-destino'); }
+}
+function closeModal(id){ document.getElementById(id).classList.remove('open'); document.body.style.overflow=''; }
+document.querySelectorAll('.modal-overlay').forEach(el=>{ el.addEventListener('click',e=>{ if(e.target===el && el.id!=='m-bolsillo-mov') closeModal(el.id); }); });
+
+async function eliminarMov(id) {
+  if(!confirm('¿Eliminar?')) return;
+  const mov = state.movimientos.find(m=>m.id===id);
+  state.movimientos = state.movimientos.filter(m=>m.id!==id);
+  await save(); renderAll();
+  if(mov) {
+    if(mov.origenId) await hf_eliminarMovBolsillo(mov.origenId, mov.origenMovId);
+    if(mov.destinoId) await hf_eliminarMovBolsillo(mov.destinoId, mov.destinoMovId);
+  }
+}
+
+let ultimoMovId = null;
+let ultimoMovTipo = null;
+let ultimoMovMonto = null;
+
+async function guardarMovimiento() {
+  const concepto = document.getElementById('m-concepto').value.trim();
+  const monto    = parseFloat(document.getElementById('m-monto').value)||0;
+  const fecha    = document.getElementById('m-fecha').value;
+  const origenId = document.getElementById('m-movimiento-origen')?.value||null;
+  const destinoId = document.getElementById('m-movimiento-destino')?.value||null;
+  if(!concepto||!monto) return alert('Completa los campos');
+  if(!state.movimientos) state.movimientos=[];
+  const movId = Date.now();
+  state.movimientos.push({id:movId, tipo:tipoActual, concepto, monto, fecha, origenId, destinoId});
+  let origenRef=null, destinoRef=null;
+  const tipoOrigen = tipoActual==='ingreso' ? 'entrada' : 'salida';
+  const tipoDestino = tipoActual==='ingreso' ? 'salida' : 'entrada';
+  if(origenId) origenRef = await hf_actualizarBolsillo(origenId, monto, tipoOrigen, concepto, fecha);
+  if(destinoId) destinoRef = await hf_actualizarBolsillo(destinoId, monto, tipoDestino, concepto, fecha);
+  if(origenRef||destinoRef) {
+    const mov = state.movimientos.find(m=>m.id===movId);
+    if(mov) {
+      if(origenRef) mov.origenMovId = origenRef.movId;
+      if(destinoRef) mov.destinoMovId = destinoRef.movId;
+    }
+  }
+  await save(); closeModal('m-movimiento');
+  ['m-concepto','m-monto'].forEach(id=>document.getElementById(id).value='');
+  setTipo('ingreso');
+  renderAll();
+}
+
+async function confirmarBolsilloMov() {
+  const bolsilloId = document.getElementById('mov-bolsillo').value;
+  if(bolsilloId && ultimoMovId) {
+    const mov = state.movimientos.find(m=>m.id===ultimoMovId);
+    if(mov) mov.bolsilloId = bolsilloId;
+    await actualizarBolsillo(bolsilloId, ultimoMovMonto, ultimoMovTipo==='ingreso'?'entrada':'salida');
+    await save();
+  }
+  closeModal('m-bolsillo-mov');
+}
+
+async function eliminarMov(id) {
+  if(!confirm('¿Eliminar este movimiento?')) return;
+  state.movimientos = state.movimientos.filter(m=>m.id!==id);
+  await save(); renderAll();
+}
+
+document.getElementById('m-fecha').value = new Date().toISOString().split('T')[0];
+function renderCreditos() {
+  const el = document.getElementById('creditos-list');
+  const creditos = state.creditos || [];
+  if(!creditos.length){
+    el.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text2)">Sin créditos registrados</div>';
+    return;
+  }
+  const fmt = v => '$'+v.toLocaleString('es-MX',{minimumFractionDigits:0});
+  el.innerHTML = creditos.map(c=>{
+    const totalAbonado = (c.abonos||[]).reduce((a,b)=>a+b.monto,0);
+    const deuda = c.monto - totalAbonado;
+    const pct = Math.min(100,(totalAbonado/c.monto)*100);
+    return `<div style="background:var(--bg2);border:1px solid ${deuda<=0?'rgba(0,200,150,0.3)':'rgba(255,77,109,0.2)'};border-radius:14px;padding:14px;margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+        <div>
+          <div style="font-size:14px;font-weight:700">${c.origen}</div>
+          <div style="font-size:11px;color:var(--text2)">${c.fecha||''}${c.nota?' · '+c.nota:''}</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-family:var(--mono);font-size:13px;color:var(--red);font-weight:700">Deuda: ${fmt(Math.max(0,deuda))}</div>
+          <div style="font-size:10px;color:var(--text2)">de ${fmt(c.monto)}</div>
+        </div>
+      </div>
+      <div style="height:6px;background:var(--bg3);border-radius:3px;margin-bottom:10px">
+        <div style="height:100%;width:${pct}%;background:var(--green);border-radius:3px"></div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button onclick="abrirAbono(${c.id})" style="flex:1;background:rgba(0,200,150,0.1);border:1px solid rgba(0,200,150,0.3);color:var(--green);border-radius:10px;padding:8px;font-family:var(--sans);font-weight:700;font-size:12px;cursor:pointer">+ Abono</button>
+        <button onclick="verAbonos(${c.id})" style="flex:1;background:var(--bg3);border:1px solid var(--border);color:var(--text2);border-radius:10px;padding:8px;font-family:var(--sans);font-weight:700;font-size:12px;cursor:pointer">Ver abonos</button>
+        <button onclick="eliminarCredito(${c.id})" style="background:rgba(255,77,109,0.1);border:1px solid rgba(255,77,109,0.2);color:var(--red);border-radius:10px;padding:8px 12px;font-family:var(--sans);font-weight:700;font-size:12px;cursor:pointer">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function guardarCredito() {
+  const origen = document.getElementById('cred-origen').value.trim();
+  const monto = parseFloat(document.getElementById('cred-monto').value)||0;
+  const fecha = document.getElementById('cred-fecha').value;
+  const nota = document.getElementById('cred-nota').value.trim();
+  if(!origen||!monto) return alert('Completa los campos');
+  if(!state.creditos) state.creditos=[];
+  state.creditos.push({id:Date.now(), origen, monto, fecha, nota, abonos:[]});
+  await save(); closeModal('m-credito'); renderCreditos(); sincronizarDeuda();
+}
+
+async function eliminarCredito(id) {
+  if(!confirm('¿Eliminar este crédito?')) return;
+  state.creditos = state.creditos.filter(c=>c.id!==id);
+  await save(); renderCreditos(); sincronizarDeuda();
+}
+
+function abrirAbono(id) {
+  creditoActivoId = id;
+  document.getElementById('abono-monto').value='';
+  document.getElementById('abono-fecha').value=new Date().toISOString().split('T')[0];
+  document.getElementById('abono-nota').value='';
+  llenarSelectBolsillos('abono-bolsillo');
+  openModal('m-abono-credito');
+}
+
+async function guardarAbono() {
+  const monto = parseFloat(document.getElementById('abono-monto').value)||0;
+  if(!monto) return alert('Ingresa el monto');
+  const fecha = document.getElementById('abono-fecha').value;
+  const nota = document.getElementById('abono-nota').value.trim();
+  const c = state.creditos.find(c=>c.id===creditoActivoId); if(!c) return;
+  if(!c.abonos) c.abonos=[];
+  c.abonos.push({id:Date.now(), monto, fecha, nota});
+  await save(); closeModal('m-abono-credito'); renderCreditos(); sincronizarDeuda();
+  const origenId = document.getElementById('m-abono-credito-origen')?.value;
+  const destinoId = document.getElementById('m-abono-credito-destino')?.value;
+  if(origenId) await hf_actualizarBolsillo(origenId, monto, 'salida', 'Abono crédito', fecha);
+  if(destinoId) await hf_actualizarBolsillo(destinoId, monto, 'entrada', 'Abono crédito', fecha);
+}
+
+function verAbonos(id) {
+  const c = state.creditos.find(c=>c.id===id); if(!c) return;
+  const fmt = v => '$'+v.toLocaleString('es-MX',{minimumFractionDigits:0});
+  const abonos = (c.abonos||[]).slice().reverse();
+  let txt = `📋 Abonos a ${c.origen}
+━━━━━━━━━━━━━━━━
+`;
+  if(!abonos.length) txt += 'Sin abonos registrados';
+  abonos.forEach(a=>{ txt += `${a.fecha} · ${fmt(a.monto)}${a.nota?' · '+a.nota:''}
+`; });
+  alert(txt);
+}
+
+async function sincronizarDeuda() {
+  const totalDeuda = (state.creditos||[]).reduce((a,c)=>{
+    const abonado = (c.abonos||[]).reduce((x,b)=>x+b.monto,0);
+    return a + Math.max(0, c.monto - abonado);
+  },0);
+  try {
+    const r = await fetch('/api/state');
+    if(!r.ok) return;
+    const d = await r.json();
+    if(!d.modulos) d.modulos={};
+    d.modulos.tortas_deuda = totalDeuda;
+    await fetch('/api/state',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
+  } catch(e){}
+}
+
+load();
+</script>
+<script src="/static/bolsillos.js"></script>
+</body>
+</html>

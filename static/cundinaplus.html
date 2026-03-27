@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>CundinaPlus</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --green:#00c896;--green2:#00a87e;--gold:#f0a500;
+  --red:#ff4d6d;--blue:#4d9fff;
+  --bg:#0a0e14;--bg2:#111620;--bg3:#1a2030;
+  --border:rgba(255,255,255,0.07);
+  --text:#f0f4ff;--text2:#6b7a99;
+  --mono:'JetBrains Mono',monospace;
+  --sans:'Syne',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;padding-bottom:80px}
+.header{position:sticky;top:0;z-index:100;background:rgba(10,14,20,0.95);backdrop-filter:blur(12px);padding:16px 20px 12px;border-bottom:1px solid var(--border)}
+.header-top{display:flex;justify-content:space-between;align-items:center}
+.back-btn{background:none;border:none;color:var(--text);font-size:22px;cursor:pointer;padding:0;margin-right:8px}
+.app-title{font-size:11px;letter-spacing:3px;color:var(--text2);font-weight:600}
+.header-titulo{display:flex;align-items:center}
+.btn-icon{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:10px;font-size:15px;cursor:pointer}
+
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:16px 20px}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:12px 14px}
+.stat-card.full{grid-column:span 2}
+.stat-label{font-size:9px;letter-spacing:1.5px;color:var(--text2);font-weight:600;margin-bottom:4px}
+.stat-val{font-family:var(--mono);font-size:15px;font-weight:700}
+
+.section{padding:0 20px}
+.section-title{font-size:10px;letter-spacing:2px;color:var(--text2);font-weight:600;margin-bottom:12px}
+
+.ahorrador-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:10px;cursor:pointer;border-left:3px solid var(--green);position:relative}
+.ahorrador-card.congelado{border-left-color:var(--blue)}
+.ahorrador-card.inactivo{border-left-color:var(--text2);opacity:0.6}
+.ahorrador-row{display:flex;justify-content:space-between;align-items:center}
+.ahorrador-avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--blue));display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#000;font-family:var(--mono);flex-shrink:0}
+.ahorrador-info{display:flex;align-items:center;gap:12px}
+.ahorrador-nombre{font-size:15px;font-weight:700}
+.ahorrador-meta{font-size:11px;color:var(--text2);margin-top:2px}
+.ahorrador-saldo{font-family:var(--mono);font-size:16px;font-weight:700;color:var(--green)}
+.badge{font-size:9px;padding:2px 7px;border-radius:5px;font-weight:600;margin-left:6px}
+.badge.congelado{background:rgba(77,159,255,0.15);color:var(--blue)}
+.badge.urgencia{background:rgba(255,77,109,0.15);color:var(--red)}
+
+.screen{display:none}
+.screen.active{display:block}
+.back-bar{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(10,14,20,0.95);backdrop-filter:blur(12px);z-index:99}
+.back-title{font-size:16px;font-weight:700}
+.back-sub{font-size:11px;color:var(--text2)}
+
+.ahorrador-header-card{margin:16px 20px;background:linear-gradient(135deg,rgba(0,200,150,0.08),rgba(77,159,255,0.04));border:1px solid rgba(0,200,150,0.2);border-radius:20px;padding:20px}
+.ahorrador-header-top{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+.ahorrador-avatar-big{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--blue));display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;color:#000;font-family:var(--mono);flex-shrink:0}
+.stats-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat-box{background:rgba(0,0,0,0.3);border-radius:12px;padding:12px;border:1px solid var(--border)}
+.stat-box-label{font-size:9px;letter-spacing:1.5px;color:var(--text2);font-weight:600;margin-bottom:4px}
+.stat-box-val{font-family:var(--mono);font-size:15px;font-weight:700}
+
+.aportacion-item{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:var(--bg3);border-radius:12px;margin-bottom:6px}
+.aportacion-left{display:flex;align-items:center;gap:10px}
+.aportacion-dot{width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0}
+.aportacion-info{font-size:13px;font-weight:600}
+.aportacion-fecha{font-size:10px;color:var(--text2)}
+.aportacion-monto{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--green)}
+
+.fab{position:fixed;bottom:24px;right:20px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--green2));border:none;color:#000;font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,200,150,0.4);z-index:50}
+
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:200;display:none;align-items:flex-end}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg2);border-radius:24px 24px 0 0;width:100%;padding:24px 20px 40px;border-top:1px solid var(--border);max-height:90vh;overflow-y:auto;animation:slideUp 0.25s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 20px}
+.modal-title{font-size:18px;font-weight:800;margin-bottom:20px}
+.form-group{margin-bottom:16px}
+.form-label{font-size:11px;letter-spacing:1.5px;color:var(--text2);font-weight:600;margin-bottom:8px;display:block}
+.form-input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:13px 16px;color:var(--text);font-family:var(--sans);font-size:15px;outline:none}
+.form-input:focus{border-color:var(--green)}
+.form-input::placeholder{color:var(--text2)}
+.form-submit{width:100%;background:var(--green);color:#000;border:none;border-radius:14px;padding:15px;font-family:var(--sans);font-weight:800;font-size:16px;cursor:pointer;margin-top:8px}
+.btn-ghost{width:100%;background:transparent;color:var(--text2);border:1px solid var(--border);border-radius:12px;padding:12px;font-family:var(--sans);font-size:14px;cursor:pointer;margin-top:8px}
+.btn-danger{width:100%;background:rgba(255,77,109,0.1);color:var(--red);border:1px solid rgba(255,77,109,0.2);border-radius:14px;padding:14px;font-family:var(--sans);font-weight:700;font-size:14px;cursor:pointer;margin-top:8px}
+.resumen-box{background:var(--bg3);border-radius:12px;padding:14px;margin-bottom:16px;font-size:13px}
+.resumen-fila{display:flex;justify-content:space-between;margin-bottom:6px}
+.resumen-fila:last-child{margin-bottom:0;font-weight:700;font-size:14px;border-top:1px solid var(--border);padding-top:8px;margin-top:4px}
+#save-indicator{position:fixed;bottom:88px;right:16px;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:600;z-index:999;opacity:0;transition:opacity 0.3s;pointer-events:none}
+</style>
+</head>
+<body>
+
+<!-- PANTALLA LISTA -->
+<div id="s-home" class="screen active">
+  <div class="header">
+    <div class="header-top">
+      <div class="header-titulo">
+        <button class="back-btn" onclick="location.href='/'">←</button>
+        <div>
+          <div class="app-title">HOPE FINANCE</div>
+          <div style="font-size:16px;font-weight:800">CundinaPlus</div>
+        </div>
+      </div>
+      <button class="btn-icon" onclick="openModal('m-ahorrador')">👤+</button>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">AHORRADORES</div>
+      <div class="stat-val" style="color:var(--green)" id="h-total-ahorradores">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">CAPITAL TOTAL</div>
+      <div class="stat-val" style="color:var(--green)" id="h-capital-total">$0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">BONIF. PAGADAS</div>
+      <div class="stat-val" style="color:var(--gold)" id="h-bonif-total">$0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">CONGELADOS</div>
+      <div class="stat-val" style="color:var(--blue)" id="h-congelados">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">TOTAL SALDOS CONGELADOS</div>
+      <div class="stat-val" style="color:var(--blue)" id="h-total-congelado">$0</div>
+    </div>
+    <div class="stat-card" style="background:rgba(0,200,150,0.06);border-color:rgba(0,200,150,0.2)">
+      <div class="stat-label">TOTAL CAPITAL ENTREGA</div>
+      <div class="stat-val" style="color:var(--green)" id="h-capital-entrega">$0</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">AHORRADORES</div>
+    <div id="ahorradores-list"></div>
+  </div>
+</div>
+
+<!-- PANTALLA AHORRADOR -->
+<div id="s-ahorrador" class="screen">
+  <div class="back-bar">
+    <button class="back-btn" onclick="volverLista()">←</button>
+    <div>
+      <div class="back-title" id="a-back-nombre">Ahorrador</div>
+      <div class="back-sub" id="a-back-sub">CundinaPlus</div>
+    </div>
+    <div style="margin-left:auto;display:flex;gap:8px">
+      <button class="btn-icon" onclick="openModal('m-aportacion')">+💚</button>
+      <button class="btn-icon" onclick="openModal('m-cierre')">🏁</button>
+    </div>
+  </div>
+
+  <div class="ahorrador-header-card">
+    <div class="ahorrador-header-top">
+      <div class="ahorrador-avatar-big" id="a-avatar">J</div>
+      <div>
+        <div style="font-size:20px;font-weight:800" id="a-nombre-big">Nombre</div>
+        <div style="font-size:12px;color:var(--text2);margin-top:2px" id="a-tel-big">Sin teléfono</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:4px" id="a-periodo-big"></div>
+      </div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-box" onclick="editarCampo('saldoInicialMonto','Capital Aportado Inicial')" style="cursor:pointer">
+        <div class="stat-box-label">CAPITAL APORTADO ✏️</div>
+        <div class="stat-box-val" id="a-capital-aportado" style="color:var(--text)">$0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-box-label">SALDO ACTUAL</div>
+        <div class="stat-box-val" id="a-saldo" style="color:var(--green)">$0</div>
+      </div>
+      <div class="stat-box" onclick="editarCampo('saldoCongelado','Capital Congelado')" style="cursor:pointer">
+        <div class="stat-box-label">CONGELADO ✏️</div>
+        <div class="stat-box-val" id="a-congelado" style="color:var(--blue)">$0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-box-label">TOTAL INVERTIDO</div>
+        <div class="stat-box-val" id="a-total-invertido" style="color:var(--gold)">$0</div>
+      </div>
+      <div class="stat-box" onclick="editarCampo('bonifInicial','Bonif. Ahorrar Inicial')" style="cursor:pointer">
+        <div class="stat-box-label">BONIF. AHORRAR ✏️</div>
+        <div class="stat-box-val" id="a-bonif-ahorrar" style="color:var(--gold)">$0</div>
+      </div>
+      <div class="stat-box" onclick="editarCampo('refInicial','Bonif. Referidos Inicial')" style="cursor:pointer">
+        <div class="stat-box-label">BONIF. REFERIDOS ✏️</div>
+        <div class="stat-box-val" id="a-bonif-ref" style="color:var(--gold)">$0</div>
+      </div>
+      <div class="stat-box"><div class="stat-box-label">REFERIDOS ACTIVOS</div><div class="stat-box-val" id="a-referidos" style="color:var(--blue)">0</div></div>
+      <div class="stat-box"><div class="stat-box-label">APORTACIONES</div><div class="stat-box-val" id="a-num-aport">0</div></div>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:8px;margin:0 20px 16px">
+    <button class="btn-danger" style="flex:1" onclick="openModal('m-urgencia')">⚠ Retiro Urgencia</button>
+
+  </div>
+
+  <div style="padding:0 20px 8px"><div class="section-title">REFERIDOS</div></div>
+  <div style="padding:0 20px 12px" id="referidos-section">
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:8px">
+      <div style="font-size:10px;letter-spacing:1.5px;color:var(--text2);font-weight:600;margin-bottom:8px">INVITADO POR:</div>
+      <div id="ref-invitado-por" style="display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:14px;font-weight:600" id="ref-invitado-nombre">—</span>
+        <button id="ref-quitar-btn" onclick="quitarReferidor()" style="display:none;background:rgba(255,77,109,0.1);border:1px solid rgba(255,77,109,0.2);color:var(--red);border-radius:8px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer">✕ Quitar</button>
+        <button id="ref-asignar-btn" onclick="openModal('m-asignar-ref')" style="background:rgba(0,200,150,0.1);border:1px solid rgba(0,200,150,0.2);color:var(--green);border-radius:8px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer">+ Asignar</button>
+      </div>
+    </div>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:14px">
+      <div style="font-size:10px;letter-spacing:1.5px;color:var(--text2);font-weight:600;margin-bottom:8px">INVITÓ A:</div>
+      <div id="ref-invito-a">—</div>
+    </div>
+  </div>
+
+  <div style="padding:0 20px 8px"><div class="section-title">HISTORIAL DE APORTACIONES</div></div>
+  <div id="aportaciones-list" style="padding:0 20px"></div>
+  <div style="height:80px"></div>
+</div>
+
+<button class="fab" id="fab" onclick="openModal('m-ahorrador')">＋</button>
+
+<!-- MODAL EDITAR CAMPO -->
+<div class="modal-overlay" id="m-editar-campo">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="m-campo-titulo">Editar</div>
+    <div style="background:rgba(255,165,0,0.08);border:1px solid rgba(255,165,0,0.2);border-radius:12px;padding:12px;margin-bottom:16px;font-size:12px;color:var(--gold)">
+      ⚠ Estás editando directamente un valor del ahorrador
+    </div>
+    <div class="form-group">
+      <label class="form-label">NUEVO VALOR</label>
+      <input class="form-input" id="campo-valor" placeholder="$0.00" type="number">
+    </div>
+    <button class="form-submit" onclick="confirmarEditarCampo()">Confirmar cambio</button>
+    <button class="btn-ghost" onclick="closeModal('m-editar-campo')">Cancelar</button>
+  </div>
+</div>
+
+<!-- MODAL EDITAR APORTACION -->
+<div class="modal-overlay" id="m-editar-aport">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Editar Aportación</div>
+    <input type="hidden" id="edit-aport-id">
+    <div class="form-group">
+      <label class="form-label">MONTO APORTADO</label>
+      <input class="form-input" id="edit-ap-monto" type="number" oninput="calcularEditBonif()">
+    </div>
+    <div class="form-group">
+      <label class="form-label">BONIF. AHORRAR</label>
+      <input class="form-input" id="edit-ap-bonif" type="number">
+    </div>
+    <div class="form-group">
+      <label class="form-label">BONIF. REFERIDOS</label>
+      <input class="form-input" id="edit-ap-ref" type="number">
+    </div>
+    <div class="form-group">
+      <label class="form-label">FECHA</label>
+      <input class="form-input" id="edit-ap-fecha" type="date">
+    </div>
+    <button class="form-submit" onclick="guardarEditarAportacion()">Guardar cambios</button>
+    <button class="btn-ghost" onclick="closeModal('m-editar-aport')">Cancelar</button>
+  </div>
+</div>
+
+<!-- MODAL NUEVO AHORRADOR -->
+<div class="modal-overlay" id="m-ahorrador">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="m-ahorrador-titulo">Nuevo Ahorrador</div>
+    <div class="form-group">
+      <label class="form-label">NOMBRE</label>
+      <input class="form-input" id="ah-nombre" placeholder="Nombre completo">
+    </div>
+    <div class="form-group">
+      <label class="form-label">TELÉFONO</label>
+      <input class="form-input" id="ah-tel" placeholder="10 dígitos" type="tel">
+    </div>
+    <div class="form-group">
+      <label class="form-label">FECHA INICIO PERIODO</label>
+      <input class="form-input" id="ah-inicio" type="date">
+    </div>
+    <div class="form-group">
+      <label class="form-label">FECHA FIN PERIODO</label>
+      <input class="form-input" id="ah-fin" type="date">
+    </div>
+    <div class="form-group">
+      <label class="form-label">REFERIDO POR (OPCIONAL)</label>
+      <select class="form-input" id="ah-referido">
+        <option value="">Sin referido</option>
+      </select>
+    </div>
+    <button class="form-submit" onclick="guardarAhorrador()">Guardar</button>
+    <button class="btn-ghost" onclick="closeModal('m-ahorrador')">Cancelar</button>
+  </div>
+</div>
+
+<!-- MODAL APORTACION -->
+<div class="modal-overlay" id="m-aportacion">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Nueva Aportación</div>
+    <div class="resumen-box" id="aport-resumen"></div>
+
+    <!-- CAMPOS INICIALES (solo primera aportación) -->
+    <div id="campos-iniciales" style="display:none">
+      <div style="background:rgba(77,159,255,0.08);border:1px solid rgba(77,159,255,0.2);border-radius:12px;padding:12px;margin-bottom:16px;font-size:12px;color:var(--blue)">
+        📋 Primera aportación — ingresa los saldos previos del cliente
+      </div>
+      <div class="form-group">
+        <label class="form-label">SALDO ANTERIOR INICIAL</label>
+        <input class="form-input" id="ap-saldo-anterior" placeholder="$0.00" type="number" oninput="calcularBonif()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">BONIFICACIÓN ACUMULADA INICIAL</label>
+        <input class="form-input" id="ap-bonif-inicial" placeholder="$0.00" type="number" oninput="calcularBonif()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">REFERIDOS ACUMULADOS INICIAL</label>
+        <input class="form-input" id="ap-ref-inicial" placeholder="$0.00" type="number" oninput="calcularBonif()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">CAPITAL CONGELADO INICIAL</label>
+        <input class="form-input" id="ap-congelado-inicial" placeholder="$0.00" type="number" oninput="calcularBonif()">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">MONTO APORTADO</label>
+      <input class="form-input" id="ap-monto" placeholder="$200.00" type="number" oninput="calcularBonif()">
+    </div>
+    <div class="form-group">
+      <label class="form-label">FECHA</label>
+      <input class="form-input" id="ap-fecha" type="date">
+    </div>
+    <div class="resumen-box" id="ap-preview" style="display:none">
+      <div class="resumen-fila"><span>Aportación</span><span id="prev-aport" style="font-family:var(--mono)">$0</span></div>
+      <div class="resumen-fila"><span>Bonif. ahorrar</span><span id="prev-bonif" style="font-family:var(--mono);color:var(--gold)">$0</span></div>
+      <div class="resumen-fila"><span>Bonif. referidos</span><span id="prev-ref" style="font-family:var(--mono);color:var(--gold)">$0</span></div>
+      <div class="resumen-fila"><span>Total esta semana</span><span id="prev-total" style="font-family:var(--mono);color:var(--green)">$0</span></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">💼 ORIGEN (opcional)</label>
+      <select class="form-input" id="m-aportacion-origen">
+        <option value="">Sin afectar bolsillo</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">💼 DESTINO (opcional)</label>
+      <select class="form-input" id="m-aportacion-destino">
+        <option value="">Sin afectar bolsillo</option>
+      </select>
+    </div>
+    <button class="form-submit" onclick="guardarAportacion()">Registrar</button>
+    <button class="btn-ghost" onclick="closeModal('m-aportacion')">Cancelar</button>
+  </div>
+</div>
+
+<!-- MODAL CIERRE DE PERIODO -->
+<div class="modal-overlay" id="m-cierre">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">🏁 Cierre de Periodo</div>
+    <div class="resumen-box" id="cierre-resumen"></div>
+    <div class="form-group">
+      <label class="form-label">¿DEJA APORTACIÓN DE ESTA SEMANA ($200)?</label>
+      <select class="form-input" id="cierre-deja-aport" onchange="calcularCierre()">
+        <option value="si">Sí, dejar $200 para nuevo periodo</option>
+        <option value="no">No, entregar todo</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">¿CONGELA EL 50% DEL CAPITAL?</label>
+      <select class="form-input" id="cierre-congela" onchange="calcularCierre()">
+        <option value="no">No</option>
+        <option value="si">Sí, congelar 50% (bonif. $8 próximo periodo)</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">FECHA INICIO NUEVO PERIODO</label>
+      <input class="form-input" id="cierre-inicio" type="date">
+    </div>
+    <div class="form-group">
+      <label class="form-label">FECHA FIN NUEVO PERIODO</label>
+      <input class="form-input" id="cierre-fin" type="date">
+    </div>
+    <div class="resumen-box" id="cierre-preview"></div>
+    <button class="form-submit" onclick="ejecutarCierre()">Confirmar Cierre</button>
+    <button class="btn-ghost" onclick="closeModal('m-cierre')">Cancelar</button>
+  </div>
+</div>
+
+<!-- MODAL RETIRO URGENCIA -->
+<div class="modal-overlay" id="m-urgencia">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">⚠ Retiro de Urgencia</div>
+    <div class="resumen-box" id="urgencia-resumen"></div>
+    <div class="form-group">
+      <label class="form-label">MONTO A RETIRAR</label>
+      <input class="form-input" id="urg-monto" placeholder="$0.00" type="number" oninput="calcularUrgencia()">
+    </div>
+    <div class="resumen-box" id="urg-preview" style="display:none">
+      <div class="resumen-fila"><span>Monto solicitado</span><span id="urg-solicitado" style="font-family:var(--mono)">$0</span></div>
+      <div class="resumen-fila"><span>Penalización 5%</span><span id="urg-penalizacion" style="font-family:var(--mono);color:var(--red)">-$0</span></div>
+      <div class="resumen-fila"><span>Monto a entregar</span><span id="urg-entregar" style="font-family:var(--mono);color:var(--green)">$0</span></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">MOTIVO</label>
+      <input class="form-input" id="urg-motivo" placeholder="Descripción de urgencia">
+    </div>
+    <div class="form-group">
+      <label class="form-label">💼 ORIGEN (opcional)</label>
+      <select class="form-input" id="m-urgencia-origen">
+        <option value="">Sin afectar bolsillo</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">💼 DESTINO (opcional)</label>
+      <select class="form-input" id="m-urgencia-destino">
+        <option value="">Sin afectar bolsillo</option>
+      </select>
+    </div>
+    <button class="form-submit" onclick="ejecutarUrgencia()">Autorizar Retiro</button>
+    <button class="btn-ghost" onclick="closeModal('m-urgencia')">Cancelar</button>
+  </div>
+</div>
+
+<div id="save-indicator"></div>
+
+<script>
+let state = {ahorradores:[]};
+let ahorActivoId = null;
+let editAhorId = null;
+
+const BONIF_NORMAL = 5;
+const BONIF_CONGELADO = 8;
+const BONIF_REFERIDO = 1;
+const PENALIZACION = 0.05;
+
+function bonifPorMonto(monto, congelado=false) {
+  const base = congelado ? BONIF_CONGELADO : BONIF_NORMAL;
+  return Math.floor(monto / 200) * base;
+}
+
+function mostrarIndicador(ok) {
+  const el = document.getElementById('save-indicator');
+  el.style.background = ok ? 'var(--green)' : 'var(--red)';
+  el.style.color = ok ? '#000' : '#fff';
+  el.textContent = ok ? '✓ Guardado' : '⚠ Sin conexión';
+  el.style.opacity = '1';
+  setTimeout(()=>{ el.style.opacity='0'; }, 2000);
+}
+
+async function save() {
+  try { localStorage.setItem('cundina_v1', JSON.stringify(state)); } catch(e){}
+  try {
+    const capitalTotal = state.ahorradores.reduce((a,ah)=>a+calcularSaldoAhorrador(ah),0);
+    const totalCongelado = state.ahorradores.reduce((a,ah)=>a+(ah.saldoCongelado||0),0);
+    const totalBonif = state.ahorradores.reduce((a,ah)=>{
+      return a + (ah.bonifInicial||0) + (ah.refInicial||0) +
+        (ah.aportaciones||[]).reduce((b,ap)=>b+(ap.bonifAhorrar||0)+(ap.bonifRef||0),0);
+    },0);
+    const capitalEntrega = capitalTotal + totalCongelado + totalBonif;
+    const ri = await fetch('/api/state');
+    if(ri.ok) {
+      const si = await ri.json();
+      if(!si.modulos) si.modulos={};
+      si.modulos.cundina = capitalTotal;
+      si.modulos.cundina_entrega = capitalEntrega;
+      await fetch('/api/state',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(si)});
+    }
+    const r = await fetch('/api/state/cundina',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(state)});
+    mostrarIndicador(r.ok);
+  } catch(e){ mostrarIndicador(false); }
+}
+
+async function load() {
+  try {
+    const r = await fetch('/api/state/cundina');
+    if(r.ok){ const d=await r.json(); if(d&&d.ahorradores){ state=d; renderAll(); return; } }
+  } catch(e){}
+  try{ const d=localStorage.getItem('cundina_v1'); if(d){ const p=JSON.parse(d); if(p.ahorradores) state=p; } } catch(e){}
+  renderAll();
+}
+
+function calcularSaldoAhorrador(ah) {
+  const aports = ah.aportaciones||[];
+  const totalAport = aports.reduce((a,ap)=>a+ap.monto,0);
+  const totalBonif = aports.reduce((a,ap)=>a+(ap.bonifAhorrar||0)+(ap.bonifRef||0),0);
+  const iniciales = (ah.saldoInicialMonto||0) + (ah.bonifInicial||0) + (ah.refInicial||0);
+  return iniciales + (ah.saldoCongelado||0) + totalAport + totalBonif - (ah.retirosUrgencia||0);
+}
+
+function referidosActivos(ahId) {
+  return state.ahorradores.filter(ah=>String(ah.referidoPor)===String(ahId) && ah.activo!==false).length;
+}
+
+function renderAll() { renderStats(); renderLista(); if(ahorActivoId) renderAhorrador(ahorActivoId); }
+
+function renderStats() {
+  const ahs = state.ahorradores||[];
+  const activos = ahs.filter(a=>a.activo!==false);
+  let capital=0, bonif=0, congelados=0, totalCongelado=0;
+  ahs.forEach(ah=>{
+    capital += calcularSaldoAhorrador(ah) - (ah.saldoCongelado||0);
+    bonif += (ah.bonifInicial||0) + (ah.refInicial||0) +
+             (ah.aportaciones||[]).reduce((a,ap)=>a+(ap.bonifAhorrar||0)+(ap.bonifRef||0),0);
+    totalCongelado += ah.saldoCongelado||0;
+    if(ah.saldoCongelado>0) congelados++;
+  });
+  const capitalEntrega = capital + totalCongelado + bonif;
+  const fmt = v=>'$'+v.toLocaleString('es-MX',{minimumFractionDigits:0});
+  document.getElementById('h-total-ahorradores').textContent = activos.length;
+  document.getElementById('h-capital-total').textContent = fmt(capital);
+  document.getElementById('h-bonif-total').textContent = fmt(bonif);
+  document.getElementById('h-congelados').textContent = congelados;
+  document.getElementById('h-total-congelado').textContent = fmt(totalCongelado);
+  document.getElementById('h-capital-entrega').textContent = fmt(capitalEntrega);
+}
+
+function renderLista() {
+  const el = document.getElementById('ahorradores-list');
+  const ahs = state.ahorradores||[];
+  if(!ahs.length){ el.innerHTML=`<div style="text-align:center;padding:60px 20px;color:var(--text2)"><div style="font-size:48px;margin-bottom:12px">💚</div><div>Sin ahorradores<br>Toca + para agregar</div></div>`; return; }
+  el.innerHTML = ahs.map(ah=>{
+    const saldo = calcularSaldoAhorrador(ah) - (ah.saldoCongelado||0);
+    const refs = referidosActivos(ah.id);
+    const tieneCongelado = (ah.saldoCongelado||0)>0;
+    return `<div class="ahorrador-card ${tieneCongelado?'congelado':''}" onclick="abrirAhorrador(${ah.id})">
+      <button onclick="event.stopPropagation();eliminarAhorrador(${ah.id})" style="position:absolute;top:10px;right:10px;background:rgba(255,77,109,0.1);border:1px solid rgba(255,77,109,0.2);color:var(--red);border-radius:8px;padding:4px 10px;font-size:12px;cursor:pointer;font-family:var(--sans);font-weight:600">✕</button>
+      <button onclick="event.stopPropagation();editarAhorrador(${ah.id})" style="position:absolute;top:10px;right:50px;background:rgba(0,200,150,0.1);border:1px solid rgba(0,200,150,0.2);color:var(--green);border-radius:8px;padding:4px 10px;font-size:12px;cursor:pointer;font-family:var(--sans);font-weight:600">✏</button>
+      <div class="ahorrador-row">
+        <div class="ahorrador-info">
+          <div class="ahorrador-avatar">${ah.nombre.charAt(0).toUpperCase()}</div>
+          <div>
+            <div class="ahorrador-nombre">${ah.nombre}${tieneCongelado?'<span class="badge congelado">Congelado</span>':''}</div>
+            <div class="ahorrador-meta">${ah.tel||'Sin teléfono'} · ${(ah.aportaciones||[]).length} aportaciones${refs>0?' · '+refs+' referidos':''}</div>
+          </div>
+        </div>
+        <div style="text-align:right;margin-right:32px">
+          <div class="ahorrador-saldo">$${saldo.toLocaleString('es-MX',{minimumFractionDigits:0})}</div>
+          <div style="font-size:10px;color:var(--text2)">${ah.finPeriodo||''}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderAhorrador(id) {
+  const ah = state.ahorradores.find(a=>a.id===id); if(!ah) return;
+  document.getElementById('a-back-nombre').textContent = ah.nombre;
+  document.getElementById('a-back-sub').textContent = ah.tel||'CundinaPlus';
+  document.getElementById('a-avatar').textContent = ah.nombre.charAt(0).toUpperCase();
+  document.getElementById('a-nombre-big').textContent = ah.nombre;
+  document.getElementById('a-tel-big').textContent = ah.tel||'Sin teléfono';
+  document.getElementById('a-periodo-big').textContent = ah.inicioPeriodo&&ah.finPeriodo?`Periodo: ${ah.inicioPeriodo} → ${ah.finPeriodo}`:'';
+
+  const aports = ah.aportaciones||[];
+  const totalAport = aports.reduce((a,ap)=>a+ap.monto,0);
+  const totalBonifAh = (ah.bonifInicial||0) + aports.reduce((a,ap)=>a+(ap.bonifAhorrar||0),0);
+  const totalBonifRef = (ah.refInicial||0) + aports.reduce((a,ap)=>a+(ap.bonifRef||0),0);
+  const refs = referidosActivos(ah.id);
+  const fmt = v=>'$'+v.toLocaleString('es-MX',{minimumFractionDigits:0});
+
+  // Capital aportado = saldo inicial + aportaciones nuevas
+  const capitalAportado = (ah.saldoInicialMonto||0) + totalAport;
+  // Saldo actual = capital aportado + bonificaciones
+  const saldoActual = capitalAportado + totalBonifAh + totalBonifRef;
+  // Total invertido = saldo actual + congelado
+  const totalInvertido = saldoActual + (ah.saldoCongelado||0);
+
+  document.getElementById('a-capital-aportado').textContent = fmt(capitalAportado);
+  document.getElementById('a-saldo').textContent = fmt(saldoActual);
+  document.getElementById('a-congelado').textContent = fmt(ah.saldoCongelado||0);
+  document.getElementById('a-total-invertido').textContent = fmt(totalInvertido);
+  document.getElementById('a-bonif-ahorrar').textContent = fmt(totalBonifAh);
+  document.getElementById('a-bonif-ref').textContent = fmt(totalBonifRef);
+  document.getElementById('a-referidos').textContent = refs;
+  renderReferidos(ah);
+  document.getElementById('a-num-aport').textContent = aports.length;
+
+  const el = document.getElementById('aportaciones-list');
+  if(!aports.length){ el.innerHTML=`<div style="text-align:center;padding:40px 0;color:var(--text2)">Sin aportaciones aún</div>`; return; }
+  el.innerHTML = aports.slice().reverse().map(ap=>`
+    <div class="aportacion-item">
+      <div class="aportacion-left">
+        <div class="aportacion-dot"></div>
+        <div>
+          <div class="aportacion-info">$${ap.monto.toLocaleString()} + $${(ap.bonifAhorrar||0)+(ap.bonifRef||0)} bonif.</div>
+          <div class="aportacion-fecha">${ap.fecha||''} · Ref: ${ap.bonifRef||0} · Bonif: ${ap.bonifAhorrar||0}</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="aportacion-monto">$${(ap.monto+(ap.bonifAhorrar||0)+(ap.bonifRef||0)).toLocaleString()}</span>
+        <button onclick="abrirEditarAportacion(${ap.id})" style="background:none;border:1px solid var(--border);color:var(--text2);border-radius:6px;padding:3px 7px;font-size:12px;cursor:pointer">✏️</button>
+        <button onclick="eliminarAportacion(${ap.id})" style="background:none;border:none;color:var(--text2);font-size:14px;cursor:pointer">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+function abrirAhorrador(id) {
+  ahorActivoId=id; renderAhorrador(id);
+  document.getElementById('s-home').classList.remove('active');
+  document.getElementById('s-ahorrador').classList.add('active');
+  document.getElementById('fab').style.display='none';
+  window.scrollTo(0,0);
+}
+
+function volverLista() {
+  ahorActivoId=null;
+  document.getElementById('s-ahorrador').classList.remove('active');
+  document.getElementById('s-home').classList.add('active');
+  document.getElementById('fab').style.display='flex';
+  renderAll();
+}
+
+function openModal(id) {
+  if(id==='m-asignar-ref') abrirAsignarRef();
+  if(id==='m-aportacion') prepAportacion();
+  if(id==='m-cierre') prepCierre();
+  if(id==='m-urgencia') prepUrgencia();
+  if(id==='m-ahorrador') prepSelectorReferido();
+  document.getElementById(id).classList.add('open');
+  document.body.style.overflow='hidden';
+
+  const _bIds=['m-aportacion','m-urgencia'];
+  if(_bIds.includes(id)){ hf_llenarSelect(id+'-origen'); hf_llenarSelect(id+'-destino'); }
+}
+function closeModal(id){ document.getElementById(id).classList.remove('open'); document.body.style.overflow=''; }
+document.querySelectorAll('.modal-overlay').forEach(el=>{ el.addEventListener('click',e=>{ if(e.target===el) closeModal(el.id); }); });
+
+let campoActivoKey = null;
+
+function renderReferidos(ah) {
+  // Invitado por
+  const invNombre = document.getElementById('ref-invitado-nombre');
+  const invBtn = document.getElementById('ref-quitar-btn');
+  const asignarBtn = document.getElementById('ref-asignar-btn');
+  if(ah.referidoPor) {
+    const inv = state.ahorradores.find(a=>String(a.id)===String(ah.referidoPor));
+    invNombre.textContent = inv ? inv.nombre : '(desconocido)';
+    invBtn.style.display = 'block';
+    if(asignarBtn) asignarBtn.style.display = 'none';
+  } else {
+    invNombre.textContent = '—';
+    invBtn.style.display = 'none';
+    if(asignarBtn) asignarBtn.style.display = 'block';
+  }
+
+  // Invitó a
+  const invitos = state.ahorradores.filter(a=>String(a.referidoPor)===String(ah.id));
+  const cont = document.getElementById('ref-invito-a');
+  if(!invitos.length){ cont.innerHTML = '<span style="font-size:13px;color:var(--text2)">Ninguno</span>'; return; }
+  cont.innerHTML = invitos.map(a=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:14px;font-weight:600">${a.nombre}</span>
+      <button onclick="quitarInvitado(${a.id})" style="background:rgba(255,77,109,0.1);border:1px solid rgba(255,77,109,0.2);color:var(--red);border-radius:8px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer">✕</button>
+    </div>
+  `).join('');
+}
+
+function abrirAsignarRef() {
+  const ah = state.ahorradores.find(a=>a.id===ahorActivoId); if(!ah) return;
+  const sel = document.getElementById('sel-nuevo-ref');
+  sel.innerHTML = '<option value="">Sin referidor</option>';
+  state.ahorradores.forEach(a=>{
+    if(a.id !== ahorActivoId)
+      sel.innerHTML += `<option value="${a.id}" ${String(ah.referidoPor)===String(a.id)?'selected':''}>${a.nombre}</option>`;
+  });
+}
+
+async function guardarNuevoReferidor() {
+  const ah = state.ahorradores.find(a=>a.id===ahorActivoId); if(!ah) return;
+  const val = document.getElementById('sel-nuevo-ref').value;
+  ah.referidoPor = val || null;
+  await save(); closeModal('m-asignar-ref'); renderAhorrador(ahorActivoId);
+}
+
+async function quitarReferidor() {
+  const ah = state.ahorradores.find(a=>a.id===ahorActivoId); if(!ah) return;
+  if(!confirm('¿Quitar el referidor de '+ah.nombre+'?')) return;
+  ah.referidoPor = null;
+  await save(); renderAhorrador(ahorActivoId);
+}
+
+async function quitarInvitado(invId) {
+  const inv = state.ahorradores.find(a=>a.id===invId); if(!inv) return;
+  if(!confirm('¿Quitar a '+inv.nombre+' como referido?')) return;
+  inv.referidoPor = null;
+  await save(); renderAhorrador(ahorActivoId);
+}
+
+function editarCampo(key, titulo) {
+  const ah = state.ahorradores.find(a=>a.id===ahorActivoId); if(!ah) return;
+  campoActivoKey = key;
+  document.getElementById('m-campo-titulo').textContent = 'Editar: '+titulo;
+  document.getElementById('campo-valor').value = ah[key]||0;
+  openModal('m-editar-campo');
+}
+
+async function confirmarEditarCampo() {
+  if(!campoActivoKey) return;
+  const ah = state.ahorradores.find(a=>a.id===ahorActivoId); if(!ah) return;
+  const nuevoVal = parseFloat(document.getElementById('campo-valor').value)||0;
+  if(!confirm(`¿Confirmas cambiar este valor a $${nuevoVal.toLocaleString()}?`)) return;
+  ah[campoActivoKey] = nuevoVal;
+  if(campoActivoKey==='saldoCongelado') ah.bonifCongelado = nuevoVal>0;
+  ah.saldoInicial = true;
+  try {
+    await fetch('/api/state/cundina', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(state)});
+  } catch(e){}
+  try { localStorage.setItem('cundina_v1', JSON.stringify(state)); } catch(e){}
+  closeModal('m-editar-campo');
+  setTimeout(()=>{ renderAhorrador(ahorActivoId); renderStats(); }, 100);
+}
+
+function prepSelectorReferido() {
+  const sel = document.getElementById('ah-referido');
+  sel.innerHTML = '<option value="">Sin referido</option>';
+  state.ahorradores.forEach(ah=>{
+    if(ah.id!==ahorActivoId) sel.innerHTML+=`<option value="${ah.id}">${ah.nombre}</option>`;
+  });
+  document.getElementById('ah-inicio').value = new Date().toISOString().split('T')[0];
+}
+
+async function enviarWA(numero, mensaje) {
+  if(!numero) return;
+  numero = numero.replace(/\D/g, '');
+  if(numero.length === 10) numero = '52' + numero;
+  try {
+    await fetch('/api/whatsapp', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ numero, mensaje })
+    });
+  } catch(e) { console.error('WA error:', e); }
+}
+
+function editarAhorrador(id) {
+  const ah = state.ahorradores.find(a=>a.id===id); if(!ah) return;
+  editAhorId = id;
+  document.getElementById('ah-nombre').value = ah.nombre||'';
+  document.getElementById('ah-tel').value = ah.tel||'';
+  document.getElementById('ah-inicio').value = ah.inicioPeriodo||'';
+  document.getElementById('ah-fin').value = ah.finPeriodo||'';
+  document.getElementById('ah-referido').value = ah.referidoPor||'';
+  openModal('m-ahorrador');
+}
+
+async function guardarAhorrador() {
+  const nombre = document.getElementById('ah-nombre').value.trim();
+  if(!nombre) return alert('El nombre es requerido');
+  const datos = {
+    nombre, tel:document.getElementById('ah-tel').value.trim(),
+    inicioPeriodo:document.getElementById('ah-inicio').value,
+    finPeriodo:document.getElementById('ah-fin').value,
+    referidoPor:document.getElementById('ah-referido').value||null,
+    activo:true, saldoCongelado:0, retirosUrgencia:0,
+    bonifCongelado:false, aportaciones:[]
+  };
+  if(editAhorId){
+    const existing = state.ahorradores.find(a=>a.id===editAhorId);
+    // Solo actualizar campos del formulario, sin tocar datos financieros
+    existing.nombre = datos.nombre;
+    existing.tel = datos.tel;
+    existing.inicioPeriodo = datos.inicioPeriodo;
+    existing.finPeriodo = datos.finPeriodo;
+    existing.referidoPor = datos.referidoPor;
+    editAhorId=null;
+  }
+  else {
+    state.ahorradores.push({id:Date.now(),...datos});
+    if(datos.tel) await enviarWA(datos.tel,
+      `🎉 ¡Bienvenid@ a CundinaPlus, ${datos.nombre}!\n\n` +
+      `Tu cuenta ha sido registrada exitosamente. 💰\n` +
+      `Periodo: ${datos.inicioPeriodo} al ${datos.finPeriodo}\n\n` +
+      `Cualquier duda, aquí estamos. 🤝`
+    );
+  }
+  await save(); closeModal('m-ahorrador');
+  ['ah-nombre','ah-tel','ah-fin'].forEach(id=>document.getElementById(id).value='');
+  renderAll();
+}
+
+async function eliminarAhorrador(id) {
+  if(!confirm('¿Eliminar este ahorrador?')) return;
+  state.ahorradores = state.ahorradores.filter(a=>a.id!==id);
+  try {
+    await fetch('/api/state/cundina', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(state)});
+  } catch(e){}
+  try { localStorage.setItem('cundina_v1', JSON.stringify(state)); } catch(e){}
+  renderStats();
+  renderLista();
+}
+
+function prepAportacion() {
+  const ah = state.ahorradores.find(a=>a.id===ahorActivoId); if(!ah) return;
+  const esPrimera = (ah.aportaciones||[]).length===0 && !ah.saldoInicial;
+  const saldo = calcularSaldoAhorrador(ah);
+  const refs = referidosActivos(ah.id);
+  const fmt = v=>'$'+v.toLocaleString('es-MX',{minimumFractionDigits:0});
+
+  // Mostrar u ocultar campos iniciales
+  document.getElementById('campos-iniciales').style.display = esPrimera ? 'block' : 'none';
+  ['ap-saldo-anterior','ap-bonif-inicial','ap-ref-inicial','ap-congelado-inicial'].forEach(id=>{
+    document.getElementById(id).value='';
+  });
+
+  document.getElementById('aport-resumen').innerHTML=`
+    <div class="resumen-fila"><span>Saldo actual</span><span style="font-family:var(--mono);color:var(--green)">${fmt(saldo)}</span></div>
+    <div class="resumen-fila"><span>Referidos activos</span><span style="font-family:var(--mono);color:var(--blue)">${refs}</span></div>
+    <div class="resumen-fila"><span>Bonif. por referido esta semana</span><span style="font-family:var(--mono);color:var(--gold)">${fmt(refs*BONIF_REFERIDO)}</span></div>
+    ${esPrimera?'<div style="font-size:11px;color:var(--blue);margin-top:4px">📋 Ingresa los saldos previos abajo</div>':''}`;
+  document.getElementById('ap-monto').value='';
+  document.getElementById('ap-fecha').value=new Date().toISOString().split('T')[0];
+  document.getElementById('ap-preview').style.display='none';
+}
+
+function calcularBonif() {
+  const ah = state.ahorradores.find(a=>a.id===ahorActivoId); if(!ah) return;
+  const monto = parseFloat(document.getElementById('ap-monto').value)||0;
+  if(!monto){ document.getElementById('ap-preview').style.display='none'; return; }
+  const refs = referidosActivos(ah.id);
+  const bonifAh = bonifPorMonto(monto, ah.bonifCongelado||false);
+  const bonifRef = refs * BONIF_REFERIDO;
+  const total = monto + bonifAh + bonifRef;
+  const fmt = v=>'$'+v.toLocaleString('es-MX',{minimumFractionDigits:0});
+  document.getElementById('prev-aport').textContent = fmt(monto);
+  document.getElementById('prev-bonif').textContent = fmt(bonifAh);
+  document.getElementById('prev-ref').textContent = fmt(bonifRef);
+  document.getElementById('prev-total').textContent = fmt(total);
+  document.getElementById('ap-preview').style.display='block';
+}
+
+async function guardarAportacion() {
+  const monto = parseFloat(document.getElementById('ap-monto').value)||0;
+  if(!monto||monto<200) return alert('Monto mínimo $200');
+  const ah = state.ahorradores.find(a=>a.id===ahorActivoId); if(!ah) return;
+  const esPrimera = (ah.aportaciones||[]).length===0 && !ah.saldoInicial;
+
+  // Si es primera, guardar saldos iniciales
+  if(esPrimera) {
+    ah.saldoInicialMonto = parseFloat(document.getElementById('ap-saldo-anterior').value)||0;
+    ah.bonifInicial      = parseFloat(document.getElementById('ap-bonif-inicial').value)||0;
+    ah.refInicial        = parseFloat(document.getElementById('ap-ref-inicial').value)||0;
+    ah.saldoCongelado    = parseFloat(document.getElementById('ap-congelado-inicial').value)||0;
+    ah.bonifCongelado    = ah.saldoCongelado > 0;
+    ah.saldoInicial      = true;
+  }
+
+  const refs = referidosActivos(ah.id);
+  const bonifAhorrar = bonifPorMonto(monto, ah.bonifCongelado||false);
+  const bonifRef = refs * BONIF_REFERIDO;
+  const saldoAntes = calcularSaldoAhorrador(ah);
+
+  ah.aportaciones.push({
+    id:Date.now(), monto, bonifAhorrar, bonifRef,
+    fecha:document.getElementById('ap-fecha').value,
+    saldoAntes
+  });
+  await save(); closeModal('m-aportacion');
+  renderAhorrador(ahorActivoId); renderStats();
+  // Comprobante
+  const _cta = String(ah.id).slice(-6);
+  const _fch = document.getElementById('ap-fecha').value;
+  const _fchFmt = _fch ? _fch.split('-').reverse().join('/') : new Date().toLocaleDateString('es-MX');
+  const _sNuevo = calcularSaldoAhorrador(ah);
+  const _sDisp = _sNuevo - (ah.saldoCongelado||0);
+  const _sAntDisp = saldoAntes - (ah.saldoCongelado||0);
+  location.href = `/static/comprobante_abono_cundina.html?nombre=${encodeURIComponent(ah.nombre)}&cuenta=${_cta}&saldo_ant=${_sAntDisp}&monto=${monto}&bonif=${bonifAhorrar}&ref=${bonifRef}&saldo_nuevo=${_sDisp}&congelado=${ah.saldoCongelado||0}&fecha=${_fchFmt}&tel=${encodeURIComponent(ah.tel||'')}`;
+  // Comprobante visual enviado como imagen automáticamente
+
+  await hf_pedirBolsillo(monto, 'Aportación CundinaPlus', fecha||new Date().toISOString().split('T')[0], ()=>{});
+
+  const _guardarAportacion_origen = document.getElementById('m-aportacion-origen')?.value;
+  const _guardarAportacion_destino = document.getElementById('m-aportacion-destino')?.value;
+  const _mnt_ap=parseFloat(document.getElementById('ap-monto')?.value)||0, _fch_ap=document.getElementById('ap-fecha')?.value||new Date().toISOString().split('T')[0], _movs_ap=[]; if(_guardarAportacion_origen) _movs_ap.push({id:_guardarAportacion_origen,monto:_mnt_ap,tipo:'salida',concepto:'Aportación CundinaPlus',fecha:_fch_ap}); if(_guardarAportacion_destino) _movs_ap.push({id:_guardarAportacion_destino,monto:_mnt_ap,tipo:'entrada',concepto:'Aportación CundinaPlus',fecha:_fch_ap}); if(_movs_ap.length) await hf_actualizarBolsillos(_movs_ap);
+}
+
+function abrirEditarAportacion(apId) {
+  const ah = state.ahorradores.find(a=>a.id===ahorActivoId); if(!ah) return;
+  const ap = ah.aportaciones.find(a=>a.id===apId); if(!ap) return;
+  document.getElementById('edit-aport-id').value = apId;
+  document.getElementById('edit-ap-monto').value = ap.monto;
+  document.getElementById('edit-ap-bonif').value = ap.bonifAhorrar||0;
+  document.getElementById('edit-ap-ref').value = ap.bonifRef||0;
+  document.getElementById('edit-ap-fecha').value = ap.fecha||'';
+  openModal('m-editar-aport');
+}
+
+function calcularEditBonif() {
+  const ah = state.ahorradores.find(a=>a.id===ahorActivoId); if(!ah) return;
+  const monto = parseFloat(document.getElementById('edit-ap-monto').value)||0;
+  document.getElementById('edit-ap-bonif').value = bonifPorMonto(monto, ah.bonifCongelado||false);
+}
+
+async function guardarEditarAportacion() {
+  const apId = parseInt(document.getElementById('edit-aport-id').value);
+  const ah = state.ahorradores.find(a=>a.id===ahorActivoId); if(!ah) return;
+  const ap = ah.aportaciones.find(a=>a.id===apId); if(!ap) return;
+  ap.monto = parseFloat(document.getElementById('edit-ap-monto').value)||0;
+  ap.bonifAhorrar = parseFloat(document.getElementById('edit-ap-bonif').value)||0;
+  ap.bonifRef = parseFloat(document.getElementById('edit-ap-ref').value)||0;
+  ap.fecha = document.getElementById('edit-ap-fecha').value;
+  try {
+    await fetch('/api/state/cundina', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(state)});
+  } catch(e){}
+  try { localStorage.setItem('cundina_v1', JSON.stringify(state)); } catch(e){}
+  closeModal('m-editar-aport');
+  renderAhorrador(ahorActivoId);
+  renderStats();
+}
+
+async function eliminarAportacion(apId) {
+  if(!confirm('¿Eliminar esta aportación?')) return;
+  const ah = state.ahorradores.find(a=>a.id===ahorActivoId); if(!ah) return;
+  const ap = ah.aportaciones.find(a=>a.id===apId);
+  ah.aportaciones = ah.aportaciones.filter(ap=>ap.id!==apId);
+  await save();
+  // Sincronizar bolsillo
+  if(ap) {
+    try {
+      const si = await fetch('/api/state').then(r=>r.json());
+      let changed = false;
+      (si.bolsillos||[]).forEach(b=>{
+        const idx = (b.movimientos||[]).findIndex(m=>
+          m.monto===ap.monto && Math.abs(m.id - ap.id) < 5000
+        );
+        if(idx>=0){
+          const mov = b.movimientos[idx];
+          b.saldo = (b.saldo||0) - (mov.tipo==='entrada'?mov.monto:-mov.monto);
+          b.movimientos.splice(idx,1);
+          changed = true;
+        }
+      });
+      if(changed) await fetch('/api/state',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(si)});
+    } catch(e){ console.error('bolsillo sync error',e); }
+  }
+  renderAhorrador(ahorActivoId); renderStats();
+}
+
+function prepCierre() {
+  const ah = state.ahorradores.find(a=>a.id===ahorActivoId); if(!ah) return;
+  const saldo = calcularSaldoAhorrador(ah);
+  const fmt = v=>'$'+v.toLocaleString('es-MX',{minimumFractionDigits:0});
+  document.getElementById('cierre-resumen').innerHTML=`
+    <div class="resumen-fila"><span>Saldo total acumulado</span><span style="font-family:var(--mono);color:var(--green)">${fmt(saldo)}</span></div>
+    <div class="resumen-fila"><span>Periodo actual</span><span style="font-size:11px">${ah.inicioPeriodo||''} → ${ah.finPeriodo||''}</span></div>`;
+  document.getElementById('cierre-inicio').value = new Date().toISOString().split('T')[0];
+  document.getElementById('cierre-fin').value = '';
+  calcularCierre();
+}
+
+function calcularCierre() {
+  const ah = state.ahorradores.find(a=>a.id===ahorActivoId); if(!ah) return;
+  const saldo = calcularSaldoAhorrador(ah);
+  const dejaAport = document.getElementById('cierre-deja-aport').value==='si';
+  const congela = document.getElementById('cierre-congela').value==='si';
+  const descAport = dejaAport ? 200 : 0;
+  const base = saldo - descAport;
+  const montoCongelado = congela ? Math.floor(base*0.5) : 0;
+  const entrega = base - montoCongelado;
+  const fmt = v=>'$'+v.toLocaleString('es-MX',{minimumFractionDigits:0});
+  document.getElementById('cierre-preview').innerHTML=`
+    <div class="resumen-fila"><span>Saldo total</span><span style="font-family:var(--mono)">${fmt(saldo)}</span></div>
+    ${dejaAport?`<div class="resumen-fila"><span>Aportación nueva semana</span><span style="font-family:var(--mono);color:var(--green)">-${fmt(descAport)}</span></div>`:''}
+    ${congela?`<div class="resumen-fila"><span>Saldo congelado 50%</span><span style="font-family:var(--mono);color:var(--blue)">-${fmt(montoCongelado)}</span></div>`:''}
+    <div class="resumen-fila"><span>💵 A entregar</span><span style="font-family:var(--mono);color:var(--green)">${fmt(entrega)}</span></div>
+    ${congela?`<div style="margin-top:8px;font-size:11px;color:var(--blue)">✓ Próximo periodo: bonificación $8 por cada $200</div>`:''}`;
+}
+
+async function ejecutarCierre() {
+  const ah = state.ahorradores.find(a=>a.id===ahorActivoId); if(!ah) return;
+  const saldo = calcularSaldoAhorrador(ah);
+  const dejaAport = document.getElementById('cierre-deja-aport').value==='si';
+  const congela = document.getElementById('cierre-congela').value==='si';
+  const descAport = dejaAport ? 200 : 0;
+  const base = saldo - descAport;
+  const montoCongelado = congela ? Math.floor(base*0.5) : 0;
+
+  // Reiniciar aportaciones
+  ah.aportaciones = [];
+  ah.retirosUrgencia = 0;
+  ah.saldoCongelado = montoCongelado + (dejaAport?200:0);
+  ah.bonifCongelado = congela;
+  ah.inicioPeriodo = document.getElementById('cierre-inicio').value;
+  ah.finPeriodo = document.getElementById('cierre-fin').value;
+
+  await save(); closeModal('m-cierre');
+  renderAhorrador(ahorActivoId); renderStats();
+  alert(`✅ Cierre completado\nA entregar: $${(base-montoCongelado).toLocaleString()}`);
+}
+
+function prepUrgencia() {
+  const ah = state.ahorradores.find(a=>a.id===ahorActivoId); if(!ah) return;
+  const saldo = calcularSaldoAhorrador(ah);
+  const fmt = v=>'$'+v.toLocaleString('es-MX',{minimumFractionDigits:0});
+  document.getElementById('urgencia-resumen').innerHTML=`
+    <div class="resumen-fila"><span>Saldo disponible</span><span style="font-family:var(--mono);color:var(--green)">${fmt(saldo)}</span></div>
+    <div class="resumen-fila"><span>Penalización</span><span style="color:var(--red)">5% sobre lo retirado</span></div>`;
+  document.getElementById('urg-monto').value='';
+  document.getElementById('urg-preview').style.display='none';
+}
+
+function calcularUrgencia() {
+  const monto = parseFloat(document.getElementById('urg-monto').value)||0;
+  if(!monto){ document.getElementById('urg-preview').style.display='none'; return; }
+  const pen = monto * PENALIZACION;
+  const entrega = monto - pen;
+  const fmt = v=>'$'+v.toLocaleString('es-MX',{minimumFractionDigits:2});
+  document.getElementById('urg-solicitado').textContent = fmt(monto);
+  document.getElementById('urg-penalizacion').textContent = '-'+fmt(pen);
+  document.getElementById('urg-entregar').textContent = fmt(entrega);
+  document.getElementById('urg-preview').style.display='block';
+}
+
+async function ejecutarUrgencia() {
+  const monto = parseFloat(document.getElementById('urg-monto').value)||0;
+  const motivo = document.getElementById('urg-motivo').value.trim();
+  if(!monto) return alert('Ingresa el monto');
+  const ah = state.ahorradores.find(a=>a.id===ahorActivoId); if(!ah) return;
+  const saldo = calcularSaldoAhorrador(ah);
+  if(monto>saldo) return alert('Monto mayor al saldo disponible');
+  ah.retirosUrgencia = (ah.retirosUrgencia||0) + monto;
+  ah.aportaciones.push({
+    id:Date.now(), monto:-monto, bonifAhorrar:0, bonifRef:0,
+    fecha:new Date().toISOString().split('T')[0],
+    nota:`⚠ Retiro urgencia: ${motivo} (penalización: $${(monto*PENALIZACION).toFixed(2)})`
+  });
+  await save(); closeModal('m-urgencia');
+  renderAhorrador(ahorActivoId); renderStats();
+
+  const _ejecutarUrgencia_origen = document.getElementById('m-urgencia-origen')?.value;
+  const _ejecutarUrgencia_destino = document.getElementById('m-urgencia-destino')?.value;
+  const _mnt_urg=parseFloat(document.getElementById('urg-monto')?.value)||0, _fch_urg=new Date().toISOString().split('T')[0], _movs_urg=[]; if(_ejecutarUrgencia_origen) _movs_urg.push({id:_ejecutarUrgencia_origen,monto:_mnt_urg,tipo:'salida',concepto:'Retiro urgente',fecha:_fch_urg}); if(_ejecutarUrgencia_destino) _movs_urg.push({id:_ejecutarUrgencia_destino,monto:_mnt_urg,tipo:'entrada',concepto:'Retiro urgente',fecha:_fch_urg}); if(_movs_urg.length) await hf_actualizarBolsillos(_movs_urg);
+}
+
+function enviarWhatsApp() {
+  const ah = state.ahorradores.find(a=>a.id===ahorActivoId); if(!ah) return;
+  const aports = ah.aportaciones||[];
+  if(!aports.length) return alert('Sin aportaciones para enviar');
+  const ult = aports[aports.length-1];
+  const saldoAntes = ult.saldoAntes||0;
+  const saldoActual = calcularSaldoAhorrador(ah);
+  const fmt = v=>'$'+v.toLocaleString('es-MX',{minimumFractionDigits:0});
+  const msg = `💚 *CundinaPlus - Comprobante de Ahorro*\n\n`+
+    `👤 *${ah.nombre}*\n`+
+    `📅 ${ult.fecha||new Date().toISOString().split('T')[0]}\n\n`+
+    `📊 Saldo anterior: ${fmt(saldoAntes)}\n`+
+    `💵 Nueva aportación: ${fmt(ult.monto)}\n`+
+    `⭐ Bonificación por ahorrar: ${fmt(ult.bonifAhorrar||0)}\n`+
+    `👥 Bonificación por referidos: ${fmt(ult.bonifRef||0)}\n`+
+    `━━━━━━━━━━━━━━━\n`+
+    `✅ *Total ahorrado: ${fmt(saldoActual)}*\n\n`+
+    `_¡Gracias por ahorrar con CundinaPlus!_ 🙏`;
+  const tel = ah.tel?ah.tel.replace(/\D/g,''):'';
+  window.open(`https://wa.me/${tel?'52'+tel:''}?text=${encodeURIComponent(msg)}`,'_blank');
+}
+
+load();
+</script>
+<!-- MODAL ASIGNAR REFERIDOR -->
+<div class="modal-overlay" id="m-asignar-ref">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Asignar Referidor</div>
+    <div class="form-group">
+      <label class="form-label">INVITADO POR:</label>
+      <select class="form-input" id="sel-nuevo-ref">
+        <option value="">Sin referido</option>
+      </select>
+    </div>
+    <button class="form-submit" onclick="guardarNuevoReferidor()">Guardar</button>
+    <button class="form-cancel" onclick="closeModal('m-asignar-ref')">Cancelar</button>
+  </div>
+</div>
+
+<script src="/static/bolsillos.js"></script>
+</body>
+</html>

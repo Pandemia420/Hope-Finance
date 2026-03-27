@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hope · Registro</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0e1a;--bg2:#111827;--green:#00c896;--red:#ff4d6d;--gold:#f0a500;--text:#e8eaf0;--text2:#6b7a99;--border:#1e2a3a;}
+body{background:var(--bg);color:var(--text);font-family:sans-serif;max-width:480px;margin:0 auto;min-height:100vh}
+.header{padding:16px 20px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10}
+.logo{font-size:18px;font-weight:800}.logo span{color:var(--green)}
+.badge{font-size:11px;padding:4px 8px;border-radius:8px;font-weight:700}
+.badge.online{background:rgba(0,200,150,0.15);color:var(--green)}
+.badge.offline{background:rgba(255,77,109,0.15);color:var(--red)}
+.modulos{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:16px}
+.mod{padding:12px 6px;border-radius:12px;border:2px solid var(--border);background:var(--bg2);color:var(--text2);font-size:11px;font-weight:700;cursor:pointer;text-align:center}
+.mod.active{border-color:var(--green);color:var(--green);background:rgba(0,200,150,0.1)}
+.mod-ico{font-size:20px;display:block;margin-bottom:4px}
+.tipos{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 16px 16px}
+.tipo{padding:12px;border-radius:12px;border:2px solid var(--border);background:var(--bg2);font-weight:700;font-size:13px;cursor:pointer;color:var(--text2)}
+.tipo.ing.active{border-color:var(--green);color:var(--green);background:rgba(0,200,150,0.1)}
+.tipo.gas.active{border-color:var(--red);color:var(--red);background:rgba(255,77,109,0.1)}
+.seccion{padding:0 16px;display:none}
+.seccion.visible{display:block}
+.lbl{font-size:10px;letter-spacing:2px;color:var(--text2);font-weight:700;margin-bottom:6px;display:block;margin-top:12px}
+.finput{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;color:var(--text);font-size:15px;outline:none;font-family:inherit;margin-bottom:4px}
+.finput:focus{border-color:var(--green)}
+select.finput{-webkit-appearance:none}
+.monto-inp{font-size:24px;font-weight:700;text-align:center;color:var(--green)}
+.btn{width:100%;padding:16px;border-radius:14px;border:none;font-size:15px;font-weight:800;cursor:pointer;margin-top:12px}
+.btn.ing{background:var(--green);color:#000}
+.btn.gas{background:var(--red);color:#fff}
+.btn.purple{background:#9d4dff;color:#fff}
+.pbar{margin:12px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
+.psync{background:rgba(240,165,0,0.15);border:1px solid rgba(240,165,0,0.3);color:var(--gold);border-radius:8px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer}
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);padding:12px 20px;border-radius:12px;font-size:13px;font-weight:700;z-index:999;opacity:0;transition:opacity 0.3s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1}
+.toast.ok{background:var(--green);color:#000}
+.toast.err{background:var(--red);color:#fff}
+.toast.inf{background:var(--gold);color:#000}
+.rec{padding:16px 16px 100px}
+.rectitle{font-size:10px;letter-spacing:2px;color:var(--text2);font-weight:700;margin-bottom:10px}
+.mov{background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+.mov.ing{border-left-color:var(--green)}
+.mov.gas{border-left-color:var(--red)}
+.mov.pend{border-left-color:var(--gold)}
+.mc{font-size:13px;font-weight:600}
+.mm{font-size:10px;color:var(--text2);margin-top:2px}
+.mv{font-size:14px;font-weight:700;text-align:right}
+.mv.ing{color:var(--green)}
+.mv.gas{color:var(--red)}
+.desglose{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-top:4px}
+.desglose-row{display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid var(--border)}
+.desglose-row:last-child{border:none;font-weight:700;font-size:13px}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">HOPE <span>·</span> REG</div>
+  <div class="badge offline" id="sync-status">⚡ Offline</div>
+</div>
+
+<div class="modulos">
+  <button class="mod active" onclick="setModulo('hogar')" id="mod-hogar"><span class="mod-ico">🏠</span>HOGAR</button>
+  <button class="mod" onclick="setModulo('pexpress')" id="mod-pexpress"><span class="mod-ico">💸</span>PRESTA</button>
+  <button class="mod" onclick="setModulo('cundina')" id="mod-cundina"><span class="mod-ico">💚</span>CUNDINA</button>
+</div>
+
+<!-- HOGAR -->
+<div class="seccion visible" id="sec-hogar">
+  <div class="tipos">
+    <button class="tipo ing active" onclick="setTipo('ingreso')" id="btn-ing">↑ INGRESO</button>
+    <button class="tipo gas" onclick="setTipo('gasto')" id="btn-gas">↓ GASTO</button>
+  </div>
+  <label class="lbl" style="padding:0 16px">MONTO</label>
+  <div style="padding:0 16px"><input class="finput monto-inp" id="h-monto" type="number" placeholder="0.00" inputmode="decimal"></div>
+  <label class="lbl" style="padding:0 16px">CONCEPTO</label>
+  <div style="padding:0 16px"><input class="finput" id="h-concepto" type="text" placeholder="En que?"></div>
+  <label class="lbl" style="padding:0 16px">FECHA</label>
+  <div style="padding:0 16px"><input class="finput" id="h-fecha" type="date"></div>
+  <div style="padding:0 16px"><button class="btn ing" id="btn-guardar-hogar" onclick="guardarHogar()">💾 GUARDAR</button></div>
+</div>
+
+<!-- PRESTA EXPRESS -->
+<div class="seccion" id="sec-pexpress">
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:0 16px 12px">
+    <button class="tipo ing active" id="ptab-abono" onclick="setPTab('abono')" style="font-size:11px">💸 ABONO</button>
+    <button class="tipo" id="ptab-nuevo" onclick="setPTab('nuevo')" style="font-size:11px">➕ PRÉSTAMO</button>
+    <button class="tipo" id="ptab-cliente" onclick="setPTab('cliente')" style="font-size:11px">👤 CLIENTE</button>
+  </div>
+  <div id="ptab-sec-abono">
+    <label class="lbl" style="padding:0 16px">CLIENTE</label>
+    <div style="padding:0 16px"><select class="finput" id="p-cliente" onchange="cargarPrestamos()"><option value="">Selecciona cliente</option></select></div>
+    <div id="p-prestamos-wrap" style="display:none">
+      <label class="lbl" style="padding:0 16px">PRÉSTAMO ACTIVO</label>
+      <div style="padding:0 16px"><select class="finput" id="p-prestamo" onchange="mostrarDesglosePrestamo()"><option value="">Selecciona préstamo</option></select></div>
+      <div class="desglose" id="p-desglose" style="margin:8px 16px;display:none">
+        <div class="desglose-row"><span>Capital</span><span id="pd-capital">-</span></div>
+        <div class="desglose-row"><span>Interés %</span><span id="pd-interes">-</span></div>
+        <div class="desglose-row"><span>Ya pagado</span><span id="pd-pagado">-</span></div>
+        <div class="desglose-row"><span>Saldo restante</span><span id="pd-saldo" style="color:var(--red)">-</span></div>
+        <div class="desglose-row"><span>Abono sugerido</span><span id="pd-abono-sug" style="color:var(--green)">-</span></div>
+        <div class="desglose-row"><span>Progreso</span><span id="pd-progreso">-</span></div>
+      </div>
+      <label class="lbl" style="padding:0 16px">ABONO TOTAL</label>
+      <div style="padding:0 16px"><input class="finput monto-inp" id="p-monto" type="number" placeholder="0.00" inputmode="decimal" oninput="calcularDesglose()"></div>
+      <label class="lbl" style="padding:0 16px">A CAPITAL</label>
+      <div style="padding:0 16px"><input class="finput" id="p-capital" type="number" placeholder="0.00" inputmode="decimal"></div>
+      <label class="lbl" style="padding:0 16px">A INTERÉS</label>
+      <div style="padding:0 16px"><input class="finput" id="p-interes-ab" type="number" placeholder="0.00" inputmode="decimal"></div>
+      <label class="lbl" style="padding:0 16px">FECHA</label>
+      <div style="padding:0 16px"><input class="finput" id="p-fecha" type="date"></div>
+      <label class="lbl" style="padding:0 16px">NOTA</label>
+      <div style="padding:0 16px"><input class="finput" id="p-nota" type="text" placeholder="Referencia"></div>
+      <div style="padding:0 16px"><button class="btn gas" onclick="guardarAbono()">REGISTRAR ABONO</button></div>
+    </div>
+  </div>
+  <div id="ptab-sec-nuevo" style="display:none">
+    <label class="lbl" style="padding:0 16px">CLIENTE</label>
+    <div style="padding:0 16px"><select class="finput" id="np-cliente"><option value="">Selecciona cliente</option></select></div>
+    <label class="lbl" style="padding:0 16px">MONTO</label>
+    <div style="padding:0 16px"><input class="finput monto-inp" id="np-monto" type="number" placeholder="0.00" inputmode="decimal" oninput="calcularNuevoPrestamo()"></div>
+    <label class="lbl" style="padding:0 16px">INTERÉS %</label>
+    <div style="padding:0 16px"><input class="finput" id="np-interes" type="number" placeholder="30" inputmode="decimal" oninput="calcularNuevoPrestamo()"></div>
+    <label class="lbl" style="padding:0 16px">MODALIDAD</label>
+    <div style="padding:0 16px"><select class="finput" id="np-modalidad" onchange="calcularNuevoPrestamo()">
+      <option value="semanal">Semanal (7 días)</option>
+      <option value="quincenal">Quincenal (15 días)</option>
+      <option value="mensual">Mensual (30 días)</option>
+      <option value="cuatrimestral">Cuatrimestral (120 días)</option>
+    </select></div>
+    <label class="lbl" style="padding:0 16px">ABONOS PARCIALES</label>
+    <div style="padding:0 16px;display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px">
+      <button class="tipo ing active" id="np-abono-si" onclick="setAbonosParciales(true)">SI</button>
+      <button class="tipo gas" id="np-abono-no" onclick="setAbonosParciales(false)">NO</button>
+    </div>
+    <div id="np-abonos-wrap">
+      <label class="lbl" style="padding:0 16px">NUMERO DE ABONOS</label>
+      <div style="padding:0 16px"><input class="finput" id="np-num-abonos" type="number" placeholder="16" inputmode="numeric" oninput="calcularNuevoPrestamo()"></div>
+    </div>
+    <label class="lbl" style="padding:0 16px">FECHA INICIO</label>
+    <div style="padding:0 16px"><input class="finput" id="np-fecha" type="date" oninput="calcularNuevoPrestamo()"></div>
+    <div class="desglose" id="np-resumen" style="margin:8px 16px;display:none">
+      <div class="desglose-row"><span>Total a pagar</span><span id="npr-total" style="color:var(--red)">-</span></div>
+      <div class="desglose-row"><span>Abono por periodo</span><span id="npr-abono" style="color:var(--green)">-</span></div>
+      <div class="desglose-row"><span>Fecha limite</span><span id="npr-limite">-</span></div>
+      <div class="desglose-row"><span>Num abonos</span><span id="npr-abonos">-</span></div>
+    </div>
+    <label class="lbl" style="padding:0 16px">NOTA</label>
+    <div style="padding:0 16px"><input class="finput" id="np-nota" type="text" placeholder="Referencia opcional"></div>
+    <div style="padding:0 16px;margin-bottom:16px"><button class="btn ing" onclick="guardarNuevoPrestamo()">REGISTRAR PRESTAMO</button></div>
+  </div>
+  <div id="ptab-sec-cliente" style="display:none">
+    <label class="lbl" style="padding:0 16px">NOMBRE COMPLETO</label>
+    <div style="padding:0 16px"><input class="finput" id="nc-nombre" type="text" placeholder="Nombre completo"></div>
+    <label class="lbl" style="padding:0 16px">TELÉFONO</label>
+    <div style="padding:0 16px"><input class="finput" id="nc-tel" type="tel" placeholder="10 dígitos"></div>
+    <label class="lbl" style="padding:0 16px">NOTA</label>
+    <div style="padding:0 16px"><input class="finput" id="nc-nota" type="text" placeholder="Referencia opcional"></div>
+    <div style="margin:8px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:12px">
+      <div style="font-size:10px;letter-spacing:2px;color:var(--text2);font-weight:700;margin-bottom:8px">HISTORIAL PREVIO (OPCIONAL)</div>
+      <label class="lbl">TOTAL PRESTADO HISTÓRICO</label>
+      <input class="finput" id="nc-hist-prestado" type="number" placeholder="0.00" style="margin-bottom:8px">
+      <label class="lbl">TOTAL PAGADO HISTÓRICO</label>
+      <input class="finput" id="nc-hist-pagado" type="number" placeholder="0.00" style="margin-bottom:8px">
+      <label class="lbl">INTERESES HISTÓRICOS</label>
+      <input class="finput" id="nc-hist-intereses" type="number" placeholder="0.00">
+    </div>
+    <div style="padding:0 16px;margin-bottom:16px"><button class="btn ing" onclick="guardarNuevoCliente()">👤 REGISTRAR CLIENTE</button></div>
+  </div>
+</div>
+
+<!-- CUNDINAPLUS -->
+<div class="seccion" id="sec-cundina">
+  <label class="lbl" style="padding:0 16px">AHORRADOR</label>
+  <div style="padding:0 16px"><select class="finput" id="c-cliente" onchange="mostrarDesgloseCundina()"><option value="">Selecciona ahorrador</option></select></div>
+  <div id="c-info-wrap" style="display:none">
+    <div class="desglose" style="margin:8px 16px">
+      <div class="desglose-row"><span>Saldo disponible</span><span id="cd-saldo" style="color:var(--green)">-</span></div>
+      <div class="desglose-row"><span>Saldo congelado</span><span id="cd-congelado" style="color:var(--gold)">-</span></div>
+      <div class="desglose-row"><span>Referidos activos</span><span id="cd-refs" style="color:var(--purple,#9d4dff)">-</span></div>
+    </div>
+    <label class="lbl" style="padding:0 16px">MONTO APORTACIÓN</label>
+    <div style="padding:0 16px"><input class="finput monto-inp" id="c-monto" type="number" placeholder="0.00" inputmode="decimal" oninput="autoCalcBonif()"></div>
+    <label class="lbl" style="padding:0 16px">BONIFICACIÓN AHORRO <span style="font-size:9px;color:var(--text2)">(auto: $5/$8 por cada $200)</span></label>
+    <div style="padding:0 16px"><input class="finput" id="c-bonif" type="number" placeholder="0.00" inputmode="decimal" oninput="editandoBonif=true"></div>
+    <label class="lbl" style="padding:0 16px">BONO X REFERIDO <span style="font-size:9px;color:var(--text2)">($1 por referido activo)</span></label>
+    <div style="padding:0 16px"><input class="finput" id="c-bonif-ref" type="number" placeholder="0.00" inputmode="decimal"></div>
+    <label class="lbl" style="padding:0 16px">FECHA</label>
+    <div style="padding:0 16px"><input class="finput" id="c-fecha" type="date"></div>
+    <div style="padding:0 16px"><button class="btn purple" onclick="guardarAportacion()">💾 REGISTRAR APORTACIÓN</button></div>
+  </div>
+</div>
+
+<!-- Pendientes -->
+<div class="pbar" id="pbar" style="display:none">
+  <div style="font-size:12px;color:var(--gold);font-weight:700" id="ptxt">0 pendientes</div>
+  <button class="psync" onclick="sincronizar()">🔄 Sincronizar</button>
+</div>
+
+<!-- Recientes -->
+<div class="rec">
+  <div class="rectitle">RECIENTES</div>
+  <div id="lista-rec"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = window.location.hostname === "localhost" || window.location.hostname === "192.168.1.9"
+  ? "http://"+window.location.hostname+":5000"
+  : "https://hopeapi.serveousercontent.com";
+const PK = "hope_pendientes";
+const RK = "hope_recientes";
+let modulo = "hogar";
+let tipo = "ingreso";
+let estadoCache = {};
+
+// Init fechas
+const hoy = new Date().toISOString().split("T")[0];
+["h-fecha","p-fecha","c-fecha"].forEach(id => { const el = document.getElementById(id); if(el) el.value = hoy; });
+
+function fmt(v){ return "$"+parseFloat(v||0).toLocaleString("es-MX",{minimumFractionDigits:2,maximumFractionDigits:2}); }
+
+function setModulo(m){
+  modulo = m;
+  ["hogar","pexpress","cundina"].forEach(x=>{
+    document.getElementById("mod-"+x).classList.toggle("active", x===m);
+    document.getElementById("sec-"+x).classList.toggle("visible", x===m);
+  });
+  if(m==="pexpress") cargarClientesPresta();
+  if(m==="cundina") cargarClientesCundina();
+}
+
+function setTipo(t){
+  tipo = t;
+  document.getElementById("btn-ing").classList.toggle("active", t==="ingreso");
+  document.getElementById("btn-gas").classList.toggle("active", t==="gasto");
+  const b = document.getElementById("btn-guardar-hogar");
+  b.className = "btn "+(t==="ingreso"?"ing":"gas");
+  b.textContent = t==="ingreso" ? "💾 GUARDAR INGRESO" : "💾 GUARDAR GASTO";
+}
+
+function toast(msg, tipo="ok"){
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.className = "toast show "+tipo;
+  setTimeout(()=>el.classList.remove("show"), 2500);
+}
+
+function getPendientes(){ try{ return JSON.parse(localStorage.getItem(PK)||"[]"); }catch(e){ return []; } }
+function savePendientes(p){ localStorage.setItem(PK, JSON.stringify(p)); renderPendientes(); }
+function getRecientes(){ try{ return JSON.parse(localStorage.getItem(RK)||"[]"); }catch(e){ return []; } }
+function saveRecientes(r){ localStorage.setItem(RK, JSON.stringify(r.slice(0,30))); }
+
+function renderPendientes(){
+  const p = getPendientes();
+  const bar = document.getElementById("pbar");
+  bar.style.display = p.length ? "flex" : "none";
+  if(p.length) document.getElementById("ptxt").textContent = p.length+" pendiente"+(p.length>1?"s":"");
+}
+
+function renderRecientes(){
+  const rec = getRecientes();
+  const el = document.getElementById("lista-rec");
+  if(!rec.length){ el.innerHTML = "<div style='color:var(--text2);font-size:12px;text-align:center;padding:20px'>Sin movimientos aun</div>"; return; }
+  el.innerHTML = rec.map((m)=>{
+    const cls = m.pending ? "pend" : (m.tipo==="ingreso"?"ing":"gas");
+    const monto = m.monto ? fmt(m.monto) : "";
+    return "<div class='mov "+cls+"' id='mov-"+m.id+"'><div><div class='mc'>"+m.concepto+"</div><div class='mm'>"+m.modulo.toUpperCase()+" · "+m.fecha+(m.pending?" · ⏳":"")+"</div></div><div style='text-align:right'><div class='mv "+cls+"'>"+monto+"</div><button onclick='confirmarBorrar("+m.id+",this)' style='background:none;border:none;color:var(--text2);font-size:11px;cursor:pointer;margin-top:2px'>🗑</button></div></div>";
+  }).join("");
+}
+
+function addReciente(mov){
+  const rec = getRecientes();
+  rec.unshift(mov);
+  saveRecientes(rec);
+  renderRecientes();
+}
+
+async function enviarWA(numero, mensaje){
+  if(!numero) return;
+  numero = numero.replace(/\D/g,"");
+  if(numero.length===10) numero = "52"+numero;
+  try{
+    await fetch(API+"/api/whatsapp",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({numero, mensaje})
+    });
+  }catch(e){ console.error("WA error",e); }
+}
+
+
+let ptabActual = "abono";
+let abonosParciales = true;
+
+function setPTab(tab){
+  ptabActual = tab;
+  ["abono","nuevo","cliente"].forEach(t=>{
+    document.getElementById("ptab-"+t).classList.toggle("active", t===tab);
+    document.getElementById("ptab-sec-"+t).style.display = t===tab?"block":"none";
+  });
+  if(tab==="nuevo") cargarClientesNuevoPrestamo();
+}
+
+function setAbonosParciales(v){
+  abonosParciales = v;
+  document.getElementById("np-abono-si").classList.toggle("active", v);
+  document.getElementById("np-abono-no").classList.toggle("active", !v);
+  document.getElementById("np-abonos-wrap").style.display = v?"block":"none";
+  calcularNuevoPrestamo();
+}
+
+async function guardarNuevoCliente(){
+  const nombre = document.getElementById("nc-nombre").value.trim();
+  const tel = document.getElementById("nc-tel").value.trim();
+  const nota = document.getElementById("nc-nota").value.trim();
+  const histPrestado = parseFloat(document.getElementById("nc-hist-prestado").value)||0;
+  const histPagado = parseFloat(document.getElementById("nc-hist-pagado").value)||0;
+  const histIntereses = parseFloat(document.getElementById("nc-hist-intereses").value)||0;
+  if(!nombre) return toast("Ingresa el nombre","err");
+  const online = await checkOnline();
+  if(!online) return toast("Sin conexion","err");
+  try{
+    const st = await getEstado("pexpress");
+    const nuevoCliente = {
+      id: Date.now(), nombre, tel, nota,
+      histPrestado, histPagado, histIntereses,
+      prestamos: []
+    };
+    st.clientes.push(nuevoCliente);
+    await setEstado("pexpress", st);
+    estadoCache["pexpress"] = null;
+    // Limpiar
+    ["nc-nombre","nc-tel","nc-nota"].forEach(id=>document.getElementById(id).value="");
+    ["nc-hist-prestado","nc-hist-pagado","nc-hist-intereses"].forEach(id=>document.getElementById(id).value="");
+    toast("Cliente registrado","ok");
+    // Recargar lista de clientes
+    const sel = document.getElementById("p-cliente");
+    const op = document.createElement("option");
+    op.value = nuevoCliente.id; op.textContent = nuevoCliente.nombre;
+    sel.appendChild(op);
+    const sel2 = document.getElementById("np-cliente");
+    const op2 = document.createElement("option");
+    op2.value = nuevoCliente.id; op2.textContent = nuevoCliente.nombre;
+    sel2.appendChild(op2);
+  }catch(e){ toast("Error: "+e.message,"err"); }
+}
+
+async function cargarClientesNuevoPrestamo(){
+  const sel = document.getElementById("np-cliente");
+  if(sel.options.length > 1) return;
+  try{
+    const state = await getEstado("pexpress");
+    state.clientes.forEach(c=>{
+      const op = document.createElement("option");
+      op.value = c.id; op.textContent = c.nombre;
+      sel.appendChild(op);
+    });
+  }catch(e){}
+}
+
+function calcularNuevoPrestamo(){
+  const monto = parseFloat(document.getElementById("np-monto").value)||0;
+  const interes = parseFloat(document.getElementById("np-interes").value)||0;
+  const modalidad = document.getElementById("np-modalidad").value;
+  const fecha = document.getElementById("np-fecha").value;
+  const resumen = document.getElementById("np-resumen");
+  if(!monto||!fecha){ resumen.style.display="none"; return; }
+  const total = monto * (1 + interes/100);
+  const diasMap = {semanal:7, quincenal:15, mensual:30, cuatrimestral:120};
+  const dias = diasMap[modalidad]||30;
+  const numAbonos = abonosParciales ? (parseInt(document.getElementById("np-num-abonos").value)||1) : 1;
+  const abonoPeriodo = total / numAbonos;
+  const fechaInicio = new Date(fecha+"T12:00:00");
+  const fechaLimite = new Date(fechaInicio);
+  fechaLimite.setDate(fechaLimite.getDate() + (numAbonos * dias));
+  const limiteFmt = fechaLimite.toISOString().split("T")[0].split("-").reverse().join("/");
+  document.getElementById("npr-total").textContent = fmt(total);
+  document.getElementById("npr-abono").textContent = fmt(abonoPeriodo);
+  document.getElementById("npr-limite").textContent = limiteFmt;
+  document.getElementById("npr-abonos").textContent = abonosParciales ? numAbonos+" abonos" : "Pago unico";
+  resumen.style.display = "block";
+}
+
+async function guardarNuevoPrestamo(){
+  const clienteId = parseInt(document.getElementById("np-cliente").value);
+  const monto = parseFloat(document.getElementById("np-monto").value)||0;
+  const interes = parseFloat(document.getElementById("np-interes").value)||0;
+  const modalidad = document.getElementById("np-modalidad").value;
+  const fecha = document.getElementById("np-fecha").value;
+  const nota = document.getElementById("np-nota").value.trim();
+  if(!clienteId) return toast("Selecciona cliente","err");
+  if(!monto) return toast("Ingresa el monto","err");
+  if(!fecha) return toast("Ingresa la fecha","err");
+  const diasMap = {semanal:7, quincenal:15, mensual:30, cuatrimestral:120};
+  const dias = diasMap[modalidad]||30;
+  const numAbonos = abonosParciales ? (parseInt(document.getElementById("np-num-abonos").value)||1) : 1;
+  const fechaInicio = new Date(fecha+"T12:00:00");
+  const fechaLimite = new Date(fechaInicio);
+  fechaLimite.setDate(fechaLimite.getDate() + (numAbonos * dias));
+  const fechaLimiteFmt = fechaLimite.toISOString().split("T")[0];
+  const online = await checkOnline();
+  if(!online) return toast("Sin conexion","err");
+  try{
+    const st = await getEstado("pexpress");
+    const cl = st.clientes.find(c=>c.id===clienteId);
+    if(!cl) throw new Error("Cliente no encontrado");
+    const nuevoPrestamo = {
+      id: Date.now(), monto, interes, modalidad, fecha,
+      fechaLimite: fechaLimiteFmt, nota, pagado: false, abonos: [],
+      totalAbonos: numAbonos,
+      abonoPeriodo: parseFloat((monto*(1+interes/100)/numAbonos).toFixed(2))
+    };
+    cl.prestamos.push(nuevoPrestamo);
+    await setEstado("pexpress", st);
+    estadoCache["pexpress"] = null;
+    const fechaFmt = fecha.split("-").reverse().join("/");
+    const limiteFmt2 = fechaLimiteFmt.split("-").reverse().join("/");
+    const params = new URLSearchParams({
+      nombre: cl.nombre, monto, interes,
+      modalidad: modalidad+(abonosParciales?" - "+numAbonos+" abonos":""),
+      limite: limiteFmt2, fecha: fechaFmt, tel: cl.tel||""
+    });
+    toast("Prestamo registrado","ok");
+    setTimeout(()=>{ window.location.href="/static/comprobante_prestamo.html?"+params.toString(); }, 500);
+  }catch(e){ toast("Error: "+e.message,"err"); }
+}
+
+async function checkOnline(){
+  try{
+    const r = await fetch(API+"/api/state", {signal: AbortSignal.timeout(4000)});
+    if(r.ok){
+      document.getElementById("sync-status").textContent = "✅ Online";
+      document.getElementById("sync-status").className = "badge online";
+      return true;
+    }
+  }catch(e){}
+  document.getElementById("sync-status").textContent = "⚡ Offline";
+  document.getElementById("sync-status").className = "badge offline";
+  return false;
+}
+
+async function getEstado(key){
+  if(estadoCache[key]) return estadoCache[key];
+  const r = await fetch(API+"/api/state/"+key);
+  if(!r.ok) throw new Error("fail");
+  const data = await r.json();
+  estadoCache[key] = data;
+  return data;
+}
+
+async function setEstado(key, data){
+  estadoCache[key] = data;
+  const r = await fetch(API+"/api/state/"+key, {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(data)});
+  if(!r.ok) throw new Error("fail");
+}
+
+// ── HOGAR ──
+async function guardarHogar(){
+  const monto = parseFloat(document.getElementById("h-monto").value)||0;
+  const concepto = document.getElementById("h-concepto").value.trim();
+  const fecha = document.getElementById("h-fecha").value;
+  if(!monto) return toast("Ingresa el monto","err");
+  if(!concepto) return toast("Ingresa el concepto","err");
+  const mov = {id:Date.now(), tipo, concepto, monto, fecha, modulo:"hogar", pending:true};
+  addReciente(mov);
+  document.getElementById("h-monto").value = "";
+  document.getElementById("h-concepto").value = "";
+  const online = await checkOnline();
+
+checkOnline();
+  if(online){
+    try{
+      const state = await getEstado("hogar");
+      if(!state.movimientos) state.movimientos = [];
+      state.movimientos.push({id:mov.id, tipo:mov.tipo, concepto, monto, fecha});
+      await setEstado("hogar", state);
+      addReciente(mov);
+      renderRecientes();
+      toast("✅ Guardado","ok");
+    }catch(e){ guardarPendiente(mov); toast("⚠️ Guardado offline","inf"); }
+  } else { guardarPendiente(mov); toast("⚡ Offline — guardado local","inf"); }
+}
+
+// ── PRESTA EXPRESS ──
+async function cargarClientesPresta(){
+  const sel = document.getElementById("p-cliente");
+  sel.innerHTML = "<option value=''>Selecciona cliente</option>";
+  try{
+    const state = await getEstado("pexpress");
+    state.clientes.forEach(c=>{
+      const op = document.createElement("option");
+      op.value = c.id;
+      op.textContent = c.nombre;
+      sel.appendChild(op);
+    });
+  }catch(e){ toast("Sin conexion","err"); }
+}
+
+function cargarPrestamos(){
+  const clienteId = parseInt(document.getElementById("p-cliente").value);
+  const wrap = document.getElementById("p-prestamos-wrap");
+  const sel = document.getElementById("p-prestamo");
+  sel.innerHTML = "<option value=''>Selecciona préstamo</option>";
+  document.getElementById("p-desglose").style.display = "none";
+  if(!clienteId){ wrap.style.display="none"; return; }
+  const state = estadoCache["pexpress"];
+  if(!state) return;
+  const cliente = state.clientes.find(c=>c.id===clienteId);
+  if(!cliente){ wrap.style.display="none"; return; }
+  const activos = (cliente.prestamos||[]).filter(p=>!p.pagado);
+  if(!activos.length){ wrap.style.display="none"; toast("Sin préstamos activos","inf"); return; }
+  activos.forEach(p=>{
+    const capAb = (p.abonos||[]).reduce((a,ab)=>a+ab.capital,0);
+    const saldo = Math.max(0, p.monto - capAb);
+    const op = document.createElement("option");
+    op.value = p.id;
+    op.textContent = fmt(p.monto)+" · "+p.interes+"% · saldo "+fmt(saldo);
+    sel.appendChild(op);
+  });
+  wrap.style.display = "block";
+}
+
+function mostrarDesglosePrestamo(){
+  const clienteId = parseInt(document.getElementById("p-cliente").value);
+  const prestamoId = parseInt(document.getElementById("p-prestamo").value);
+  const desg = document.getElementById("p-desglose");
+  if(!clienteId||!prestamoId){ desg.style.display="none"; return; }
+  const state = estadoCache["pexpress"];
+  const cliente = state.clientes.find(c=>c.id===clienteId);
+  const prestamo = (cliente.prestamos||[]).find(p=>p.id===prestamoId);
+  if(!prestamo){ desg.style.display="none"; return; }
+  const capAb = (prestamo.abonos||[]).reduce((a,ab)=>a+ab.capital,0);
+  const intAb = (prestamo.abonos||[]).reduce((a,ab)=>a+(ab.interes||0),0);
+  const saldo = Math.max(0, prestamo.monto - capAb);
+  const totalPag = capAb + intAb;
+  document.getElementById("pd-capital").textContent = fmt(prestamo.monto);
+  document.getElementById("pd-interes").textContent = prestamo.interes+"%";
+  document.getElementById("pd-pagado").textContent = fmt(totalPag);
+  document.getElementById("pd-saldo").textContent = fmt(saldo);
+  if(prestamo.totalAbonos && prestamo.abonoPeriodo){
+    const abonosHechos = (prestamo.abonos||[]).length;
+    document.getElementById("pd-abono-sug").textContent = fmt(prestamo.abonoPeriodo)+" ("+(abonosHechos+1)+"/"+prestamo.totalAbonos+")";
+    document.getElementById("pd-progreso").textContent = abonosHechos+"/"+prestamo.totalAbonos+" abonos";
+    document.getElementById("p-monto").value = Number(prestamo.abonoPeriodo).toFixed(2).replace(",",".");
+    calcularDesglose();
+  } else {
+    document.getElementById("pd-abono-sug").textContent = "—";
+    document.getElementById("pd-progreso").textContent = "—";
+  }
+  desg.style.display = "block";
+  // Auto-calcular capital e interes
+  document.getElementById("p-capital").value = saldo.toFixed(2);
+  document.getElementById("p-interes-ab").value = (prestamo.monto*(prestamo.interes||0)/100 - intAb).toFixed(2);
+}
+
+function calcularDesglose(){
+  const monto = parseFloat(document.getElementById("p-monto").value)||0;
+  const clienteId = parseInt(document.getElementById("p-cliente").value);
+  const prestamoId = parseInt(document.getElementById("p-prestamo").value);
+  if(!clienteId||!prestamoId||!monto) return;
+  const state = estadoCache["pexpress"];
+  const cliente = state.clientes.find(c=>c.id===clienteId);
+  const prestamo = (cliente.prestamos||[]).find(p=>p.id===prestamoId);
+  if(!prestamo) return;
+  const intAb = (prestamo.abonos||[]).reduce((a,ab)=>a+(ab.interes||0),0);
+  const intPend = Math.max(0, prestamo.monto*(prestamo.interes||0)/100 - intAb);
+  const intAbono = Math.min(monto, intPend);
+  const capAbono = Math.max(0, monto - intAbono);
+  document.getElementById("p-interes-ab").value = intAbono.toFixed(2);
+  document.getElementById("p-capital").value = capAbono.toFixed(2);
+}
+
+async function guardarAbono(){
+  const clienteId = parseInt(document.getElementById("p-cliente").value);
+  const prestamoId = parseInt(document.getElementById("p-prestamo").value);
+  const monto = parseFloat(document.getElementById("p-monto").value)||0;
+  const capital = parseFloat(document.getElementById("p-capital").value)||0;
+  const interes = parseFloat(document.getElementById("p-interes-ab").value)||0;
+  const fecha = document.getElementById("p-fecha").value;
+  const nota = document.getElementById("p-nota").value.trim();
+  if(!clienteId) return toast("Selecciona cliente","err");
+  if(!prestamoId) return toast("Selecciona préstamo","err");
+  if(!monto) return toast("Ingresa el monto","err");
+  const state = estadoCache["pexpress"];
+  const cliente = state.clientes.find(c=>c.id===clienteId);
+  const mov = {id:Date.now(), tipo:"gasto", concepto:"Abono "+cliente.nombre, monto, modulo:"pexpress", fecha, pending:false, _clienteId:clienteId, _prestamoId:prestamoId, _capital:capital, _interes:interes, _nota:nota};
+  document.getElementById("p-monto").value = "";
+  const online = await checkOnline();
+  if(online){
+    try{
+      const st = await getEstado("pexpress");
+      const cl = st.clientes.find(c=>c.id===clienteId);
+      const pr = (cl.prestamos||[]).find(p=>p.id===prestamoId);
+      if(!pr) throw new Error("no prestamo");
+      pr.abonos.push({id:mov.id, monto, capital, interes, fecha, nota});
+      const capAb = pr.abonos.reduce((a,ab)=>a+ab.capital,0);
+      if(capAb >= pr.monto) pr.pagado = true;
+      await setEstado("pexpress", st);
+      estadoCache["pexpress"] = null;
+      addReciente(mov);
+      renderRecientes();
+      toast("✅ Abono registrado","ok");
+      // Redirigir al comprobante
+      const capAb2 = pr.abonos.reduce((a,ab)=>a+ab.capital,0);
+      const intAb2 = pr.abonos.reduce((a,ab)=>a+(ab.interes||0),0);
+      const capRest = Math.max(0, pr.monto - capAb2);
+      const intPend = Math.max(0, pr.monto*(pr.interes||0)/100 - intAb2);
+      const saldoRest = capRest + intPend;
+      const liqInteres = (intPend*0.95).toFixed(2);
+      const liquidaHoy = (capRest + parseFloat(liqInteres)).toFixed(2);
+      const limiteFmt = pr.fechaLimite ? pr.fechaLimite.split("-").reverse().join("/") : "—";
+      const fechaFmt = fecha.split("-").reverse().join("/");
+      const abonosHechosN = (pr.abonos||[]).length;
+      const totalAbonosN = pr.totalAbonos||0;
+      const params2 = new URLSearchParams({
+        nombre: cliente.nombre,
+        monto: monto,
+        capital: capital,
+        interes: interes,
+        saldo: saldoRest.toFixed(2),
+        limite: limiteFmt,
+        fecha: fechaFmt,
+        total_capital: capAb2.toFixed(2),
+        liq_capital: capRest.toFixed(2),
+        liq_interes: liqInteres,
+        liquida: liquidaHoy,
+        tel: cliente.tel||"",
+        abono_num: abonosHechosN,
+        abono_total: totalAbonosN
+      });
+      window.location.href = "/static/comprobante_abono_presta.html?"+params2.toString();
+    }catch(e){ guardarPendiente(mov); toast("⚠️ Guardado offline","inf"); }
+  } else { guardarPendiente(mov); toast("⚡ Offline — guardado local","inf"); }
+}
+
+// ── CUNDINAPLUS ──
+async function cargarClientesCundina(){
+  const sel = document.getElementById("c-cliente");
+  sel.innerHTML = "<option value=''>Selecciona ahorrador</option>";
+  try{
+    const state = await getEstado("cundina");
+    (state.ahorradores||[]).filter(a=>a.activo!==false).forEach(a=>{
+      const op = document.createElement("option");
+      op.value = a.id;
+      op.textContent = a.nombre;
+      sel.appendChild(op);
+    });
+  }catch(e){ toast("Sin conexion","err"); }
+}
+
+function calcularSaldo(a){
+  const aports = (a.aportaciones||[]);
+  const totalAport = aports.reduce((s,ap)=>s+(ap.monto||0),0);
+  const totalBonif = aports.reduce((s,ap)=>s+(ap.bonifAhorrar||0)+(ap.bonifRef||0),0);
+  const iniciales = (a.saldoInicialMonto||0) + (a.bonifInicial||0) + (a.refInicial||0);
+  return iniciales + (a.saldoCongelado||0) + totalAport + totalBonif - (a.retirosUrgencia||0);
+}
+function calcularReferidos(ahId, ahorradores){
+  return ahorradores.filter(a=>String(a.referidoPor)===String(ahId) && a.activo!==false).length;
+}
+function calcularBonifReferidos(ahId, ahorradores){
+  return calcularReferidos(ahId, ahorradores) * 1; // $1 por referido
+}
+function calcularBonifAhorrar(ah){
+  return (ah.saldoCongelado||0) > 0 ? 8 : 5;
+}
+
+function mostrarDesgloseCundina(){
+  const id = parseInt(document.getElementById("c-cliente").value);
+  const wrap = document.getElementById("c-info-wrap");
+  if(!id){ wrap.style.display="none"; return; }
+  const state = estadoCache["cundina"];
+  const ah = (state.ahorradores||[]).find(a=>a.id===id);
+  if(!ah){ wrap.style.display="none"; return; }
+  const saldo = calcularSaldo(ah) - (ah.saldoCongelado||0);
+  const refs = calcularReferidos(ah.id, state.ahorradores||[]);
+  const bonifRef = calcularBonifReferidos(ah.id, state.ahorradores||[]);
+  _ahActual = ah;
+  editandoBonif = false;
+  document.getElementById("cd-saldo").textContent = fmt(saldo);
+  document.getElementById("cd-congelado").textContent = fmt(ah.saldoCongelado||0);
+  document.getElementById("cd-refs").textContent = refs+" referido"+(refs!==1?"s":"")+" · $"+bonifRef;
+  const bonifAh = calcularBonifAhorrar(ah);
+  document.getElementById("c-bonif").value = bonifAh.toFixed(2);
+  document.getElementById("c-bonif-ref").value = bonifRef.toFixed(2);
+  wrap.style.display = "block";
+}
+
+async function guardarAportacion(){
+  const id = parseInt(document.getElementById("c-cliente").value);
+  const monto = parseFloat(document.getElementById("c-monto").value)||0;
+  const bonif = parseFloat(document.getElementById("c-bonif").value)||0;
+  const bonifRefVal = parseFloat(document.getElementById("c-bonif-ref").value)||0;
+  const fecha = document.getElementById("c-fecha").value;
+  if(!id) return toast("Selecciona ahorrador","err");
+  if(!monto) return toast("Ingresa el monto","err");
+  const state = estadoCache["cundina"];
+  const ah = (state.ahorradores||[]).find(a=>a.id===id);
+  const saldoAntes = calcularSaldo(ah);
+  const mov = {id:Date.now(), tipo:"ingreso", concepto:"Aportación "+ah.nombre, monto, modulo:"cundina", fecha, pending:false, _ahorradorId:id, _bonif:bonif, _bonifRef:bonifRefVal, _saldoAntes:saldoAntes};
+  document.getElementById("c-monto").value = "";
+  document.getElementById("c-bonif").value = "";
+  const online = await checkOnline();
+  if(online){
+    try{
+      const st = await getEstado("cundina");
+      const a = (st.ahorradores||[]).find(a=>a.id===id);
+      if(!a.aportaciones) a.aportaciones = [];
+      a.aportaciones.push({id:mov.id, monto, bonifAhorrar:bonif, bonifRef:bonifRefVal, fecha, saldoAntes});
+      await setEstado("cundina", st);
+      estadoCache["cundina"] = null;
+      addReciente(mov);
+      renderRecientes();
+      toast("✅ Aportación registrada","ok");
+      // Redirigir al comprobante (que manda WhatsApp automáticamente)
+      const saldoNuevo = calcularSaldo(a) - (ah.saldoCongelado||0);
+      const saldoAnterior = saldoAntes - (ah.saldoCongelado||0);
+      const refs = calcularReferidos(ah.id, st.ahorradores||[]);
+      const bonifRef = calcularBonifReferidos(ah.id, st.ahorradores||[]);
+      const params = new URLSearchParams({
+        nombre: ah.nombre,
+        cuenta: String(ah.id).slice(-6),
+        saldo_ant: saldoAnterior.toFixed(2),
+        monto: monto,
+        bonif: bonif,
+        ref: bonifRefVal,
+        saldo_nuevo: saldoNuevo.toFixed(2),
+        fecha: fecha,
+        tel: ah.tel||'',
+        congelado: ah.saldoCongelado||0
+      });
+      window.location.href = '/static/comprobante_abono_cundina.html?'+params.toString();
+      await cargarClientesCundina();
+      mostrarDesgloseCundina();
+    }catch(e){ console.error("Error al guardar aportacion:", e); toast("⚠️ Error: "+e.message,"err"); }
+  } else { guardarPendiente(mov); toast("⚡ Offline — guardado local","inf"); }
+}
+
+// ── PENDIENTES ──
+function guardarPendiente(mov){
+  const p = getPendientes();
+  p.push(mov);
+  savePendientes(p);
+}
+
+async function sincronizar(){
+  const online = await checkOnline();
+  if(!online) return toast("Sin conexion","err");
+  const pendientes = getPendientes();
+  if(!pendientes.length) return toast("Nada que sincronizar","inf");
+  let ok=0, fail=0;
+  for(const mov of pendientes){
+    try{
+      if(mov.modulo==="hogar"){
+        const st = await getEstado("hogar");
+        if(!st.movimientos) st.movimientos=[];
+        st.movimientos.push({id:mov.id,tipo:mov.tipo,concepto:mov.concepto,monto:mov.monto,fecha:mov.fecha});
+        await setEstado("hogar",st);
+      } else if(mov.modulo==="pexpress"){
+        const st = await getEstado("pexpress");
+        const cl = st.clientes.find(c=>c.id===mov._clienteId);
+        const pr = (cl.prestamos||[]).find(p=>p.id===mov._prestamoId);
+        pr.abonos.push({id:mov.id,monto:mov.monto,capital:mov._capital,interes:mov._interes,fecha:mov.fecha,nota:mov._nota});
+        await setEstado("pexpress",st);
+      } else if(mov.modulo==="cundina"){
+        const st = await getEstado("cundina");
+        const a = (st.ahorradores||[]).find(a=>a.id===mov._ahorradorId);
+        if(!a.aportaciones) a.aportaciones=[];
+        a.aportaciones.push({id:mov.id,monto:mov.monto,bonifAhorrar:mov._bonif||0,bonifRef:mov._bonifRef||0,fecha:mov.fecha,saldoAntes:mov._saldoAntes||0});
+        await setEstado("cundina",st);
+      }
+      estadoCache = {};
+      ok++;
+    }catch(e){ fail++; }
+  }
+  if(fail===0){
+    savePendientes([]);
+    saveRecientes(getRecientes().map(r=>({...r,pending:false})));
+    renderRecientes();
+    toast(ok+" sincronizado"+(ok>1?"s":""),"ok");
+  } else {
+    savePendientes(getPendientes().slice(ok));
+    toast(ok+" ok, "+fail+" fallaron","inf");
+  }
+}
+
+let editandoBonif = false;
+let _ahActual = null;
+window.autoCalcBonif = function(){
+  if(editandoBonif) return;
+  const monto = parseFloat(document.getElementById("c-monto").value)||0;
+  if(!_ahActual || !monto) return;
+  const unidades = Math.floor(monto/200);
+  const bonifPorUnidad = (_ahActual.saldoCongelado||0)>0 ? 8 : 5;
+  document.getElementById("c-bonif").value = (unidades * bonifPorUnidad).toFixed(2);
+};
+window.confirmarBorrar = function(id, btn){
+  id = Number(id);
+  if(btn.getAttribute("data-ok") === "1"){
+    borrarReciente(id);
+  } else {
+    btn.setAttribute("data-ok","1");
+    btn.textContent = "✓ Borrar";
+    btn.style.color = "var(--red)";
+    btn.style.fontSize = "10px";
+    setTimeout(()=>{
+      btn.setAttribute("data-ok","0");
+      btn.textContent="🗑";
+      btn.style.color="var(--text2)";
+      btn.style.fontSize="11px";
+    }, 2500);
+  }
+};
+window.borrarReciente = function(id){
+  id = Number(id);
+  const rec = getRecientes().filter(r=>Number(r.id)!==id);
+  saveRecientes(rec);
+  const pend = getPendientes().filter(r=>Number(r.id)!==id);
+  savePendientes(pend);
+  renderRecientes();
+  toast("🗑 Eliminado","inf");
+};
+
+checkOnline();
+renderPendientes();
+renderRecientes();
+setInterval(async()=>{ if(getPendientes().length>0){ const on=await checkOnline(); if(on) sincronizar(); } },30000);
+</script>
+</body>
+</html>

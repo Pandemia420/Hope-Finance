@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Estado de Cuenta</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#e8edf2;font-family:'Nunito',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 16px}
+.card{width:100%;max-width:390px;background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.15)}
+.hdr{background:linear-gradient(135deg,#1a1a2e 0%,#0f3460 100%);padding:22px 24px 18px;text-align:center;position:relative}
+.hdr-line{position:absolute;bottom:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#f0a500,#ff6b35,#f0a500)}
+.badge{display:inline-block;font-size:9px;letter-spacing:2.5px;color:#f0c040;font-weight:800;background:rgba(240,192,64,0.15);border:1px solid rgba(240,192,64,0.4);border-radius:20px;padding:4px 12px;margin-bottom:10px}
+.titulo{font-size:18px;font-weight:900;color:#ffffff;letter-spacing:0.5px}
+.titulo span{color:#f0c040}
+.fecha{margin-top:6px;font-size:11px;color:rgba(255,255,255,0.6);font-family:'JetBrains Mono',monospace}
+.sep{border:none;border-top:2px dashed #e0e0e0;margin:0 20px}
+.cli{display:flex;align-items:center;gap:12px;padding:14px 20px;background:#f8f9ff;border-bottom:1px solid #eee}
+.cli-avatar{width:38px;height:38px;background:linear-gradient(135deg,#1a1a2e,#0f3460);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#f0c040;font-weight:900;font-size:16px;flex-shrink:0}
+.cli-info{}
+.cli-lbl{font-size:9px;letter-spacing:1.5px;color:#999;font-weight:700}
+.cli-nombre{font-size:14px;font-weight:900;color:#1a1a2e}
+.prestamo-card{margin:10px 14px;border:1.5px solid #e8e8e8;border-radius:14px;overflow:hidden}
+.prestamo-num{background:linear-gradient(135deg,#1a1a2e,#0f3460);padding:8px 14px;font-size:9px;letter-spacing:2px;color:#f0c040;font-weight:800}
+.p-fila{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid #f0f0f0}
+.p-fila:last-child{border-bottom:none}
+.p-lbl{font-size:10px;letter-spacing:0.5px;color:#888;font-weight:700}
+.p-val{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:800}
+.total{margin:12px 14px 14px;background:linear-gradient(135deg,#1a1a2e,#0f3460);border-radius:16px;padding:16px 18px;text-align:center}
+.total-lbl{font-size:10px;letter-spacing:2px;color:#f0c040;font-weight:800;margin-bottom:6px}
+.total-monto{font-family:'JetBrains Mono',monospace;font-size:32px;font-weight:900;color:#ffffff}
+.footer{padding:12px 20px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid #eee}
+.footer-msg{font-size:11px;color:#aaa;font-style:italic}
+.footer-logo{font-size:9px;letter-spacing:2px;color:#0f3460;font-weight:900;opacity:.6}
+.btns{display:flex;gap:10px;margin-top:14px;width:100%;max-width:390px}
+.btn{flex:1;padding:14px;border-radius:14px;border:none;font-family:'Nunito',sans-serif;font-size:14px;font-weight:800;cursor:pointer}
+.btn-p{background:linear-gradient(135deg,#f0a500,#e08000);color:#fff}
+.btn-s{background:#fff;border:1.5px solid #ddd;color:#666}
+#debug{width:100%;max-width:390px;margin-top:8px;padding:8px;background:#fff;border-radius:10px;font-family:monospace;font-size:11px;color:#666;word-break:break-all}
+</style>
+</head>
+<body>
+<div class="card" id="card">
+  <div class="hdr">
+    <div class="hdr-line"></div>
+    <div class="badge">PRESTA · EXPRESS</div>
+    <div class="titulo">✦ <span>ESTADO DE CUENTA</span> ✦</div>
+    <div class="fecha">🕐 <span id="f-fecha">—</span></div>
+  </div>
+  <div class="cli">
+    <div class="cli-avatar" id="f-avatar">?</div>
+    <div class="cli-info">
+      <div class="cli-lbl">👤 CLIENTE</div>
+      <div class="cli-nombre" id="f-nombre">—</div>
+    </div>
+  </div>
+  <div id="prestamos-container"></div>
+  <div class="total">
+    <div class="total-lbl">💳 TOTAL PENDIENTE</div>
+    <div class="total-monto" id="f-total">$0.00</div>
+  </div>
+  <div class="footer">
+    <div class="footer-msg">¡Gracias por tu confianza!</div>
+    <div class="footer-logo">PRESTAEXPRESS</div>
+  </div>
+</div>
+<div class="btns">
+  <button class="btn btn-s" onclick="history.back()">← Volver</button>
+  <button class="btn btn-p" onclick="compartir()">📲 Compartir</button>
+</div>
+<div id="debug"></div>
+<script>
+const $ = id => document.getElementById(id);
+const fmt = v => '$' + parseFloat(v||0).toLocaleString('es-MX',{minimumFractionDigits:2});
+const p = new URLSearchParams(location.search);
+const nombre = p.get('nombre') || '—';
+$('f-nombre').textContent = nombre;
+$('f-avatar').textContent = nombre.charAt(0).toUpperCase();
+$('f-fecha').textContent  = new Date().toLocaleDateString('es-MX');
+let totalPendiente = 0;
+try {
+  const prestamos = JSON.parse(decodeURIComponent(p.get('prestamos')||'[]'));
+  const cont = $('prestamos-container');
+  prestamos.forEach((pr, i) => {
+    const totalAPagar = pr.monto * (1 + (pr.interes||0)/100);
+    const saldo = Math.max(0, totalAPagar - (pr.pagado||0));
+    totalPendiente += saldo;
+    cont.innerHTML += `<div class="prestamo-card">
+      <div class="prestamo-num">PRÉSTAMO ${i+1} ${pr.modalidad ? '· '+pr.modalidad.toUpperCase() : ''}</div>
+      <div class="p-fila"><div class="p-lbl">💵 CAPITAL</div><div class="p-val" style="color:#1a1a2e">${fmt(pr.monto)}</div></div>
+      <div class="p-fila"><div class="p-lbl">📊 INTERÉS</div><div class="p-val" style="color:#f0a500">${pr.interes||0}%</div></div>
+      <div class="p-fila"><div class="p-lbl">💳 TOTAL A PAGAR</div><div class="p-val" style="color:#00966e">${fmt(totalAPagar)}</div></div>
+      <div class="p-fila"><div class="p-lbl">✅ YA PAGADO</div><div class="p-val" style="color:#2270e0">${fmt(pr.pagado||0)}</div></div>
+      <div class="p-fila"><div class="p-lbl">⏳ SALDO RESTANTE</div><div class="p-val" style="color:#e02040">${fmt(saldo)}</div></div>
+      <div class="p-fila"><div class="p-lbl">📅 FECHA LÍMITE</div><div class="p-val" style="color:#1a1a2e">${pr.limite || '—'}</div></div>
+    </div>`;
+  });
+} catch(e){}
+$('f-total').textContent = fmt(totalPendiente);
+
+async function capturar() {
+  return await html2canvas($('card'), {backgroundColor:'#ffffff', scale:2, useCORS:true, logging:false});
+}
+window.addEventListener('load', async () => {
+  const tel = p.get('tel');
+  const dbg = $('debug');
+  if(!tel) return;
+  dbg.textContent = 'Enviando...';
+  try {
+    await new Promise(r => setTimeout(r, 800));
+    const canvas = await capturar();
+    canvas.toBlob(async blob => {
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64 = reader.result.split(',')[1];
+        const res = await fetch('/api/whatsapp-image', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({numero:tel,imagen:base64,caption:'✦ Estado de Cuenta PrestaExpress ✦'})});
+        const json = await res.json();
+        dbg.textContent = json.ok ? '✅ Enviado' : '❌ '+JSON.stringify(json);
+      };
+      reader.readAsDataURL(blob);
+    }, 'image/png');
+  } catch(e){ dbg.textContent = '❌ '+e.message; }
+});
+async function compartir() {
+  const canvas = await capturar();
+  canvas.toBlob(async blob => {
+    const file = new File([blob], 'estado_cuenta.png', {type:'image/png'});
+    if(navigator.canShare && navigator.canShare({files:[file]})) await navigator.share({files:[file]});
+    else { const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='estado_cuenta.png'; a.click(); }
+  }, 'image/png');
+}
+</script>
+</body>
+</html>
