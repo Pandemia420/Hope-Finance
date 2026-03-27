@@ -56,7 +56,7 @@ def get_state():
 @app.route('/api/state', methods=['POST'])
 def save_state():
     conn = get_db()
-    conn.execute("INSERT OR REPLACE INTO app_state (key,value,updated_at) VALUES (?,?,?)",
+    conn.execute("DELETE FROM app_state WHERE key=?", (key_val,)); conn.execute("INSERT INTO app_state (key,value,updated_at) VALUES (?,?,?)",
     ('main', json.dumps(request.get_json()), datetime.now().isoformat()))
     conn.commit()
     conn.close()
@@ -72,7 +72,7 @@ def get_modulo(modulo):
 @app.route('/api/state/<modulo>', methods=['POST'])
 def save_modulo(modulo):
     conn = get_db()
-    conn.execute("INSERT OR REPLACE INTO app_state (key,value,updated_at) VALUES (?,?,?)",
+    conn.execute("DELETE FROM app_state WHERE key=?", (key_val,)); conn.execute("INSERT INTO app_state (key,value,updated_at) VALUES (?,?,?)",
     (modulo, json.dumps(request.get_json()), datetime.now().isoformat()))
     conn.commit()
     conn.close()
