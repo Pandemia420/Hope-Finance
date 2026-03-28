@@ -13,7 +13,7 @@ def add_headers(resp):
     return resp
 
 
-DB = os.getenv('DATABASE_URL', 'finanzas_prod.db')
+DB = os.getenv('DATABASE_URL', '/home/d-s/HopeData/finanzas_prod.db')
 if DB.startswith('postgres://'): DB = DB.replace('postgres://', 'postgresql://', 1)
 
 def get_db():
